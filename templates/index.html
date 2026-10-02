@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WorkPulse - Inginer Proiectant Mecanic</title>
+    <title>WorkPulse - War Room Inginer Mecanic</title>
     <!-- PWA Settings -->
     <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#1e40af">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -37,18 +37,18 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen pb-20 md:pb-6">
+<body class="bg-slate-950 text-slate-100 min-h-screen pb-24 md:pb-8">
 
     <!-- Top Sticky Header -->
     <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-2.5">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-2.5">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
                     <i class="fa-solid fa-compass-drafting text-white text-base"></i>
                 </div>
                 <div>
-                    <h1 class="text-sm font-bold tracking-tight text-white leading-tight">WorkPulse <span class="text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.2 rounded font-medium">CAD Pro</span></h1>
-                    <p class="text-[10px] text-slate-400">Inginer Proiectant Mecanic • Monitorizare & Evaluare</p>
+                    <h1 class="text-sm font-bold tracking-tight text-white leading-tight">WorkPulse <span class="text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.2 rounded font-medium">CAD v3.0</span></h1>
+                    <p class="text-[10px] text-slate-400">Inginer Proiectant Mecanic • War Room & Dosar Mărire</p>
                 </div>
             </div>
 
@@ -71,8 +71,11 @@
             <button onclick="switchTab('blockers')" id="nav-blockers" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
                 <i class="fa-solid fa-shield-halved text-rose-400"></i> Scut & Blocaje
             </button>
+            <button onclick="switchTab('kanban')" id="nav-kanban" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
+                <i class="fa-solid fa-bars-progress text-cyan-400"></i> Kanban CAD
+            </button>
             <button onclick="switchTab('projects')" id="nav-projects" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
-                <i class="fa-solid fa-cubes-stacked text-blue-400"></i> Ansambluri CAD
+                <i class="fa-solid fa-cubes-stacked text-blue-400"></i> Ansambluri PDM
             </button>
             <button onclick="switchTab('time')" id="nav-time" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
                 <i class="fa-solid fa-clock text-amber-400"></i> Pontaj Etape
@@ -86,8 +89,31 @@
         </nav>
     </header>
 
+    <!-- 1-TAP QUICK LOGGING BAR (Optimizat pentru telefon de către Consiliu) -->
+    <div class="max-w-6xl mx-auto px-4 pt-3 pb-1">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar text-xs">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider whitespace-nowrap flex items-center gap-1">
+                <i class="fa-solid fa-bolt text-amber-400"></i> 1-Tap Log:
+            </span>
+            <div class="flex items-center gap-1.5 whitespace-nowrap">
+                <button onclick="quickLogPreset('Modelare CAD 3D', 60, false)" class="px-2.5 py-1 rounded-lg bg-blue-600/30 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 font-semibold transition active:scale-95">
+                    +1h CAD 3D
+                </button>
+                <button onclick="quickLogPreset('Desene de Execuție 2D & BOM', 60, false)" class="px-2.5 py-1 rounded-lg bg-cyan-600/30 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-cyan-500/30 font-semibold transition active:scale-95">
+                    +1h Desene 2D
+                </button>
+                <button onclick="quickLogPreset('Asistență Tehnică Atelier', 30, false)" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 font-semibold transition active:scale-95">
+                    +30m Atelier
+                </button>
+                <button onclick="quickLogPreset('Ore Suplimentare', 60, true)" class="px-2.5 py-1 rounded-lg bg-amber-500/30 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-500/40 font-bold transition active:scale-95">
+                    +1h Overtime 🔥
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Container -->
-    <main class="max-w-6xl mx-auto px-4 py-4 space-y-5">
+    <main class="max-w-6xl mx-auto px-4 py-2 space-y-5">
 
         <!-- ================= TAB 1: DASHBOARD ================= -->
         <section id="tab-dashboard" class="space-y-4">
@@ -128,7 +154,7 @@
                 </div>
             </div>
 
-            <!-- Metric Cards (Inginerie Mecanică) -->
+            <!-- War Room Metric Cards (Inginerie Mecanică) -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
                     <div class="flex items-center justify-between text-slate-400 mb-1">
@@ -141,11 +167,20 @@
 
                 <div class="bg-slate-900 border border-amber-500/30 rounded-xl p-3.5 bg-gradient-to-br from-slate-900 to-amber-950/20">
                     <div class="flex items-center justify-between text-amber-400 mb-1">
-                        <span class="text-[10px] font-bold uppercase tracking-wider">Overtime</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Overtime Asumat</span>
                         <i class="fa-solid fa-fire text-amber-400 text-sm"></i>
                     </div>
                     <div class="text-2xl font-black text-amber-300" id="stat-overtime-hours">0</div>
                     <div class="text-[10px] text-amber-400/80 mt-0.5">ore suplimentare atelier/CAD</div>
+                </div>
+
+                <div class="bg-slate-900 border border-emerald-500/30 rounded-xl p-3.5 bg-gradient-to-br from-slate-900 to-emerald-950/20">
+                    <div class="flex items-center justify-between text-emerald-400 mb-1">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Economii Generate</span>
+                        <i class="fa-solid fa-money-bill-trend-up text-emerald-400 text-sm"></i>
+                    </div>
+                    <div class="text-2xl font-black text-emerald-300" id="stat-money-saved">0</div>
+                    <div class="text-[10px] text-emerald-400/80 mt-0.5">RON piese & timp salvat</div>
                 </div>
 
                 <div class="bg-slate-900 border border-rose-500/30 rounded-xl p-3.5 bg-gradient-to-br from-slate-900 to-rose-950/20">
@@ -155,15 +190,6 @@
                     </div>
                     <div class="text-2xl font-black text-rose-300" id="stat-total-blockers">0</div>
                     <div class="text-[10px] text-rose-400/80 mt-0.5"><span id="stat-blocker-hours">0</span>h probleme rezolvate</div>
-                </div>
-
-                <div class="bg-slate-900 border border-emerald-500/30 rounded-xl p-3.5 bg-gradient-to-br from-slate-900 to-emerald-950/20">
-                    <div class="flex items-center justify-between text-emerald-400 mb-1">
-                        <span class="text-[10px] font-bold uppercase tracking-wider">Top Realizări</span>
-                        <i class="fa-solid fa-award text-emerald-400 text-sm"></i>
-                    </div>
-                    <div class="text-2xl font-black text-emerald-300" id="stat-highlights">0</div>
-                    <div class="text-[10px] text-emerald-400/80 mt-0.5">argumente tari pt. mărire</div>
                 </div>
             </div>
 
@@ -184,9 +210,9 @@
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-chart-pie text-cyan-400"></i> Repartizare pe Ansambluri CAD
+                            <i class="fa-solid fa-chart-pie text-cyan-400"></i> Repartizare pe Ansambluri PDM
                         </h3>
-                        <span class="text-[10px] text-slate-500">Ore cumulate</span>
+                        <span class="text-[10px] text-slate-500">Ore cumulate pe Part Numbers</span>
                     </div>
                     <div class="h-56 relative flex items-center justify-center">
                         <canvas id="chart-projects"></canvas>
@@ -234,15 +260,97 @@
             <div id="blockers-list" class="space-y-3"></div>
         </section>
 
-        <!-- ================= TAB 3: PROIECTE & ANSAMBLURI CAD ================= -->
+        <!-- ================= TAB 3: KANBAN ETAPE PROIECTARE CAD ================= -->
+        <section id="tab-kanban" class="hidden space-y-4">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                    <h2 class="text-base font-bold text-white">Panou Etape CAD & Producție (Kanban)</h2>
+                    <p class="text-xs text-slate-400">Urmărește piesele de la Concept 3D până la Prototip Validat</p>
+                </div>
+                <button onclick="openNewTaskModal()" class="px-3 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-cyan-600/30 transition">
+                    <i class="fa-solid fa-plus"></i> Sarcină / Piesă Nouă
+                </button>
+            </div>
+
+            <!-- Kanban Columns Container (Horizontal scroll on phone) -->
+            <div class="flex space-x-3 overflow-x-auto pb-4 no-scrollbar">
+                <!-- Column 1: Concept 3D -->
+                <div class="w-64 shrink-0 bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-col">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+                        <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-slate-400"></span> 1. Concept 3D
+                        </span>
+                        <span id="kanban-cnt-concept" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded-full text-slate-400 font-mono">0</span>
+                    </div>
+                    <div id="kanban-col-concept" class="space-y-2 min-h-[150px]"></div>
+                </div>
+
+                <!-- Column 2: Modelare 3D -->
+                <div class="w-64 shrink-0 bg-slate-900 border border-blue-500/30 rounded-2xl p-3 flex flex-col">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+                        <span class="text-xs font-bold text-blue-400 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span> 2. Modelare 3D
+                        </span>
+                        <span id="kanban-cnt-modelare" class="text-[10px] bg-blue-950 px-2 py-0.5 rounded-full text-blue-300 font-mono">0</span>
+                    </div>
+                    <div id="kanban-col-modelare" class="space-y-2 min-h-[150px]"></div>
+                </div>
+
+                <!-- Column 3: Simulare FEA -->
+                <div class="w-64 shrink-0 bg-slate-900 border border-purple-500/30 rounded-2xl p-3 flex flex-col">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+                        <span class="text-xs font-bold text-purple-400 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-purple-500"></span> 3. Simulare FEA
+                        </span>
+                        <span id="kanban-cnt-fea" class="text-[10px] bg-purple-950 px-2 py-0.5 rounded-full text-purple-300 font-mono">0</span>
+                    </div>
+                    <div id="kanban-col-fea" class="space-y-2 min-h-[150px]"></div>
+                </div>
+
+                <!-- Column 4: Desene 2D & BOM -->
+                <div class="w-64 shrink-0 bg-slate-900 border border-amber-500/30 rounded-2xl p-3 flex flex-col">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+                        <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span> 4. Desene 2D & BOM
+                        </span>
+                        <span id="kanban-cnt-2d" class="text-[10px] bg-amber-950 px-2 py-0.5 rounded-full text-amber-300 font-mono">0</span>
+                    </div>
+                    <div id="kanban-col-2d" class="space-y-2 min-h-[150px]"></div>
+                </div>
+
+                <!-- Column 5: Lansat Atelier -->
+                <div class="w-64 shrink-0 bg-slate-900 border border-orange-500/30 rounded-2xl p-3 flex flex-col">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+                        <span class="text-xs font-bold text-orange-400 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-orange-500"></span> 5. Lansat Atelier
+                        </span>
+                        <span id="kanban-cnt-atelier" class="text-[10px] bg-orange-950 px-2 py-0.5 rounded-full text-orange-300 font-mono">0</span>
+                    </div>
+                    <div id="kanban-col-atelier" class="space-y-2 min-h-[150px]"></div>
+                </div>
+
+                <!-- Column 6: Prototip Validat -->
+                <div class="w-64 shrink-0 bg-slate-900 border border-emerald-500/30 rounded-2xl p-3 flex flex-col">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+                        <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 6. Prototip Validat ✓
+                        </span>
+                        <span id="kanban-cnt-done" class="text-[10px] bg-emerald-950 px-2 py-0.5 rounded-full text-emerald-300 font-mono">0</span>
+                    </div>
+                    <div id="kanban-col-done" class="space-y-2 min-h-[150px]"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 4: PROIECTE & ANSAMBLURI PDM ================= -->
         <section id="tab-projects" class="hidden space-y-4">
             <div class="flex items-center justify-between flex-wrap gap-2">
                 <div>
-                    <h2 class="text-base font-bold text-white">Proiecte & Ansambluri Mecanice</h2>
-                    <p class="text-xs text-slate-400">Urmărește orele, software-ul CAD, desenele de execuție și termenele</p>
+                    <h2 class="text-base font-bold text-white">Ansambluri & Part Numbers (PDM)</h2>
+                    <p class="text-xs text-slate-400">Monitorizează orele, numărul de revizie și lansarea desenelor de execuție</p>
                 </div>
                 <button onclick="openNewProjectModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-blue-600/30 transition">
-                    <i class="fa-solid fa-plus"></i> Ansamblu / Proiect Nou
+                    <i class="fa-solid fa-plus"></i> Ansamblu Nou
                 </button>
             </div>
 
@@ -250,7 +358,7 @@
             <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
         </section>
 
-        <!-- ================= TAB 4: PONTAJ ETAPE INGINERIE ================= -->
+        <!-- ================= TAB 5: PONTAJ ETAPE INGINERIE ================= -->
         <section id="tab-time" class="hidden space-y-4">
             <div class="flex items-center justify-between flex-wrap gap-2">
                 <div>
@@ -267,11 +375,11 @@
                 </div>
             </div>
 
-            <!-- Filters Bar -->
+            <!-- Search and Filter Bar -->
             <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex flex-col sm:flex-row gap-2">
                 <div class="flex-1 relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-                    <input type="text" id="time-search-input" onkeyup="debounceLoadTimeEntries()" placeholder="Caută după descriere piesă / ansamblu..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500">
+                    <input type="text" id="time-search-input" onkeyup="debounceLoadTimeEntries()" placeholder="Caută după Part Number, piesă, descriere..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500">
                 </div>
                 <select id="time-filter-category" onchange="loadTimeEntries()" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500">
                     <option value="">Toate Etapele</option>
@@ -291,7 +399,7 @@
             </div>
         </section>
 
-        <!-- ================= TAB 5: DOSAR MĂRIRE & CALCULATOR ROI ================= -->
+        <!-- ================= TAB 6: DOSAR MĂRIRE & CALCULATOR ROI ================= -->
         <section id="tab-brag" class="hidden space-y-4">
             <!-- Salary & ROI Calculator Card -->
             <div class="bg-slate-900 border border-emerald-500/40 rounded-2xl p-4 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/20">
@@ -301,8 +409,8 @@
                             <i class="fa-solid fa-calculator"></i>
                         </div>
                         <div>
-                            <h3 class="text-sm font-bold text-white">Calculator ROI & Justificare Financiară Mărire</h3>
-                            <p class="text-[10px] text-slate-400">Valoarea monetară a orelor suplimentare și a economiilor de proiectare</p>
+                            <h3 class="text-sm font-bold text-white">Calculator ROI & Justificare Matematică Mărire</h3>
+                            <p class="text-[10px] text-slate-400">Comparație între mărirea cerută și banii economisiți firmei</p>
                         </div>
                     </div>
                 </div>
@@ -326,20 +434,20 @@
                 <!-- Calculated Metrics Cards -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-800 text-center">
                     <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <div class="text-[10px] text-slate-400">Tarif Orar Net</div>
-                        <div class="text-base font-black text-white mt-0.5" id="calc-hourly-rate">0 RON/h</div>
+                        <div class="text-[10px] text-slate-400">Total Economii Generate</div>
+                        <div class="text-base font-black text-emerald-400 mt-0.5" id="calc-total-savings">0 RON</div>
                     </div>
                     <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <div class="text-[10px] text-amber-400">Total Overtime</div>
-                        <div class="text-base font-black text-amber-300 mt-0.5" id="calc-overtime-hours">0 h</div>
-                    </div>
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <div class="text-[10px] text-amber-400">Valoare Ore Suplimentare (175%)</div>
+                        <div class="text-[10px] text-amber-400">Valoare Overtime (175%)</div>
                         <div class="text-base font-black text-amber-400 mt-0.5" id="calc-overtime-value">0 RON</div>
                     </div>
+                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <div class="text-[10px] text-blue-400">Cost Anual Mărire Cerută</div>
+                        <div class="text-base font-black text-blue-400 mt-0.5" id="calc-yearly-cost">0 RON/an</div>
+                    </div>
                     <div class="bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/40">
-                        <div class="text-[10px] text-emerald-300 font-bold">Mărire Lunar Cerută</div>
-                        <div class="text-base font-black text-emerald-400 mt-0.5" id="calc-target-raise">+0 RON</div>
+                        <div class="text-[10px] text-emerald-300 font-bold">Raport ROI Companie</div>
+                        <div class="text-base font-black text-emerald-400 mt-0.5" id="calc-roi-multiple">0x</div>
                     </div>
                 </div>
             </div>
@@ -358,7 +466,7 @@
             <div id="achievements-list" class="space-y-3"></div>
         </section>
 
-        <!-- ================= TAB 6: RAPORT EVALUARE ================= -->
+        <!-- ================= TAB 7: RAPORT EVALUARE ================= -->
         <section id="tab-report" class="hidden space-y-4">
             <div class="no-print bg-slate-900 border border-slate-800 rounded-2xl p-4">
                 <h2 class="text-base font-bold text-white mb-1">Generator Dosar Evaluare & Mărire Salarială</h2>
@@ -407,14 +515,18 @@
                 </div>
 
                 <!-- Executive Summary Cards -->
-                <div class="grid grid-cols-3 gap-3 mb-5 text-center">
+                <div class="grid grid-cols-4 gap-2 mb-5 text-center">
                     <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
                         <div class="text-[10px] text-slate-500 font-bold uppercase">Total Ore Proiectare</div>
                         <div class="text-xl font-black text-slate-900 mt-0.5" id="rep-total-hours">0</div>
                     </div>
                     <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5">
-                        <div class="text-[10px] text-amber-800 font-bold uppercase">Ore Suplimentare (Overtime)</div>
+                        <div class="text-[10px] text-amber-800 font-bold uppercase">Overtime Asumat</div>
                         <div class="text-xl font-black text-amber-700 mt-0.5" id="rep-overtime-hours">0</div>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5">
+                        <div class="text-[10px] text-emerald-800 font-bold uppercase">Economii Generate</div>
+                        <div class="text-xl font-black text-emerald-700 mt-0.5" id="rep-savings">0 RON</div>
                     </div>
                     <div class="bg-blue-50 border border-blue-200 rounded-xl p-2.5">
                         <div class="text-[10px] text-blue-800 font-bold uppercase">Zile Lucrate</div>
@@ -425,7 +537,7 @@
                 <!-- 1. Scut de Apărare (Blocaje & Probleme Rezolvate) -->
                 <div class="mb-5">
                     <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-2.5 flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> 1. Scut de Apărare: Blocaje & Incidente Rezolvate
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> 1. Scut de Apărare: Blocaje & Incidente Rezolvate Fără Vina Proiectantului
                     </h2>
                     <div id="rep-blockers-list" class="space-y-2"></div>
                 </div>
@@ -438,10 +550,10 @@
                     <div id="rep-achievements-list" class="space-y-2"></div>
                 </div>
 
-                <!-- 3. Repartizare Proiecte CAD -->
+                <!-- 3. Repartizare Proiecte CAD & PDM -->
                 <div class="mb-5">
                     <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-2.5 flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span> 3. Proiecte & Ansambluri Gestionate
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span> 3. Ansambluri & Part Numbers Gestionate
                     </h2>
                     <div id="rep-projects-table" class="overflow-x-auto"></div>
                 </div>
@@ -451,6 +563,51 @@
     </main>
 
     <!-- ================= MODALS ================= -->
+
+    <!-- Modal: Sarcină Nouă Kanban -->
+    <div id="modal-new-task" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-cyan-500/40 w-full max-w-md rounded-2xl p-5 space-y-3.5 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-bars-progress text-cyan-400"></i> Piesă / Sarcină CAD Nouă
+                </h3>
+                <button onclick="closeModal('modal-new-task')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-2.5 text-xs">
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Denumire Reper / Piesă *:</label>
+                    <input type="text" id="task-title" placeholder="ex: Modelat flanșă adaptor și verificat cotație" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Ansamblu PDM:</label>
+                        <select id="task-project" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500"></select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Etapă Inițială:</label>
+                        <select id="task-stage" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+                            <option value="Concept 3D">1. Concept 3D</option>
+                            <option value="Modelare 3D" selected>2. Modelare 3D</option>
+                            <option value="Simulare FEA">3. Simulare FEA</option>
+                            <option value="Desene 2D & BOM">4. Desene 2D & BOM</option>
+                            <option value="Lansat Atelier">5. Lansat Atelier</option>
+                            <option value="Prototip Validat">6. Prototip Validat</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Termen Limită:</label>
+                    <input type="date" id="task-due-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                <button onclick="closeModal('modal-new-task')" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Anulează</button>
+                <button onclick="submitNewTask()" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs">
+                    Adaugă pe Panou
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal: Blocaj Tehnic Nou (Scut) -->
     <div id="modal-new-blocker" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
@@ -472,7 +629,7 @@
                         <input type="date" id="blk-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-rose-500">
                     </div>
                     <div>
-                        <label class="block font-medium text-slate-300 mb-1">Ansamblu / Proiect:</label>
+                        <label class="block font-medium text-slate-300 mb-1">Ansamblu PDM:</label>
                         <select id="blk-project" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-rose-500"></select>
                     </div>
                 </div>
@@ -525,8 +682,18 @@
                 <button onclick="closeModal('modal-new-project')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-2.5 text-xs">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Part Number (P/N) *:</label>
+                        <input type="text" id="proj-pn" placeholder="ex: ASM-300" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Revizie inițială:</label>
+                        <input type="text" id="proj-rev" value="Rev A" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Denumire Ansamblu / Utilaj *:</label>
+                    <label class="block font-medium text-slate-300 mb-1">Denumire Ansamblu *:</label>
                     <input type="text" id="proj-name" placeholder="ex: Modul Ridicare & Răsturnare Paleți" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
@@ -605,7 +772,7 @@
                     <input type="date" id="manual-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Ansamblu / Proiect:</label>
+                    <label class="block font-medium text-slate-300 mb-1">Ansamblu / P/N:</label>
                     <select id="manual-project" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500"></select>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
@@ -632,7 +799,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Descriere detaliată reper / activitate:</label>
+                    <label class="block font-medium text-slate-300 mb-1">Descriere reper / activitate:</label>
                     <textarea id="manual-desc" rows="2" placeholder="ex: Proiectat suport lagăr, verificat jocuri rulmenți..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500"></textarea>
                 </div>
                 <div class="flex items-center space-x-2 pt-1">
@@ -673,19 +840,25 @@
                         <select id="ach-project" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"></select>
                     </div>
                 </div>
-                <div>
-                    <label class="block font-medium text-amber-300 mb-1">Impact Cuantificabil (Economie greutate/bani, piese salvate) *:</label>
-                    <textarea id="ach-impact" rows="2" placeholder="ex: Eliminat coliziune ax-flanșă, salvat piese de ~12.000 RON și 5 zile de montaj..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-medium text-emerald-400 mb-1">Economie Estimată (RON):</label>
+                        <input type="number" id="ach-savings" placeholder="ex: 15000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-emerald-400 font-bold focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Categorie:</label>
+                        <select id="ach-category" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+                            <option value="Eliminare Rebuturi & Calitate">Eliminare Rebuturi & Calitate 3D</option>
+                            <option value="Optimizare Producție & Timp">Optimizare Timp Montaj / Atelier</option>
+                            <option value="Calcul Tehnic & FEA">Calcul Tehnic & FEA (Reducere Masă)</option>
+                            <option value="Standardizare & Achiziții">Standardizare Organe Asamblare & BOM</option>
+                            <option value="Inovație & Dispozitive Noi">Inovație / Dispozitive & Scule Noi</option>
+                        </select>
+                    </div>
                 </div>
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Categorie:</label>
-                    <select id="ach-category" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
-                        <option value="Eliminare Rebuturi & Calitate">Eliminare Rebuturi & Calitate 3D</option>
-                        <option value="Optimizare Producție & Timp">Optimizare Timp Montaj / Atelier</option>
-                        <option value="Calcul Tehnic & FEA">Calcul Tehnic & FEA (Reducere Masă)</option>
-                        <option value="Standardizare & Achiziții">Standardizare Organe Asamblare & BOM</option>
-                        <option value="Inovație & Dispozitive Noi">Inovație / Dispozitive & Scule Noi</option>
-                    </select>
+                    <label class="block font-medium text-amber-300 mb-1">Rezultat Tehnic Cuantificabil (Descriere) *:</label>
+                    <textarea id="ach-impact" rows="2" placeholder="ex: Eliminat coliziune ax-flanșă, salvat piese de ~12.000 RON și 5 zile de montaj..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
                 </div>
                 <div>
                     <label class="block font-medium text-slate-300 mb-1">Feedback Primit / Aprecieri (Șef atelier, conducere):</label>
@@ -734,6 +907,7 @@
             loadStats();
             checkTimerState();
             loadBlockers();
+            loadKanban();
             loadTimeEntries();
             loadAchievements();
             loadSalaryCalculator();
@@ -744,7 +918,7 @@
 
         function switchTab(tabId) {
             currentTab = tabId;
-            ['dashboard', 'blockers', 'projects', 'time', 'brag', 'report'].forEach(t => {
+            ['dashboard', 'blockers', 'kanban', 'projects', 'time', 'brag', 'report'].forEach(t => {
                 const el = document.getElementById(`tab-${t}`);
                 const nav = document.getElementById(`nav-${t}`);
                 if (t === tabId) {
@@ -758,6 +932,7 @@
 
             if (tabId === 'dashboard') loadStats();
             else if (tabId === 'blockers') loadBlockers();
+            else if (tabId === 'kanban') loadKanban();
             else if (tabId === 'projects') loadProjects();
             else if (tabId === 'time') loadTimeEntries();
             else if (tabId === 'brag') { loadAchievements(); loadSalaryCalculator(); }
@@ -786,12 +961,32 @@
         function openNewProjectModal() { openModal('modal-new-project'); }
         function openNewAchievementModal() { populateProjectDropdowns(); openModal('modal-new-achievement'); }
         function openNewBlockerModal() { populateProjectDropdowns(); openModal('modal-new-blocker'); }
+        function openNewTaskModal() { populateProjectDropdowns(); openModal('modal-new-task'); }
 
         function formatDuration(totalSeconds) {
             const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
             const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
             const s = (totalSeconds % 60).toString().padStart(2, '0');
             return `${h}:${m}:${s}`;
+        }
+
+        // ================= 1-TAP QUICK PRESET =================
+        async function quickLogPreset(category, minutes, is_overtime) {
+            try {
+                const res = await fetch('/api/time-entries/quick', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category, duration_minutes: minutes, is_overtime })
+                });
+                if (res.ok) {
+                    showToast(`+${minutes} min înregistrate: ${category}!`);
+                    loadStats();
+                    loadTimeEntries();
+                    loadSalaryCalculator();
+                }
+            } catch (err) {
+                showToast('Eroare la logare rapidă', true);
+            }
         }
 
         // ================= TIMER =================
@@ -835,7 +1030,7 @@
                 activeInfo.classList.remove('hidden');
                 document.getElementById('timer-current-task').innerText = activeTimerState.category || 'Modelare CAD 3D';
                 const proj = projectsList.find(p => p.id === activeTimerState.project_id);
-                document.getElementById('timer-current-project').innerText = proj ? proj.name : 'General';
+                document.getElementById('timer-current-project').innerText = proj ? `[${proj.part_number}] ${proj.name}` : 'General';
 
                 if (activeTimerState.is_overtime) overtimePill.classList.remove('hidden');
                 else overtimePill.classList.add('hidden');
@@ -851,7 +1046,7 @@
 
         function handleTimerClick() {
             if (activeTimerState.is_running) stopTimer();
-            else openManualTimeModal(); // Or quick start
+            else openManualTimeModal();
         }
 
         async function stopTimer() {
@@ -875,11 +1070,10 @@
 
                 document.getElementById('stat-total-hours').innerText = data.total_hours;
                 document.getElementById('stat-overtime-hours').innerText = data.overtime_hours;
+                document.getElementById('stat-money-saved').innerText = Number(data.total_money_saved).toLocaleString('ro-RO');
                 document.getElementById('stat-total-blockers').innerText = data.total_blockers;
                 document.getElementById('stat-blocker-hours').innerText = data.blocker_hours_managed;
-                document.getElementById('stat-highlights').innerText = data.highlight_achievements;
 
-                // Render Top Highlights List
                 const hlList = document.getElementById('dashboard-highlights-list');
                 if (data.top_achievements && data.top_achievements.length > 0) {
                     hlList.innerHTML = data.top_achievements.map(a => `
@@ -887,8 +1081,9 @@
                             <div class="space-y-1">
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <span class="text-xs font-bold text-amber-300">${a.title}</span>
-                                    <span class="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full font-medium">${a.project_name || 'General'}</span>
+                                    <span class="text-[10px] bg-blue-950 text-blue-300 font-mono px-2 py-0.5 rounded-full border border-blue-500/30">${a.part_number || 'P/N'} ${a.revision || ''}</span>
                                     <span class="text-[10px] text-slate-500">${a.date}</span>
+                                    ${a.money_saved_est > 0 ? `<span class="text-[10px] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded font-bold border border-emerald-500/30">+${Number(a.money_saved_est).toLocaleString()} RON</span>` : ''}
                                 </div>
                                 <p class="text-xs text-slate-300 font-medium">${a.impact_value}</p>
                                 ${a.feedback_received ? `<p class="text-[11px] text-emerald-400 italic">💬 "${a.feedback_received}"</p>` : ''}
@@ -915,7 +1110,7 @@
                     labels: timeline.labels,
                     datasets: [
                         { label: 'Ore CAD Normale', data: timeline.regular, backgroundColor: '#2563eb', borderRadius: 4 },
-                        { label: 'Overtime Atelier/CAD', data: timeline.overtime, backgroundColor: '#f59e0b', borderRadius: 4 }
+                        { label: 'Overtime Asumat', data: timeline.overtime, backgroundColor: '#f59e0b', borderRadius: 4 }
                     ]
                 },
                 options: {
@@ -934,7 +1129,7 @@
             const ctx = document.getElementById('chart-projects').getContext('2d');
             if (chartProjectsInstance) chartProjectsInstance.destroy();
 
-            const labels = projects.map(p => `${p.name} [${p.cad || 'CAD'}]`);
+            const labels = projects.map(p => `[${p.pn} ${p.rev}] ${p.name}`);
             const data = projects.map(p => p.hours);
             const colors = projects.map(p => p.color || '#2563eb');
 
@@ -957,6 +1152,112 @@
             });
         }
 
+        // ================= KANBAN ETAPE PROIECTARE CAD =================
+        async function loadKanban() {
+            try {
+                const res = await fetch('/api/tasks');
+                const tasks = await res.json();
+
+                const cols = {
+                    'Concept 3D': { el: document.getElementById('kanban-col-concept'), cntEl: document.getElementById('kanban-cnt-concept'), count: 0 },
+                    'Modelare 3D': { el: document.getElementById('kanban-col-modelare'), cntEl: document.getElementById('kanban-cnt-modelare'), count: 0 },
+                    'Simulare FEA': { el: document.getElementById('kanban-col-fea'), cntEl: document.getElementById('kanban-cnt-fea'), count: 0 },
+                    'Desene 2D & BOM': { el: document.getElementById('kanban-col-2d'), cntEl: document.getElementById('kanban-cnt-2d'), count: 0 },
+                    'Lansat Atelier': { el: document.getElementById('kanban-col-atelier'), cntEl: document.getElementById('kanban-cnt-atelier'), count: 0 },
+                    'Prototip Validat': { el: document.getElementById('kanban-col-done'), cntEl: document.getElementById('kanban-cnt-done'), count: 0 },
+                };
+
+                Object.values(cols).forEach(c => { if(c.el) c.el.innerHTML = ''; });
+
+                tasks.forEach(t => {
+                    const target = cols[t.stage] || cols['Modelare 3D'];
+                    target.count++;
+
+                    const card = document.createElement('div');
+                    card.className = "bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs space-y-2 shadow";
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between gap-1">
+                            <span class="font-bold text-white leading-tight">${t.title}</span>
+                            <button onclick="deleteTask(${t.id})" class="text-slate-600 hover:text-rose-400 text-[10px]"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                        <div class="flex items-center justify-between text-[10px] text-slate-400">
+                            <span class="font-mono text-blue-400">${t.part_number || 'P/N'}</span>
+                            <span>${t.due_date ? `Termen: ${t.due_date}` : ''}</span>
+                        </div>
+                        <div class="pt-1.5 border-t border-slate-900 flex items-center justify-between">
+                            <span class="text-[9px] text-slate-500 uppercase font-semibold">Mută etapă:</span>
+                            <select onchange="moveTaskStage(${t.id}, this.value)" class="bg-slate-900 border border-slate-700 text-slate-200 text-[10px] rounded px-1.5 py-0.5 focus:outline-none">
+                                <option value="Concept 3D" ${t.stage === 'Concept 3D' ? 'selected' : ''}>Concept 3D</option>
+                                <option value="Modelare 3D" ${t.stage === 'Modelare 3D' ? 'selected' : ''}>Modelare 3D</option>
+                                <option value="Simulare FEA" ${t.stage === 'Simulare FEA' ? 'selected' : ''}>Simulare FEA</option>
+                                <option value="Desene 2D & BOM" ${t.stage === 'Desene 2D & BOM' ? 'selected' : ''}>Desene 2D</option>
+                                <option value="Lansat Atelier" ${t.stage === 'Lansat Atelier' ? 'selected' : ''}>Lansat Atelier</option>
+                                <option value="Prototip Validat" ${t.stage === 'Prototip Validat' ? 'selected' : ''}>Validat ✓</option>
+                            </select>
+                        </div>
+                    `;
+                    target.el.appendChild(card);
+                });
+
+                Object.values(cols).forEach(c => {
+                    if (c.cntEl) c.cntEl.innerText = c.count;
+                    if (c.count === 0 && c.el) {
+                        c.el.innerHTML = `<div class="text-[10px] text-slate-600 italic text-center py-4">Fără repere</div>`;
+                    }
+                });
+
+            } catch (err) { console.error(err); }
+        }
+
+        async function moveTaskStage(id, stage) {
+            try {
+                const res = await fetch(`/api/tasks/${id}/move-stage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stage })
+                });
+                if (res.ok) {
+                    showToast(`Piesă mutată în: ${stage}`);
+                    loadKanban();
+                }
+            } catch (err) { showToast('Eroare la mutare etapă', true); }
+        }
+
+        async function deleteTask(id) {
+            try {
+                const res = await fetch(`/api/tasks/${id}/delete`, { method: 'POST' });
+                if (res.ok) {
+                    showToast('Sarcină ștearsă');
+                    loadKanban();
+                }
+            } catch (err) { showToast('Eroare la ștergere', true); }
+        }
+
+        async function submitNewTask() {
+            const title = document.getElementById('task-title').value.trim();
+            if (!title) return showToast('Completează denumirea reperului!', true);
+
+            const payload = {
+                title,
+                project_id: document.getElementById('task-project').value,
+                stage: document.getElementById('task-stage').value,
+                due_date: document.getElementById('task-due-date').value
+            };
+
+            try {
+                const res = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    closeModal('modal-new-task');
+                    showToast('Reper adăugat pe panou!');
+                    loadKanban();
+                }
+            } catch (err) { showToast('Eroare la adăugare', true); }
+        }
+
         // ================= SCUT & BLOCAJE =================
         async function loadBlockers() {
             try {
@@ -976,7 +1277,7 @@
                             <div>
                                 <div class="flex items-center gap-2 flex-wrap mb-1">
                                     <span class="text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-full">${b.cause_type}</span>
-                                    <span class="text-xs font-semibold text-blue-400">${b.project_name || 'Atelier / General'}</span>
+                                    <span class="text-xs font-semibold text-blue-400 font-mono">[${b.part_number || 'P/N'} ${b.revision || ''}] ${b.project_name || ''}</span>
                                     <span class="text-xs text-slate-500">• ${b.date}</span>
                                 </div>
                                 <h3 class="text-sm font-bold text-white">${b.title}</h3>
@@ -1070,13 +1371,13 @@
                         <div>
                             <div class="flex items-center justify-between gap-2 mb-1">
                                 <div class="flex items-center gap-1.5">
+                                    <span class="text-[10px] font-mono font-bold bg-slate-800 text-blue-300 border border-slate-700 px-2 py-0.5 rounded">${p.part_number} ${p.revision}</span>
                                     <span class="text-[10px] font-bold uppercase ${priorityClass} px-2 py-0.5 rounded-full">${p.priority}</span>
-                                    <span class="text-[10px] bg-slate-800 text-blue-300 border border-slate-700 font-mono px-2 py-0.5 rounded-full">${p.cad_software || 'CAD'}</span>
                                 </div>
                                 <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md ${p.status === 'Finalizat' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-300'}">${p.status}</span>
                             </div>
                             <h3 class="text-sm font-bold text-white mt-1.5">${p.name}</h3>
-                            <p class="text-xs text-slate-400 font-medium">${p.client || 'Atelier / Intern'}</p>
+                            <p class="text-xs text-slate-400 font-medium">${p.client || 'Atelier / Intern'} • <span class="text-slate-300 font-mono">${p.cad_software}</span></p>
                             ${p.description ? `<p class="text-xs text-slate-300 mt-1 line-clamp-2">${p.description}</p>` : ''}
                         </div>
 
@@ -1107,11 +1408,11 @@
         }
 
         function populateProjectDropdowns() {
-            ['timer-modal-project', 'manual-project', 'ach-project', 'blk-project'].forEach(id => {
+            ['timer-modal-project', 'manual-project', 'ach-project', 'blk-project', 'task-project'].forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
                 el.innerHTML = '<option value="">(Selectează Ansamblu)</option>' +
-                    projectsList.map(p => `<option value="${p.id}">${p.name} [${p.cad_software || 'CAD'}]</option>`).join('');
+                    projectsList.map(p => `<option value="${p.id}">[${p.part_number} ${p.revision}] ${p.name}</option>`).join('');
             });
         }
 
@@ -1120,6 +1421,8 @@
             if (!name) return showToast('Completează numele ansamblului!', true);
 
             const payload = {
+                part_number: document.getElementById('proj-pn').value.trim(),
+                revision: document.getElementById('proj-rev').value.trim(),
                 name,
                 client: document.getElementById('proj-client').value.trim(),
                 cad_software: document.getElementById('proj-cad').value,
@@ -1138,7 +1441,7 @@
                 });
                 if (res.ok) {
                     closeModal('modal-new-project');
-                    showToast('Ansamblu adăugat!');
+                    showToast('Ansamblu PDM adăugat!');
                     loadProjects();
                     loadStats();
                 }
@@ -1184,6 +1487,7 @@
                             <div class="space-y-1">
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <span class="font-bold text-white">${e.date}</span>
+                                    <span class="font-mono text-cyan-300 bg-cyan-950/60 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[10px]">${e.part_number || 'P/N'} ${e.revision || ''}</span>
                                     <span class="font-semibold text-blue-400">${e.project_name || 'General'}</span>
                                     <span class="bg-slate-800 text-slate-300 border border-slate-700 px-1.5 py-0.5 rounded text-[10px]">${e.category}</span>
                                     ${e.is_overtime ? `<span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded text-[10px] font-bold">OVERTIME</span>` : ''}
@@ -1242,10 +1546,10 @@
 
                 document.getElementById('calc-current-salary').value = data.current_net_salary;
                 document.getElementById('calc-raise-pct').value = data.target_raise_pct;
-                document.getElementById('calc-hourly-rate').innerText = `${data.hourly_net} ${data.currency}/h`;
-                document.getElementById('calc-overtime-hours').innerText = `${data.overtime_hours} ore`;
-                document.getElementById('calc-overtime-value').innerText = `${data.overtime_total_value} ${data.currency}`;
-                document.getElementById('calc-target-raise').innerText = `+${data.requested_raise_amount} ${data.currency} (${data.target_raise_pct}%)`;
+                document.getElementById('calc-total-savings').innerText = `${Number(data.total_savings).toLocaleString()} ${data.currency}`;
+                document.getElementById('calc-overtime-value').innerText = `${Number(data.overtime_total_value).toLocaleString()} ${data.currency}`;
+                document.getElementById('calc-yearly-cost').innerText = `+${Number(data.requested_raise_yearly).toLocaleString()} ${data.currency}`;
+                document.getElementById('calc-roi-multiple').innerText = `${data.roi_multiple}x`;
             } catch (err) { console.error(err); }
         }
 
@@ -1260,7 +1564,7 @@
                     body: JSON.stringify({ current_net_salary, target_raise_pct })
                 });
                 if (res.ok) {
-                    showToast('Calcule actualizate!');
+                    showToast('Calcule ROI actualizate!');
                     loadSalaryCalculator();
                 }
             } catch (err) { showToast('Eroare la recalculare', true); }
@@ -1284,8 +1588,9 @@
                             <div>
                                 <div class="flex items-center gap-2 flex-wrap mb-1">
                                     <span class="text-[10px] uppercase font-bold tracking-wider bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">${a.category}</span>
-                                    <span class="text-xs font-semibold text-blue-400">${a.project_name || 'General'}</span>
+                                    <span class="text-xs font-semibold text-blue-400 font-mono">[${a.part_number || 'P/N'} ${a.revision || ''}] ${a.project_name || ''}</span>
                                     <span class="text-xs text-slate-500">• ${a.date}</span>
+                                    ${a.money_saved_est > 0 ? `<span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded-full font-bold border border-emerald-500/40">+${Number(a.money_saved_est).toLocaleString()} RON salvați</span>` : ''}
                                 </div>
                                 <h3 class="text-sm font-bold text-white">${a.title}</h3>
                             </div>
@@ -1328,6 +1633,7 @@
             const payload = {
                 title,
                 impact_value,
+                money_saved_est: document.getElementById('ach-savings').value,
                 date: document.getElementById('ach-date').value,
                 project_id: document.getElementById('ach-project').value,
                 category: document.getElementById('ach-category').value,
@@ -1346,6 +1652,7 @@
                     showToast('Realizare salvată!');
                     loadAchievements();
                     loadStats();
+                    loadSalaryCalculator();
                 }
             } catch (err) { showToast('Eroare la salvare', true); }
         }
@@ -1360,10 +1667,11 @@
                 const data = await res.json();
 
                 document.getElementById('report-period-tag').innerText = `Perioadă: ${data.start_date} → ${data.end_date}`;
-                document.getElementById('report-gen-date').innerText = `Generat la: ${new Date().toLocaleDateString('ro-RO')}`;
+                document.getElementById('report-gen-date').innerText = `Data: ${new Date().toLocaleDateString('ro-RO')}`;
 
                 document.getElementById('rep-total-hours').innerText = data.overview.total_hours || '0';
                 document.getElementById('rep-overtime-hours').innerText = data.overview.overtime_hours || '0';
+                document.getElementById('rep-savings').innerText = `${Number(data.period_savings || 0).toLocaleString()} RON`;
                 document.getElementById('rep-days-worked').innerText = data.overview.days_worked || '0';
 
                 // Blockers in report (Scut)
@@ -1372,7 +1680,7 @@
                     blkContainer.innerHTML = data.blockers.map((b, i) => `
                         <div class="border border-slate-200 rounded-xl p-2.5 bg-slate-50 text-xs">
                             <div class="flex items-center justify-between mb-1">
-                                <h4 class="font-bold text-slate-900">${i+1}. ${b.title} (${b.date})</h4>
+                                <h4 class="font-bold text-slate-900">[${b.part_number || 'P/N'}] ${i+1}. ${b.title} (${b.date})</h4>
                                 <span class="text-[10px] bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded">${b.cause_type}</span>
                             </div>
                             <p class="text-slate-600 mb-1">Cauză: ${b.description}</p>
@@ -1390,8 +1698,11 @@
                     achContainer.innerHTML = data.achievements.map((a, i) => `
                         <div class="border border-slate-200 rounded-xl p-2.5 bg-slate-50 text-xs">
                             <div class="flex items-center justify-between mb-1">
-                                <h4 class="font-bold text-slate-900">${i+1}. ${a.title}</h4>
-                                <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded">${a.category}</span>
+                                <h4 class="font-bold text-slate-900">[${a.part_number || 'P/N'}] ${i+1}. ${a.title}</h4>
+                                <div class="flex items-center gap-1">
+                                    ${a.money_saved_est > 0 ? `<span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">+${Number(a.money_saved_est).toLocaleString()} RON</span>` : ''}
+                                    <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded">${a.category}</span>
+                                </div>
                             </div>
                             <p class="text-slate-700 font-semibold mb-1">Rezultat Tehnic: <span class="font-normal">${a.impact_value}</span></p>
                             ${a.feedback_received ? `<p class="text-[11px] text-emerald-700 italic">Feedback: "${a.feedback_received}"</p>` : ''}
@@ -1408,6 +1719,7 @@
                         <table class="w-full text-xs text-left border-collapse border border-slate-200">
                             <thead>
                                 <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                    <th class="p-2 border-r border-slate-200">P/N & Rev</th>
                                     <th class="p-2 border-r border-slate-200">Ansamblu Mecanic</th>
                                     <th class="p-2 border-r border-slate-200">CAD</th>
                                     <th class="p-2 border-r border-slate-200">Client / Atelier</th>
@@ -1418,6 +1730,7 @@
                             <tbody>
                                 ${data.projects.map(p => `
                                     <tr class="border-b border-slate-200">
+                                        <td class="p-2 font-mono font-bold text-blue-800 border-r border-slate-200">${p.part_number} ${p.revision}</td>
                                         <td class="p-2 font-bold text-slate-900 border-r border-slate-200">${p.name}</td>
                                         <td class="p-2 text-slate-600 border-r border-slate-200 font-mono">${p.cad_software || 'CAD'}</td>
                                         <td class="p-2 text-slate-600 border-r border-slate-200">${p.client || '-'}</td>
