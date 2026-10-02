@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WorkPulse - War Room Inginer Mecanic</title>
+    <title>WorkPulse - Activitate & Dosar Mărire</title>
     <!-- PWA Settings -->
     <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#1e40af">
+    <meta name="theme-color" content="#1e3a8a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,8 +15,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -37,575 +35,468 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen pb-24 md:pb-8">
+<body class="bg-slate-950 text-slate-100 min-h-screen">
 
-    <!-- Top Sticky Header -->
-    <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-2.5">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-2.5">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                    <i class="fa-solid fa-compass-drafting text-white text-base"></i>
+    <!-- ================= LOGIN SCREEN (CYBERSECURITY) ================= -->
+    <div id="login-overlay" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4">
+            <div class="text-center space-y-1.5">
+                <div class="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-shield-halved text-white text-xl"></i>
                 </div>
+                <h2 class="text-lg font-black text-white tracking-tight">WorkPulse Security</h2>
+                <p class="text-xs text-slate-400">Autentificare Cont Admin Proiectant</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-3 text-xs">
                 <div>
-                    <h1 class="text-sm font-bold tracking-tight text-white leading-tight">WorkPulse <span class="text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.2 rounded font-medium">CAD v3.0</span></h1>
-                    <p class="text-[10px] text-slate-400">Inginer Proiectant Mecanic • War Room & Dosar Mărire</p>
+                    <label class="block font-medium text-slate-300 mb-1">Utilizator:</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-3 top-2.5 text-slate-500"></i>
+                        <input type="text" id="login-username" value="admin" required class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-2 text-white focus:outline-none focus:border-blue-500 font-medium">
+                    </div>
                 </div>
-            </div>
 
-            <div class="flex items-center space-x-2">
-                <button onclick="installPWA()" id="header-install-btn" class="px-2.5 py-1 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/40 text-[11px] font-bold flex items-center gap-1 transition">
-                    <i class="fa-solid fa-mobile-screen-button"></i> <span>Instalează</span>
-                </button>
-                <div id="header-timer-badge" class="hidden flex items-center space-x-2 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 px-2.5 py-1 rounded-full text-xs font-mono font-medium animate-pulse">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                    <span id="header-timer-clock">00:00:00</span>
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Parolă:</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3 top-2.5 text-slate-500"></i>
+                        <input type="password" id="login-password" value="admin" required class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-2 text-white focus:outline-none focus:border-blue-500 font-medium">
+                    </div>
                 </div>
-            </div>
+
+                <div class="flex items-center justify-between pt-1">
+                    <label class="flex items-center space-x-2 text-[11px] text-slate-400 cursor-pointer">
+                        <input type="checkbox" id="login-remember" checked class="w-4 h-4 rounded text-blue-600 bg-slate-950 border-slate-800">
+                        <span>Ține-mă minte 60 zile</span>
+                    </label>
+                </div>
+
+                <div id="login-error-msg" class="hidden text-[11px] text-rose-400 font-medium bg-rose-950/40 border border-rose-500/30 p-2 rounded-xl text-center"></div>
+
+                <button type="submit" id="btn-login-submit" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> <span>Conectare Securizată</span>
+                </button>
+
+                <div class="pt-2 text-center text-[10px] text-slate-500">
+                    Cont inițial: <strong class="text-slate-400">admin</strong> / Parolă: <strong class="text-slate-400">admin</strong>  
+                    <br>(Poți schimba parola oricând din aplicație)
+                </div>
+            </form>
         </div>
+    </div>
 
-        <!-- Navigation Tabs (Touch-scrollable on phone) -->
-        <nav class="max-w-6xl mx-auto mt-2 flex space-x-1.5 overflow-x-auto no-scrollbar pt-1 text-xs">
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="active-nav-btn px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
-                <i class="fa-solid fa-gauge-high"></i> Dashboard
-            </button>
-            <button onclick="switchTab('blockers')" id="nav-blockers" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
-                <i class="fa-solid fa-shield-halved text-rose-400"></i> Scut & Blocaje
-            </button>
-            <button onclick="switchTab('kanban')" id="nav-kanban" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
-                <i class="fa-solid fa-bars-progress text-cyan-400"></i> Kanban CAD
-            </button>
-            <button onclick="switchTab('projects')" id="nav-projects" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
-                <i class="fa-solid fa-cubes-stacked text-blue-400"></i> Ansambluri PDM
-            </button>
-            <button onclick="switchTab('time')" id="nav-time" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
-                <i class="fa-solid fa-clock text-amber-400"></i> Pontaj Etape
-            </button>
-            <button onclick="switchTab('brag')" id="nav-brag" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
-                <i class="fa-solid fa-trophy text-amber-400"></i> Dosar Mărire & ROI
-            </button>
-            <button onclick="switchTab('report')" id="nav-report" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
-                <i class="fa-solid fa-file-contract text-emerald-400"></i> Raport Evaluare
-            </button>
-        </nav>
-    </header>
+    <!-- ================= MAIN APP VIEW ================= -->
+    <div id="app-view" class="hidden pb-20 md:pb-8">
 
-    <!-- 1-TAP QUICK LOGGING BAR (Optimizat pentru telefon de către Consiliu) -->
-    <div class="max-w-6xl mx-auto px-4 pt-3 pb-1">
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar text-xs">
-            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider whitespace-nowrap flex items-center gap-1">
-                <i class="fa-solid fa-bolt text-amber-400"></i> 1-Tap Log:
-            </span>
-            <div class="flex items-center gap-1.5 whitespace-nowrap">
-                <button onclick="quickLogPreset('Modelare CAD 3D', 60, false)" class="px-2.5 py-1 rounded-lg bg-blue-600/30 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 font-semibold transition active:scale-95">
-                    +1h CAD 3D
+        <!-- Top Header -->
+        <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-2.5">
+            <div class="max-w-6xl mx-auto flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                        <i class="fa-solid fa-compass-drafting text-white text-base"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-sm font-bold tracking-tight text-white leading-tight">WorkPulse <span class="text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.2 rounded font-medium">Jurnal CAD</span></h1>
+                        <p class="text-[10px] text-slate-400">Evidență Lejeră pe Zile & Luni • Protecție Evaluare</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <button onclick="openChangePasswordModal()" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-medium flex items-center gap-1 transition" title="Securitate & Parolă">
+                        <i class="fa-solid fa-key text-amber-400"></i> <span class="hidden sm:inline">Parolă</span>
+                    </button>
+                    <button onclick="handleLogout()" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/50 text-slate-300 hover:text-rose-300 border border-slate-700 text-[11px] font-medium flex items-center gap-1 transition" title="Deconectare">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs (Mobile touch scroll) -->
+            <nav class="max-w-6xl mx-auto mt-2 flex space-x-1.5 overflow-x-auto no-scrollbar pt-1 text-xs">
+                <button onclick="switchTab('table')" id="nav-table" class="active-nav-btn px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-table-list text-cyan-400"></i> Jurnal Tabelar Zile
                 </button>
-                <button onclick="quickLogPreset('Desene de Execuție 2D & BOM', 60, false)" class="px-2.5 py-1 rounded-lg bg-cyan-600/30 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-cyan-500/30 font-semibold transition active:scale-95">
-                    +1h Desene 2D
+                <button onclick="switchTab('blockers')" id="nav-blockers" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved text-rose-400"></i> Scut & Blocaje
                 </button>
-                <button onclick="quickLogPreset('Asistență Tehnică Atelier', 30, false)" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 font-semibold transition active:scale-95">
-                    +30m Atelier
+                <button onclick="switchTab('projects')" id="nav-projects" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-cubes-stacked text-blue-400"></i> Ansambluri PDM
                 </button>
-                <button onclick="quickLogPreset('Ore Suplimentare', 60, true)" class="px-2.5 py-1 rounded-lg bg-amber-500/30 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-500/40 font-bold transition active:scale-95">
-                    +1h Overtime 🔥
+                <button onclick="switchTab('brag')" id="nav-brag" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-trophy text-amber-400"></i> Dosar Mărire & ROI
+                </button>
+                <button onclick="switchTab('report')" id="nav-report" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-contract text-emerald-400"></i> Raport Evaluare
+                </button>
+            </nav>
+        </header>
+
+        <!-- Main Body Content -->
+        <main class="max-w-6xl mx-auto px-4 py-4 space-y-4">
+
+            <!-- ================= TAB 1: JURNAL TABELAR LEJER (ZILE / LUNI / ANI) ================= -->
+            <section id="tab-table" class="space-y-3.5">
+
+                <!-- Monthly & Filter Control Bar -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fa-regular fa-calendar text-blue-400"></i> Filtru Perioadă:
+                            </span>
+                            <select id="filter-month-select" onchange="loadDailyLogs()" class="bg-slate-950 border border-slate-700 text-white font-bold text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-blue-500">
+                                <option value="all">Toate Lunile & Anii</option>
+                            </select>
+                            <select id="filter-project-select" onchange="loadDailyLogs()" class="bg-slate-950 border border-slate-700 text-white font-semibold text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-blue-500">
+                                <option value="all">Toate Ansamblurile</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <a href="/export/csv" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1 transition">
+                                <i class="fa-solid fa-file-csv text-emerald-400"></i> Export CSV
+                            </a>
+                            <button onclick="openNewDailyLogModal()" class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-600/30 transition">
+                                <i class="fa-solid fa-plus"></i> + Notează Ziua
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Summary Chips (Lejer) -->
+                    <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800 text-center">
+                        <div class="bg-slate-950/70 border border-slate-800 p-2 rounded-xl">
+                            <span class="text-[10px] text-slate-400 font-semibold uppercase">Zile de Muncă</span>
+                            <div class="text-base font-black text-white mt-0.5" id="sum-active-days">0</div>
+                        </div>
+                        <div class="bg-slate-950/70 border border-slate-800 p-2 rounded-xl">
+                            <span class="text-[10px] text-slate-400 font-semibold uppercase">Ansambluri Lucrate</span>
+                            <div class="text-base font-black text-cyan-400 mt-0.5" id="sum-active-projects">0</div>
+                        </div>
+                        <div class="bg-slate-950/70 border border-slate-800 p-2 rounded-xl">
+                            <span class="text-[10px] text-slate-400 font-semibold uppercase">Realizări Cheie</span>
+                            <div class="text-base font-black text-amber-400 mt-0.5" id="sum-highlights">0 ⭐</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Activity Table Card -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                    <div class="p-3 border-b border-slate-800 flex items-center justify-between text-xs">
+                        <div class="relative flex-1 max-w-xs">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2 text-slate-500 text-[11px]"></i>
+                            <input type="text" id="daily-search" onkeyup="debounceLoadDailyLogs()" placeholder="Caută reper, sarcină sau descriere..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1 text-xs text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                        <span id="table-entries-count" class="text-[11px] text-slate-500">0 înregistrări</span>
+                    </div>
+
+                    <!-- Responsive Table Container -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3 whitespace-nowrap">Data</th>
+                                    <th class="p-3 whitespace-nowrap">Ansamblu / P/N</th>
+                                    <th class="p-3">Ce am realizat / Livrabil</th>
+                                    <th class="p-3 whitespace-nowrap">Etapă</th>
+                                    <th class="p-3 whitespace-nowrap">Stare</th>
+                                    <th class="p-3 text-center whitespace-nowrap">⭐ Mărire</th>
+                                </tr>
+                            </thead>
+                            <tbody id="daily-table-body" class="divide-y divide-slate-800/60 font-medium">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= TAB 2: SCUT & BLOCAJE (PROBLEME LA EVALUARE) ================= -->
+            <section id="tab-blockers" class="hidden space-y-4">
+                <div class="bg-gradient-to-r from-rose-950/40 via-slate-900 to-slate-900 border border-rose-500/40 rounded-2xl p-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <div class="inline-flex items-center gap-1.5 bg-rose-500/20 text-rose-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full mb-1.5 border border-rose-500/30">
+                                <i class="fa-solid fa-shield-halved"></i> SCUT DE APĂRARE LA EVALUARE
+                            </div>
+                            <h2 class="text-base font-bold text-white">Jurnal de Blocaje, Modificări Client & Incidente</h2>
+                            <p class="text-xs text-slate-300 mt-1">
+                                Când apar întârzieri din cauze externe (cerințe modificate pe ultima sută de metri, lipsă mostre/cote furnizori, limitări atelier), le notezi aici cu soluția aplicată. La evaluare ai răspunsul concret la secundă!
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between">
+                        <span class="text-xs text-slate-400">Ai <strong id="blocker-count-badge" class="text-rose-400">0</strong> obstacole documentate</span>
+                        <button onclick="openNewBlockerModal()" class="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-rose-600/30 transition">
+                            <i class="fa-solid fa-plus"></i> Înregistrează Blocaj / Incident
+                        </button>
+                    </div>
+                </div>
+
+                <div id="blockers-list" class="space-y-3"></div>
+            </section>
+
+            <!-- ================= TAB 3: PROIECTE & ANSAMBLURI PDM ================= -->
+            <section id="tab-projects" class="hidden space-y-4">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                        <h2 class="text-base font-bold text-white">Ansambluri & Part Numbers (PDM)</h2>
+                        <p class="text-xs text-slate-400">Organizează proiectele pe coduri de reper și numere de revizie</p>
+                    </div>
+                    <button onclick="openNewProjectModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-blue-600/30 transition">
+                        <i class="fa-solid fa-plus"></i> Ansamblu Nou
+                    </button>
+                </div>
+
+                <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+            </section>
+
+            <!-- ================= TAB 4: DOSAR MĂRIRE & CALCULATOR ROI ================= -->
+            <section id="tab-brag" class="hidden space-y-4">
+                <div class="bg-slate-900 border border-emerald-500/40 rounded-2xl p-4 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/20">
+                    <div class="flex items-center gap-2 mb-3 border-b border-slate-800 pb-2">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
+                            <i class="fa-solid fa-calculator"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Calculator ROI & Justificare Financiară Mărire</h3>
+                            <p class="text-[10px] text-slate-400">Comparație matematică între mărirea cerută și economiile aduse</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 text-xs">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Salariul Tău Net Lunar (RON):</label>
+                            <input type="number" id="calc-current-salary" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Mărire Dorită (%):</label>
+                            <input type="number" id="calc-raise-pct" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-emerald-400 font-bold">
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="saveSalarySettings()" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
+                                Recalculează
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-800 text-center">
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <div class="text-[10px] text-slate-400">Total Economii Generate</div>
+                            <div class="text-base font-black text-emerald-400 mt-0.5" id="calc-total-savings">0 RON</div>
+                        </div>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <div class="text-[10px] text-slate-400">Zile Active Lucrate</div>
+                            <div class="text-base font-black text-white mt-0.5" id="calc-active-days">0 zile</div>
+                        </div>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <div class="text-[10px] text-blue-400">Cost Anual Mărire Cerută</div>
+                            <div class="text-base font-black text-blue-400 mt-0.5" id="calc-yearly-cost">0 RON/an</div>
+                        </div>
+                        <div class="bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/40">
+                            <div class="text-[10px] text-emerald-300 font-bold">Multiplicator ROI</div>
+                            <div class="text-base font-black text-emerald-400 mt-0.5" id="calc-roi-multiple">0x</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-white">Realizări Tehnice Majore (Brag Sheet)</h3>
+                        <p class="text-xs text-slate-400">Rebuturi prevenite, optimizări de masă, dispozitive noi</p>
+                    </div>
+                    <button onclick="openNewAchievementModal()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition">
+                        <i class="fa-solid fa-plus"></i> Înregistrează Realizare
+                    </button>
+                </div>
+
+                <div id="achievements-list" class="space-y-3"></div>
+            </section>
+
+            <!-- ================= TAB 5: RAPORT EVALUARE ================= -->
+            <section id="tab-report" class="hidden space-y-4">
+                <div class="no-print bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                    <h2 class="text-base font-bold text-white mb-1">Generator Dosar Evaluare & Mărire Salarială</h2>
+                    <p class="text-xs text-slate-400 mb-4">Generează dosarul complet structurat pentru ședința de evaluare cu conducerea.</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">De la data:</label>
+                            <input type="date" id="report-start-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Până la data:</label>
+                            <input type="date" id="report-end-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="loadReportData()" class="w-full px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center justify-center gap-2 transition">
+                                <i class="fa-solid fa-rotate"></i> Actualizează Raport
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-800">
+                        <button onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition">
+                            <i class="fa-solid fa-print"></i> Printează / Salvează PDF
+                        </button>
+                        <a href="/export/markdown" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-file-lines text-blue-400"></i> Descarcă Markdown (.md)
+                        </a>
+                        <button onclick="backupToPhone()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-download text-amber-400"></i> Salvează Copie pe Telefon
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Printable Paper Document -->
+                <div id="printable-report-area" class="bg-white text-slate-900 rounded-2xl p-6 shadow-2xl border border-slate-200">
+                    <div class="border-b-2 border-blue-600 pb-4 mb-5 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                        <div>
+                            <h1 class="text-xl font-black text-slate-900 tracking-tight">RAPORT DE ACTIVITATE INGINEREASCĂ & EVALUARE</h1>
+                            <p class="text-xs text-slate-500 font-semibold">Post: Inginer Proiectant Mecanic • Dosar Justificativ Mărire Salarială</p>
+                        </div>
+                        <div class="text-left sm:text-right">
+                            <span class="inline-block bg-blue-50 text-blue-800 border border-blue-200 text-xs px-2.5 py-0.5 rounded font-bold" id="report-period-tag">Perioadă</span>
+                            <div class="text-[10px] text-slate-400 mt-1" id="report-gen-date">Data: azi</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 mb-5 text-center">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                            <div class="text-[10px] text-slate-500 font-bold uppercase">Zile Lucrate</div>
+                            <div class="text-xl font-black text-slate-900 mt-0.5" id="rep-days-worked">0</div>
+                        </div>
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5">
+                            <div class="text-[10px] text-emerald-800 font-bold uppercase">Economii Generate</div>
+                            <div class="text-xl font-black text-emerald-700 mt-0.5" id="rep-savings">0 RON</div>
+                        </div>
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-2.5">
+                            <div class="text-[10px] text-blue-800 font-bold uppercase">Activități Notate</div>
+                            <div class="text-xl font-black text-blue-700 mt-0.5" id="rep-total-actions">0</div>
+                        </div>
+                    </div>
+
+                    <!-- 1. Scut de Apărare -->
+                    <div class="mb-5">
+                        <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-2.5 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> 1. Scut de Apărare: Blocaje & Incidente Rezolvate Fără Vina Proiectantului
+                        </h2>
+                        <div id="rep-blockers-list" class="space-y-2"></div>
+                    </div>
+
+                    <!-- 2. Realizări -->
+                    <div class="mb-5">
+                        <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-2.5 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> 2. Valoare Adusă Companiei: Optimizări, Rebuturi Prevenite & Standardizări
+                        </h2>
+                        <div id="rep-achievements-list" class="space-y-2"></div>
+                    </div>
+
+                    <!-- 3. Repartizare Proiecte -->
+                    <div class="mb-5">
+                        <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-2.5 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span> 3. Ansambluri & Part Numbers Gestionate
+                        </h2>
+                        <div id="rep-projects-table" class="overflow-x-auto"></div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Modal: Notează Activitatea Zilei (Lejer) -->
+    <div id="modal-new-daily-log" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-blue-500/40 w-full max-w-md rounded-2xl p-5 space-y-3.5 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-blue-400"></i> Înregistrare Activitate Zi
+                </h3>
+                <button onclick="closeModal('modal-new-daily-log')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-2.5 text-xs">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Data:</label>
+                        <input type="date" id="log-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Ansamblu / PDM:</label>
+                        <select id="log-project" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500"></select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Tip Activitate:</label>
+                        <select id="log-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                            <option value="Modelare CAD 3D">Modelare CAD 3D</option>
+                            <option value="Desene 2D & BOM">Desene 2D & BOM</option>
+                            <option value="Calcule & Simulare FEA">Calcule & Simulare FEA</option>
+                            <option value="Modificare ECN">Modificare ECN (Client/Atelier)</option>
+                            <option value="Asistență Atelier">Asistență Atelier / Montaj</option>
+                            <option value="Documentație Tehnică">Documentație Tehnică</option>
+                            <option value="Ședință Tehnică / Furnizori">Ședință Tehnică / Furnizori</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Stare / Progres:</label>
+                        <select id="log-status" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                            <option value="Finalizat">Finalizat</option>
+                            <option value="În curs">În curs</option>
+                            <option value="Lansat Atelier">Lansat Atelier</option>
+                            <option value="Realizare Cheie ⭐">Realizare Cheie ⭐</option>
+                            <option value="Modificare Client">Modificare Client</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Ce ai realizat / livrat concret *:</label>
+                    <textarea id="log-desc" rows="3" placeholder="ex: Finalizat ansamblul de role, verificat coliziuni cinematice și exportat desenele 2D pentru debitare..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <div class="flex items-center space-x-2 pt-1">
+                    <input type="checkbox" id="log-highlight" class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-800 focus:ring-0">
+                    <label for="log-highlight" class="font-bold text-amber-300">⭐ Evidențiază ca realizare importantă pentru mărire</label>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                <button onclick="closeModal('modal-new-daily-log')" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Anulează</button>
+                <button onclick="submitNewDailyLog()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs">
+                    Salvează în Tabel
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Main Container -->
-    <main class="max-w-6xl mx-auto px-4 py-2 space-y-5">
-
-        <!-- ================= TAB 1: DASHBOARD ================= -->
-        <section id="tab-dashboard" class="space-y-4">
-
-            <!-- Live Timer Banner for Mechanical Tasks -->
-            <div class="bg-gradient-to-r from-slate-900 via-blue-950/40 to-slate-900 border border-blue-500/30 rounded-2xl p-4 shadow-xl">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div class="flex items-center space-x-3">
-                        <div id="timer-icon-box" class="w-11 h-11 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center text-lg border border-slate-700">
-                            <i class="fa-solid fa-stopwatch"></i>
-                        </div>
-                        <div>
-                            <span class="text-[10px] font-semibold tracking-wider uppercase text-blue-400">Sesiune Proiectare Live</span>
-                            <div class="text-2xl font-black font-mono tracking-tight text-white" id="live-timer-display">00:00:00</div>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-2">
-                        <div id="timer-status-text" class="text-xs text-slate-400">Status: <span class="font-medium text-slate-300">Oprit</span></div>
-                        <button id="btn-toggle-timer" onclick="handleTimerClick()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-lg shadow-blue-600/30 flex items-center gap-1.5 transition active:scale-95">
-                            <i class="fa-solid fa-play"></i> <span>Start Sesiune CAD</span>
-                        </button>
-                        <button onclick="openManualTimeModal()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition">
-                            <i class="fa-solid fa-plus"></i> Pontaj Manual
-                        </button>
-                    </div>
-                </div>
-
-                <div id="timer-active-info" class="hidden mt-3 pt-3 border-t border-slate-800 text-xs flex flex-wrap items-center justify-between gap-2 text-slate-300">
-                    <div>
-                        <span class="text-slate-400">Etapă:</span> <strong id="timer-current-task">Modelare CAD 3D</strong>
-                        <span class="mx-1.5 text-slate-600">•</span>
-                        <span class="text-slate-400">Ansamblu:</span> <strong id="timer-current-project" class="text-blue-300">General</strong>
-                    </div>
-                    <div id="timer-overtime-pill" class="hidden bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold">
-                        🔥 ORE SUPLIMENTARE (OVERTIME)
-                    </div>
-                </div>
-            </div>
-
-            <!-- War Room Metric Cards (Inginerie Mecanică) -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
-                    <div class="flex items-center justify-between text-slate-400 mb-1">
-                        <span class="text-[10px] font-semibold uppercase tracking-wider">Total Ore CAD</span>
-                        <i class="fa-regular fa-clock text-blue-400 text-sm"></i>
-                    </div>
-                    <div class="text-2xl font-black text-white" id="stat-total-hours">0</div>
-                    <div class="text-[10px] text-slate-400 mt-0.5">proiectare & urmărire</div>
-                </div>
-
-                <div class="bg-slate-900 border border-amber-500/30 rounded-xl p-3.5 bg-gradient-to-br from-slate-900 to-amber-950/20">
-                    <div class="flex items-center justify-between text-amber-400 mb-1">
-                        <span class="text-[10px] font-bold uppercase tracking-wider">Overtime Asumat</span>
-                        <i class="fa-solid fa-fire text-amber-400 text-sm"></i>
-                    </div>
-                    <div class="text-2xl font-black text-amber-300" id="stat-overtime-hours">0</div>
-                    <div class="text-[10px] text-amber-400/80 mt-0.5">ore suplimentare atelier/CAD</div>
-                </div>
-
-                <div class="bg-slate-900 border border-emerald-500/30 rounded-xl p-3.5 bg-gradient-to-br from-slate-900 to-emerald-950/20">
-                    <div class="flex items-center justify-between text-emerald-400 mb-1">
-                        <span class="text-[10px] font-bold uppercase tracking-wider">Economii Generate</span>
-                        <i class="fa-solid fa-money-bill-trend-up text-emerald-400 text-sm"></i>
-                    </div>
-                    <div class="text-2xl font-black text-emerald-300" id="stat-money-saved">0</div>
-                    <div class="text-[10px] text-emerald-400/80 mt-0.5">RON piese & timp salvat</div>
-                </div>
-
-                <div class="bg-slate-900 border border-rose-500/30 rounded-xl p-3.5 bg-gradient-to-br from-slate-900 to-rose-950/20">
-                    <div class="flex items-center justify-between text-rose-400 mb-1">
-                        <span class="text-[10px] font-bold uppercase tracking-wider">Scut & Blocaje</span>
-                        <i class="fa-solid fa-shield-halved text-rose-400 text-sm"></i>
-                    </div>
-                    <div class="text-2xl font-black text-rose-300" id="stat-total-blockers">0</div>
-                    <div class="text-[10px] text-rose-400/80 mt-0.5"><span id="stat-blocker-hours">0</span>h probleme rezolvate</div>
-                </div>
-            </div>
-
-            <!-- Charts: Etape Inginerie & Distribuție Proiecte -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-chart-column text-blue-400"></i> Trend Ore (Ultimele 14 Zile)
-                        </h3>
-                        <span class="text-[10px] text-slate-500">Normale vs Overtime</span>
-                    </div>
-                    <div class="h-56 relative">
-                        <canvas id="chart-timeline"></canvas>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-chart-pie text-cyan-400"></i> Repartizare pe Ansambluri PDM
-                        </h3>
-                        <span class="text-[10px] text-slate-500">Ore cumulate pe Part Numbers</span>
-                    </div>
-                    <div class="h-56 relative flex items-center justify-center">
-                        <canvas id="chart-projects"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Top Highlights for Salary Review -->
-            <div class="bg-slate-900 border border-blue-500/30 rounded-2xl p-4">
-                <div class="flex items-center justify-between mb-3">
-                    <div>
-                        <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
-                            <i class="fa-solid fa-star text-amber-400"></i> Realizări Cheie Pregătite Pentru Mărire
-                        </h3>
-                        <p class="text-[11px] text-slate-400">Rebuturi prevenite prin verificare 3D, optimizări de greutate și dispozitive de producție</p>
-                    </div>
-                    <button onclick="switchTab('brag')" class="text-xs text-blue-400 hover:text-blue-300 font-semibold">Vezi toate →</button>
-                </div>
-                <div id="dashboard-highlights-list" class="space-y-2.5"></div>
-            </div>
-        </section>
-
-        <!-- ================= TAB 2: SCUT & BLOCAJE ================= -->
-        <section id="tab-blockers" class="hidden space-y-4">
-            <div class="bg-gradient-to-r from-rose-950/40 via-slate-900 to-slate-900 border border-rose-500/40 rounded-2xl p-4">
-                <div class="flex items-start justify-between gap-3">
-                    <div>
-                        <div class="inline-flex items-center gap-1.5 bg-rose-500/20 text-rose-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full mb-1.5 border border-rose-500/30">
-                            <i class="fa-solid fa-shield-halved"></i> SCUT DE APĂRARE LA EVALUARE
-                        </div>
-                        <h2 class="text-base font-bold text-white">Jurnalul de Blocaje, Modificări Client & Incidente</h2>
-                        <p class="text-xs text-slate-300 mt-1">
-                            Aici notezi tot ce a cauzat întârzieri fără vina ta (cerințe modificate de client pe ultima sută de metri, lipsă mostre/cote de la furnizori, limitări de scule în atelier). La evaluare, ai data exactă și soluția prin care tu ai deblocat situația!
-                        </p>
-                    </div>
-                </div>
-                <div class="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between">
-                    <span class="text-xs text-slate-400">Ai <strong id="blocker-count-badge" class="text-rose-400">0</strong> obstacole documentate</span>
-                    <button onclick="openNewBlockerModal()" class="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-rose-600/30 transition">
-                        <i class="fa-solid fa-plus"></i> Înregistrează Blocaj / Incident
-                    </button>
-                </div>
-            </div>
-
-            <div id="blockers-list" class="space-y-3"></div>
-        </section>
-
-        <!-- ================= TAB 3: KANBAN ETAPE PROIECTARE CAD ================= -->
-        <section id="tab-kanban" class="hidden space-y-4">
-            <div class="flex items-center justify-between flex-wrap gap-2">
-                <div>
-                    <h2 class="text-base font-bold text-white">Panou Etape CAD & Producție (Kanban)</h2>
-                    <p class="text-xs text-slate-400">Urmărește piesele de la Concept 3D până la Prototip Validat</p>
-                </div>
-                <button onclick="openNewTaskModal()" class="px-3 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-cyan-600/30 transition">
-                    <i class="fa-solid fa-plus"></i> Sarcină / Piesă Nouă
-                </button>
-            </div>
-
-            <!-- Kanban Columns Container (Horizontal scroll on phone) -->
-            <div class="flex space-x-3 overflow-x-auto pb-4 no-scrollbar">
-                <!-- Column 1: Concept 3D -->
-                <div class="w-64 shrink-0 bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-col">
-                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
-                        <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-slate-400"></span> 1. Concept 3D
-                        </span>
-                        <span id="kanban-cnt-concept" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded-full text-slate-400 font-mono">0</span>
-                    </div>
-                    <div id="kanban-col-concept" class="space-y-2 min-h-[150px]"></div>
-                </div>
-
-                <!-- Column 2: Modelare 3D -->
-                <div class="w-64 shrink-0 bg-slate-900 border border-blue-500/30 rounded-2xl p-3 flex flex-col">
-                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
-                        <span class="text-xs font-bold text-blue-400 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-blue-500"></span> 2. Modelare 3D
-                        </span>
-                        <span id="kanban-cnt-modelare" class="text-[10px] bg-blue-950 px-2 py-0.5 rounded-full text-blue-300 font-mono">0</span>
-                    </div>
-                    <div id="kanban-col-modelare" class="space-y-2 min-h-[150px]"></div>
-                </div>
-
-                <!-- Column 3: Simulare FEA -->
-                <div class="w-64 shrink-0 bg-slate-900 border border-purple-500/30 rounded-2xl p-3 flex flex-col">
-                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
-                        <span class="text-xs font-bold text-purple-400 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-purple-500"></span> 3. Simulare FEA
-                        </span>
-                        <span id="kanban-cnt-fea" class="text-[10px] bg-purple-950 px-2 py-0.5 rounded-full text-purple-300 font-mono">0</span>
-                    </div>
-                    <div id="kanban-col-fea" class="space-y-2 min-h-[150px]"></div>
-                </div>
-
-                <!-- Column 4: Desene 2D & BOM -->
-                <div class="w-64 shrink-0 bg-slate-900 border border-amber-500/30 rounded-2xl p-3 flex flex-col">
-                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
-                        <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-amber-500"></span> 4. Desene 2D & BOM
-                        </span>
-                        <span id="kanban-cnt-2d" class="text-[10px] bg-amber-950 px-2 py-0.5 rounded-full text-amber-300 font-mono">0</span>
-                    </div>
-                    <div id="kanban-col-2d" class="space-y-2 min-h-[150px]"></div>
-                </div>
-
-                <!-- Column 5: Lansat Atelier -->
-                <div class="w-64 shrink-0 bg-slate-900 border border-orange-500/30 rounded-2xl p-3 flex flex-col">
-                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
-                        <span class="text-xs font-bold text-orange-400 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-orange-500"></span> 5. Lansat Atelier
-                        </span>
-                        <span id="kanban-cnt-atelier" class="text-[10px] bg-orange-950 px-2 py-0.5 rounded-full text-orange-300 font-mono">0</span>
-                    </div>
-                    <div id="kanban-col-atelier" class="space-y-2 min-h-[150px]"></div>
-                </div>
-
-                <!-- Column 6: Prototip Validat -->
-                <div class="w-64 shrink-0 bg-slate-900 border border-emerald-500/30 rounded-2xl p-3 flex flex-col">
-                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
-                        <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 6. Prototip Validat ✓
-                        </span>
-                        <span id="kanban-cnt-done" class="text-[10px] bg-emerald-950 px-2 py-0.5 rounded-full text-emerald-300 font-mono">0</span>
-                    </div>
-                    <div id="kanban-col-done" class="space-y-2 min-h-[150px]"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= TAB 4: PROIECTE & ANSAMBLURI PDM ================= -->
-        <section id="tab-projects" class="hidden space-y-4">
-            <div class="flex items-center justify-between flex-wrap gap-2">
-                <div>
-                    <h2 class="text-base font-bold text-white">Ansambluri & Part Numbers (PDM)</h2>
-                    <p class="text-xs text-slate-400">Monitorizează orele, numărul de revizie și lansarea desenelor de execuție</p>
-                </div>
-                <button onclick="openNewProjectModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-blue-600/30 transition">
-                    <i class="fa-solid fa-plus"></i> Ansamblu Nou
-                </button>
-            </div>
-
-            <!-- Projects Grid -->
-            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
-        </section>
-
-        <!-- ================= TAB 5: PONTAJ ETAPE INGINERIE ================= -->
-        <section id="tab-time" class="hidden space-y-4">
-            <div class="flex items-center justify-between flex-wrap gap-2">
-                <div>
-                    <h2 class="text-base font-bold text-white">Pontaj Activități de Proiectare</h2>
-                    <p class="text-xs text-slate-400">Evidența strictă pe etape: Modelare 3D, Desene 2D, FEA, ECN, Atelier</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <a href="/export/csv" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1 transition">
-                        <i class="fa-solid fa-file-csv text-emerald-400"></i> Export CSV
-                    </a>
-                    <button onclick="openManualTimeModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-blue-600/30 transition">
-                        <i class="fa-solid fa-plus"></i> Înregistrează Ore
-                    </button>
-                </div>
-            </div>
-
-            <!-- Search and Filter Bar -->
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex flex-col sm:flex-row gap-2">
-                <div class="flex-1 relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-                    <input type="text" id="time-search-input" onkeyup="debounceLoadTimeEntries()" placeholder="Caută după Part Number, piesă, descriere..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500">
-                </div>
-                <select id="time-filter-category" onchange="loadTimeEntries()" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500">
-                    <option value="">Toate Etapele</option>
-                    <option value="Modelare CAD 3D">Modelare CAD 3D</option>
-                    <option value="Desene de Execuție 2D & BOM">Desene 2D & BOM</option>
-                    <option value="Calcule & Simulări FEA">Calcule & Simulări FEA</option>
-                    <option value="Modificări Proiectare (ECN)">Modificări (ECN)</option>
-                    <option value="Asistență Tehnică Atelier">Asistență Atelier / Montaj</option>
-                    <option value="Documentație Tehnică">Documentație Tehnică</option>
-                    <option value="Ore Suplimentare">Ore Suplimentare</option>
-                </select>
-            </div>
-
-            <!-- Time entries list -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
-                <div id="time-entries-list" class="space-y-2.5 divide-y divide-slate-800"></div>
-            </div>
-        </section>
-
-        <!-- ================= TAB 6: DOSAR MĂRIRE & CALCULATOR ROI ================= -->
-        <section id="tab-brag" class="hidden space-y-4">
-            <!-- Salary & ROI Calculator Card -->
-            <div class="bg-slate-900 border border-emerald-500/40 rounded-2xl p-4 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/20">
-                <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2.5">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
-                            <i class="fa-solid fa-calculator"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-white">Calculator ROI & Justificare Matematică Mărire</h3>
-                            <p class="text-[10px] text-slate-400">Comparație între mărirea cerută și banii economisiți firmei</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 text-xs">
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Salariul Tău Net Lunar (RON):</label>
-                        <input type="number" id="calc-current-salary" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Mărire Dorită (%):</label>
-                        <input type="number" id="calc-raise-pct" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-emerald-400 font-bold">
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="saveSalarySettings()" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
-                            Recalculează
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Calculated Metrics Cards -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-800 text-center">
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <div class="text-[10px] text-slate-400">Total Economii Generate</div>
-                        <div class="text-base font-black text-emerald-400 mt-0.5" id="calc-total-savings">0 RON</div>
-                    </div>
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <div class="text-[10px] text-amber-400">Valoare Overtime (175%)</div>
-                        <div class="text-base font-black text-amber-400 mt-0.5" id="calc-overtime-value">0 RON</div>
-                    </div>
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <div class="text-[10px] text-blue-400">Cost Anual Mărire Cerută</div>
-                        <div class="text-base font-black text-blue-400 mt-0.5" id="calc-yearly-cost">0 RON/an</div>
-                    </div>
-                    <div class="bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/40">
-                        <div class="text-[10px] text-emerald-300 font-bold">Raport ROI Companie</div>
-                        <div class="text-base font-black text-emerald-400 mt-0.5" id="calc-roi-multiple">0x</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Achievements Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-sm font-bold text-white">Realizări Tehnice de Impact (Brag Document)</h3>
-                    <p class="text-xs text-slate-400">Rebuturi evitate, optimizări de greutate, standardizări de piese</p>
-                </div>
-                <button onclick="openNewAchievementModal()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition">
-                    <i class="fa-solid fa-plus"></i> Înregistrează Realizare
-                </button>
-            </div>
-
-            <div id="achievements-list" class="space-y-3"></div>
-        </section>
-
-        <!-- ================= TAB 7: RAPORT EVALUARE ================= -->
-        <section id="tab-report" class="hidden space-y-4">
-            <div class="no-print bg-slate-900 border border-slate-800 rounded-2xl p-4">
-                <h2 class="text-base font-bold text-white mb-1">Generator Dosar Evaluare & Mărire Salarială</h2>
-                <p class="text-xs text-slate-400 mb-4">Generează dosarul complet structurat pentru ședința de evaluare cu managerul sau conducerea.</p>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">De la data:</label>
-                        <input type="date" id="report-start-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Până la data:</label>
-                        <input type="date" id="report-end-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="loadReportData()" class="w-full px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center justify-center gap-2 transition">
-                            <i class="fa-solid fa-rotate"></i> Actualizează Raport
-                        </button>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-800">
-                    <button onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition">
-                        <i class="fa-solid fa-print"></i> Printează / Salvează PDF
-                    </button>
-                    <a href="/export/markdown" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium flex items-center gap-1.5 transition">
-                        <i class="fa-solid fa-file-lines text-blue-400"></i> Descarcă Markdown (.md)
-                    </a>
-                    <button onclick="backupToPhone()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium flex items-center gap-1.5 transition">
-                        <i class="fa-solid fa-download text-amber-400"></i> Salvează Copie pe Telefon
-                    </button>
-                </div>
-            </div>
-
-            <!-- Printable Paper Document -->
-            <div id="printable-report-area" class="bg-white text-slate-900 rounded-2xl p-6 shadow-2xl border border-slate-200">
-                <div class="border-b-2 border-blue-600 pb-4 mb-5 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                    <div>
-                        <h1 class="text-xl font-black text-slate-900 tracking-tight">RAPORT DE ACTIVITATE INGINEREASCĂ & EVALUARE</h1>
-                        <p class="text-xs text-slate-500 font-semibold">Post: Inginer Proiectant Mecanic • Dosar Justificativ Mărire Salarială</p>
-                    </div>
-                    <div class="text-left sm:text-right">
-                        <span class="inline-block bg-blue-50 text-blue-800 border border-blue-200 text-xs px-2.5 py-0.5 rounded font-bold" id="report-period-tag">Perioadă</span>
-                        <div class="text-[10px] text-slate-400 mt-1" id="report-gen-date">Data: azi</div>
-                    </div>
-                </div>
-
-                <!-- Executive Summary Cards -->
-                <div class="grid grid-cols-4 gap-2 mb-5 text-center">
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
-                        <div class="text-[10px] text-slate-500 font-bold uppercase">Total Ore Proiectare</div>
-                        <div class="text-xl font-black text-slate-900 mt-0.5" id="rep-total-hours">0</div>
-                    </div>
-                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5">
-                        <div class="text-[10px] text-amber-800 font-bold uppercase">Overtime Asumat</div>
-                        <div class="text-xl font-black text-amber-700 mt-0.5" id="rep-overtime-hours">0</div>
-                    </div>
-                    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5">
-                        <div class="text-[10px] text-emerald-800 font-bold uppercase">Economii Generate</div>
-                        <div class="text-xl font-black text-emerald-700 mt-0.5" id="rep-savings">0 RON</div>
-                    </div>
-                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-2.5">
-                        <div class="text-[10px] text-blue-800 font-bold uppercase">Zile Lucrate</div>
-                        <div class="text-xl font-black text-blue-700 mt-0.5" id="rep-days-worked">0</div>
-                    </div>
-                </div>
-
-                <!-- 1. Scut de Apărare (Blocaje & Probleme Rezolvate) -->
-                <div class="mb-5">
-                    <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-2.5 flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> 1. Scut de Apărare: Blocaje & Incidente Rezolvate Fără Vina Proiectantului
-                    </h2>
-                    <div id="rep-blockers-list" class="space-y-2"></div>
-                </div>
-
-                <!-- 2. Realizări de Impact Tehnic & Financiar -->
-                <div class="mb-5">
-                    <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-2.5 flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> 2. Valoare Adusă Companiei: Optimizări, Rebuturi Prevenite & Standardizări
-                    </h2>
-                    <div id="rep-achievements-list" class="space-y-2"></div>
-                </div>
-
-                <!-- 3. Repartizare Proiecte CAD & PDM -->
-                <div class="mb-5">
-                    <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-2.5 flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span> 3. Ansambluri & Part Numbers Gestionate
-                    </h2>
-                    <div id="rep-projects-table" class="overflow-x-auto"></div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- ================= MODALS ================= -->
-
-    <!-- Modal: Sarcină Nouă Kanban -->
-    <div id="modal-new-task" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-cyan-500/40 w-full max-w-md rounded-2xl p-5 space-y-3.5 shadow-2xl">
+    <!-- Modal: Schimbare Parolă Admin (Cybersecurity) -->
+    <div id="modal-change-password" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-5 space-y-3.5 shadow-2xl">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-bars-progress text-cyan-400"></i> Piesă / Sarcină CAD Nouă
+                    <i class="fa-solid fa-key text-amber-400"></i> Securitate & Parolă Admin
                 </h3>
-                <button onclick="closeModal('modal-new-task')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="closeModal('modal-change-password')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="space-y-2.5 text-xs">
+            <form onsubmit="submitChangePassword(event)" class="space-y-3 text-xs">
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Denumire Reper / Piesă *:</label>
-                    <input type="text" id="task-title" placeholder="ex: Modelat flanșă adaptor și verificat cotație" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block font-medium text-slate-300 mb-1">Ansamblu PDM:</label>
-                        <select id="task-project" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500"></select>
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-300 mb-1">Etapă Inițială:</label>
-                        <select id="task-stage" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
-                            <option value="Concept 3D">1. Concept 3D</option>
-                            <option value="Modelare 3D" selected>2. Modelare 3D</option>
-                            <option value="Simulare FEA">3. Simulare FEA</option>
-                            <option value="Desene 2D & BOM">4. Desene 2D & BOM</option>
-                            <option value="Lansat Atelier">5. Lansat Atelier</option>
-                            <option value="Prototip Validat">6. Prototip Validat</option>
-                        </select>
-                    </div>
+                    <label class="block font-medium text-slate-300 mb-1">Parola Actuală:</label>
+                    <input type="password" id="pwd-old" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Termen Limită:</label>
-                    <input type="date" id="task-due-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+                    <label class="block font-medium text-slate-300 mb-1">Noua Parolă:</label>
+                    <input type="password" id="pwd-new" required minlength="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                 </div>
-            </div>
-            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-                <button onclick="closeModal('modal-new-task')" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Anulează</button>
-                <button onclick="submitNewTask()" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs">
-                    Adaugă pe Panou
-                </button>
-            </div>
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                    <button type="button" onclick="closeModal('modal-change-password')" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Anulează</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs">
+                        Schimbă Parola
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -641,11 +532,10 @@
                         <option value="Limitare Tehnologică Atelier">Limitare Tehnologică Atelier</option>
                         <option value="Lipsă Date Intrare / Măsurători">Lipsă Date Intrare / Măsurători</option>
                         <option value="Coliziune / Eroare Specificații">Coliziune / Eroare Specificații</option>
-                        <option value="Altele">Altele</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Descriere situație (ce a cauzat problema):</label>
+                    <label class="block font-medium text-slate-300 mb-1">Descriere situație:</label>
                     <textarea id="blk-desc" rows="2" placeholder="ex: Clientul a trimis noi cote de gabarit după lansarea desenelor..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-rose-500"></textarea>
                 </div>
                 <div>
@@ -654,8 +544,8 @@
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block font-medium text-slate-300 mb-1">Timp pierdut (ore):</label>
-                        <input type="number" id="blk-hours" value="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-rose-500">
+                        <label class="block font-medium text-slate-300 mb-1">Timp pierdut (zile):</label>
+                        <input type="number" id="blk-days" value="1" step="0.5" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-rose-500">
                     </div>
                     <div>
                         <label class="block font-medium text-slate-300 mb-1">Ce risc/cost ai prevenit:</label>
@@ -714,17 +604,16 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Descriere tehnică & Cerințe:</label>
+                    <label class="block font-medium text-slate-300 mb-1">Descriere tehnică:</label>
                     <textarea id="proj-desc" rows="2" placeholder="Subansamble principale, motoare, ghidaje..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500"></textarea>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block font-medium text-slate-300 mb-1">Status Proiectare:</label>
+                        <label class="block font-medium text-slate-300 mb-1">Status:</label>
                         <select id="proj-status" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                             <option value="În Lucru">În Lucru</option>
                             <option value="Planificat">Planificat</option>
                             <option value="Finalizat">Finalizat</option>
-                            <option value="În Aprobare">În Aprobare</option>
                         </select>
                     </div>
                     <div>
@@ -737,16 +626,6 @@
                         </select>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block font-medium text-slate-300 mb-1">Țintă Ore:</label>
-                        <input type="number" id="proj-target-hours" value="60" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-300 mb-1">Termen Lansare Atelier:</label>
-                        <input type="date" id="proj-deadline" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
-                    </div>
-                </div>
             </div>
             <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
                 <button onclick="closeModal('modal-new-project')" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Anulează</button>
@@ -757,66 +636,7 @@
         </div>
     </div>
 
-    <!-- Modal: Adaugă Pontaj Manual -->
-    <div id="modal-manual-time" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-5 space-y-3.5 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-clock text-blue-400"></i> Înregistrare Ore Proiectare
-                </h3>
-                <button onclick="closeModal('modal-manual-time')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-2.5 text-xs">
-                <div>
-                    <label class="block font-medium text-slate-300 mb-1">Data:</label>
-                    <input type="date" id="manual-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block font-medium text-slate-300 mb-1">Ansamblu / P/N:</label>
-                    <select id="manual-project" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500"></select>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block font-medium text-slate-300 mb-1">Ore:</label>
-                        <input type="number" id="manual-hours" min="0" max="24" value="2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block font-medium text-slate-300 mb-1">Minute suplimentare:</label>
-                        <input type="number" id="manual-minutes" min="0" max="59" step="5" value="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
-                    </div>
-                </div>
-                <div>
-                    <label class="block font-medium text-slate-300 mb-1">Etapă Inginerie:</label>
-                    <select id="manual-category" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
-                        <option value="Modelare CAD 3D">Modelare CAD 3D (Piese / Ansambluri)</option>
-                        <option value="Desene de Execuție 2D & BOM">Desene 2D & BOM (Cote, Toleranțe)</option>
-                        <option value="Calcule & Simulări FEA">Calcule & Simulări FEA / Rezistență</option>
-                        <option value="Modificări Proiectare (ECN)">Modificări Proiectare (ECN/ECO)</option>
-                        <option value="Asistență Tehnică Atelier">Asistență Tehnică Atelier / Montaj</option>
-                        <option value="Documentație Tehnică">Documentație & Manual Tehnic</option>
-                        <option value="Ședințe Tehnice & Furnizori">Ședințe Tehnice & Furnizori</option>
-                        <option value="Altele">Altele</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block font-medium text-slate-300 mb-1">Descriere reper / activitate:</label>
-                    <textarea id="manual-desc" rows="2" placeholder="ex: Proiectat suport lagăr, verificat jocuri rulmenți..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500"></textarea>
-                </div>
-                <div class="flex items-center space-x-2 pt-1">
-                    <input type="checkbox" id="manual-overtime" class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-800 focus:ring-0">
-                    <label for="manual-overtime" class="font-bold text-amber-300">Marchează ca Ore Suplimentare (Overtime)</label>
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-                <button onclick="closeModal('modal-manual-time')" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Anulează</button>
-                <button onclick="submitManualTime()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs">
-                    Salvează Orele
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Adaugă Realizare Tehnică (Brag Sheet) -->
+    <!-- Modal: Adaugă Realizare (Brag Sheet) -->
     <div id="modal-new-achievement" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-amber-500/40 w-full max-w-md rounded-2xl p-5 space-y-3.5 shadow-2xl">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
@@ -850,19 +670,14 @@
                         <select id="ach-category" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
                             <option value="Eliminare Rebuturi & Calitate">Eliminare Rebuturi & Calitate 3D</option>
                             <option value="Optimizare Producție & Timp">Optimizare Timp Montaj / Atelier</option>
-                            <option value="Calcul Tehnic & FEA">Calcul Tehnic & FEA (Reducere Masă)</option>
-                            <option value="Standardizare & Achiziții">Standardizare Organe Asamblare & BOM</option>
-                            <option value="Inovație & Dispozitive Noi">Inovație / Dispozitive & Scule Noi</option>
+                            <option value="Calcul Tehnic & FEA">Calcul Tehnic & FEA</option>
+                            <option value="Standardizare & Achiziții">Standardizare Organe Asamblare</option>
                         </select>
                     </div>
                 </div>
                 <div>
-                    <label class="block font-medium text-amber-300 mb-1">Rezultat Tehnic Cuantificabil (Descriere) *:</label>
-                    <textarea id="ach-impact" rows="2" placeholder="ex: Eliminat coliziune ax-flanșă, salvat piese de ~12.000 RON și 5 zile de montaj..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
-                </div>
-                <div>
-                    <label class="block font-medium text-slate-300 mb-1">Feedback Primit / Aprecieri (Șef atelier, conducere):</label>
-                    <input type="text" id="ach-feedback" placeholder='ex: Inginerul șef a felicitat soluția tehnică' class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+                    <label class="block font-medium text-amber-300 mb-1">Rezultat Tehnic Cuantificabil *:</label>
+                    <textarea id="ach-impact" rows="2" placeholder="ex: Eliminat coliziune ax-flanșă, salvat piese de ~12.000 RON..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
                 </div>
                 <div class="flex items-center space-x-2 pt-1">
                     <input type="checkbox" id="ach-highlight" checked class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-800 focus:ring-0">
@@ -886,39 +701,118 @@
 
     <!-- Application Script -->
     <script>
-        let currentTab = 'dashboard';
+        let currentTab = 'table';
         let projectsList = [];
-        let timerInterval = null;
-        let chartTimelineInstance = null;
-        let chartProjectsInstance = null;
         let searchTimeout = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T')[0];
             const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString().split('T')[0];
             
-            document.getElementById('manual-date').value = today;
+            document.getElementById('log-date').value = today;
             document.getElementById('ach-date').value = today;
             document.getElementById('blk-date').value = today;
             document.getElementById('report-start-date').value = ninetyDaysAgo;
             document.getElementById('report-end-date').value = today;
 
+            checkAuthStatus();
+        });
+
+        // ================= AUTHENTICATION =================
+        async function checkAuthStatus() {
+            try {
+                const res = await fetch('/api/auth/me');
+                const data = await res.json();
+                if (data.authenticated) {
+                    document.getElementById('login-overlay').classList.add('hidden');
+                    document.getElementById('app-view').classList.remove('hidden');
+                    initializeApp();
+                } else {
+                    document.getElementById('login-overlay').classList.remove('hidden');
+                    document.getElementById('app-view').classList.add('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            const remember = document.getElementById('login-remember').checked;
+            const errEl = document.getElementById('login-error-msg');
+            errEl.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, remember })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Autentificat cu succes ca Admin!');
+                    checkAuthStatus();
+                } else {
+                    errEl.innerText = data.error || 'Autentificare eșuată';
+                    errEl.classList.remove('hidden');
+                }
+            } catch (err) {
+                errEl.innerText = 'Eroare de conexiune la server';
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        async function handleLogout() {
+            if (!confirm('Ești sigur că vrei să te deconectezi?')) return;
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                checkAuthStatus();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function openChangePasswordModal() {
+            openModal('modal-change-password');
+        }
+
+        async function submitChangePassword(e) {
+            e.preventDefault();
+            const old_password = document.getElementById('pwd-old').value;
+            const new_password = document.getElementById('pwd-new').value;
+
+            try {
+                const res = await fetch('/api/auth/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ old_password, new_password })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    closeModal('modal-change-password');
+                    showToast('Parola a fost schimbată cu succes!');
+                } else {
+                    alert(data.error || 'Eroare la schimbarea parolei');
+                }
+            } catch (err) {
+                alert('Eroare de conexiune');
+            }
+        }
+
+        function initializeApp() {
             loadProjects();
-            loadStats();
-            checkTimerState();
+            loadDailyLogs();
             loadBlockers();
-            loadKanban();
-            loadTimeEntries();
             loadAchievements();
             loadSalaryCalculator();
             loadReportData();
-
-            setInterval(checkTimerTick, 1000);
-        });
+        }
 
         function switchTab(tabId) {
             currentTab = tabId;
-            ['dashboard', 'blockers', 'kanban', 'projects', 'time', 'brag', 'report'].forEach(t => {
+            ['table', 'blockers', 'projects', 'brag', 'report'].forEach(t => {
                 const el = document.getElementById(`tab-${t}`);
                 const nav = document.getElementById(`nav-${t}`);
                 if (t === tabId) {
@@ -930,11 +824,9 @@
                 }
             });
 
-            if (tabId === 'dashboard') loadStats();
+            if (tabId === 'table') loadDailyLogs();
             else if (tabId === 'blockers') loadBlockers();
-            else if (tabId === 'kanban') loadKanban();
             else if (tabId === 'projects') loadProjects();
-            else if (tabId === 'time') loadTimeEntries();
             else if (tabId === 'brag') { loadAchievements(); loadSalaryCalculator(); }
             else if (tabId === 'report') loadReportData();
         }
@@ -957,317 +849,155 @@
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function openManualTimeModal() { populateProjectDropdowns(); openModal('modal-manual-time'); }
+        function openNewDailyLogModal() { populateProjectDropdowns(); openModal('modal-new-daily-log'); }
         function openNewProjectModal() { openModal('modal-new-project'); }
         function openNewAchievementModal() { populateProjectDropdowns(); openModal('modal-new-achievement'); }
         function openNewBlockerModal() { populateProjectDropdowns(); openModal('modal-new-blocker'); }
-        function openNewTaskModal() { populateProjectDropdowns(); openModal('modal-new-task'); }
 
-        function formatDuration(totalSeconds) {
-            const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
-            const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
-            const s = (totalSeconds % 60).toString().padStart(2, '0');
-            return `${h}:${m}:${s}`;
+        // ================= JURNAL TABELAR ZILE & LUNI =================
+        function debounceLoadDailyLogs() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(loadDailyLogs, 300);
         }
 
-        // ================= 1-TAP QUICK PRESET =================
-        async function quickLogPreset(category, minutes, is_overtime) {
-            try {
-                const res = await fetch('/api/time-entries/quick', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ category, duration_minutes: minutes, is_overtime })
-                });
-                if (res.ok) {
-                    showToast(`+${minutes} min înregistrate: ${category}!`);
-                    loadStats();
-                    loadTimeEntries();
-                    loadSalaryCalculator();
-                }
-            } catch (err) {
-                showToast('Eroare la logare rapidă', true);
+        async function loadDailyLogs() {
+            const monthVal = document.getElementById('filter-month-select')?.value || 'all';
+            const projectVal = document.getElementById('filter-project-select')?.value || 'all';
+            const searchVal = document.getElementById('daily-search')?.value || '';
+
+            let url = `/api/daily-logs?search=${encodeURIComponent(searchVal)}&project_id=${projectVal}`;
+            if (monthVal !== 'all') {
+                const [y, m] = monthVal.split('-');
+                url += `&year=${y}&month=${m}`;
             }
-        }
 
-        // ================= TIMER =================
-        let activeTimerState = { is_running: 0, elapsed_seconds: 0, start_timestamp: null };
-
-        async function checkTimerState() {
             try {
-                const res = await fetch('/api/timer');
-                activeTimerState = await res.json();
-                updateTimerUI();
-            } catch (err) { console.error(err); }
-        }
-
-        function checkTimerTick() {
-            if (activeTimerState.is_running && activeTimerState.start_timestamp) {
-                const nowSec = Math.floor(Date.now() / 1000);
-                activeTimerState.elapsed_seconds = Math.max(0, nowSec - Math.floor(activeTimerState.start_timestamp));
-                updateTimerUI();
-            }
-        }
-
-        function updateTimerUI() {
-            const timeStr = formatDuration(activeTimerState.elapsed_seconds);
-            document.getElementById('live-timer-display').innerText = timeStr;
-            document.getElementById('header-timer-clock').innerText = timeStr;
-
-            const headerBadge = document.getElementById('header-timer-badge');
-            const timerIcon = document.getElementById('timer-icon-box');
-            const btn = document.getElementById('btn-toggle-timer');
-            const statusText = document.getElementById('timer-status-text');
-            const activeInfo = document.getElementById('timer-active-info');
-            const overtimePill = document.getElementById('timer-overtime-pill');
-
-            if (activeTimerState.is_running) {
-                headerBadge.classList.remove('hidden');
-                timerIcon.className = "w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg animate-pulse border border-emerald-500/40";
-                btn.className = "px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs shadow-lg shadow-rose-600/30 flex items-center gap-1.5 transition active:scale-95";
-                btn.innerHTML = `<i class="fa-solid fa-stop"></i> <span>Oprește Sesiunea</span>`;
-                statusText.innerHTML = `Status: <span class="font-bold text-emerald-400">Activă (${activeTimerState.category || 'CAD 3D'})</span>`;
-                
-                activeInfo.classList.remove('hidden');
-                document.getElementById('timer-current-task').innerText = activeTimerState.category || 'Modelare CAD 3D';
-                const proj = projectsList.find(p => p.id === activeTimerState.project_id);
-                document.getElementById('timer-current-project').innerText = proj ? `[${proj.part_number}] ${proj.name}` : 'General';
-
-                if (activeTimerState.is_overtime) overtimePill.classList.remove('hidden');
-                else overtimePill.classList.add('hidden');
-            } else {
-                headerBadge.classList.add('hidden');
-                timerIcon.className = "w-11 h-11 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center text-lg border border-slate-700";
-                btn.className = "px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-lg shadow-blue-600/30 flex items-center gap-1.5 transition active:scale-95";
-                btn.innerHTML = `<i class="fa-solid fa-play"></i> <span>Start Sesiune CAD</span>`;
-                statusText.innerHTML = `Status: <span class="font-medium text-slate-400">Oprit</span>`;
-                activeInfo.classList.add('hidden');
-            }
-        }
-
-        function handleTimerClick() {
-            if (activeTimerState.is_running) stopTimer();
-            else openManualTimeModal();
-        }
-
-        async function stopTimer() {
-            try {
-                const res = await fetch('/api/timer/stop', { method: 'POST' });
-                const data = await res.json();
-                if (res.ok) {
-                    showToast(`Sesiune salvată: +${data.duration_minutes} min!`);
-                    checkTimerState();
-                    loadStats();
-                    loadTimeEntries();
-                }
-            } catch (err) { showToast('Eroare la oprirea timer-ului', true); }
-        }
-
-        // ================= STATS & CHARTS =================
-        async function loadStats() {
-            try {
-                const res = await fetch('/api/stats');
+                const res = await fetch(url);
+                if (res.status === 401) return checkAuthStatus();
                 const data = await res.json();
 
-                document.getElementById('stat-total-hours').innerText = data.total_hours;
-                document.getElementById('stat-overtime-hours').innerText = data.overtime_hours;
-                document.getElementById('stat-money-saved').innerText = Number(data.total_money_saved).toLocaleString('ro-RO');
-                document.getElementById('stat-total-blockers').innerText = data.total_blockers;
-                document.getElementById('stat-blocker-hours').innerText = data.blocker_hours_managed;
+                // Update summary chips
+                document.getElementById('sum-active-days').innerText = `${data.summary.unique_days} zile`;
+                document.getElementById('sum-active-projects').innerText = `${data.summary.unique_projects} ansambluri`;
+                document.getElementById('sum-highlights').innerText = `${data.summary.highlights} ⭐`;
+                document.getElementById('table-entries-count').innerText = `${data.logs.length} activități`;
 
-                const hlList = document.getElementById('dashboard-highlights-list');
-                if (data.top_achievements && data.top_achievements.length > 0) {
-                    hlList.innerHTML = data.top_achievements.map(a => `
-                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-start justify-between gap-3">
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-1.5 flex-wrap">
-                                    <span class="text-xs font-bold text-amber-300">${a.title}</span>
-                                    <span class="text-[10px] bg-blue-950 text-blue-300 font-mono px-2 py-0.5 rounded-full border border-blue-500/30">${a.part_number || 'P/N'} ${a.revision || ''}</span>
-                                    <span class="text-[10px] text-slate-500">${a.date}</span>
-                                    ${a.money_saved_est > 0 ? `<span class="text-[10px] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded font-bold border border-emerald-500/30">+${Number(a.money_saved_est).toLocaleString()} RON</span>` : ''}
-                                </div>
-                                <p class="text-xs text-slate-300 font-medium">${a.impact_value}</p>
-                                ${a.feedback_received ? `<p class="text-[11px] text-emerald-400 italic">💬 "${a.feedback_received}"</p>` : ''}
-                            </div>
-                            <span class="text-amber-400 text-sm">⭐</span>
-                        </div>
-                    `).join('');
-                } else {
-                    hlList.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-2">Nicio realizare marcată încă.</p>`;
+                // Populate available months dropdown once or update
+                const monthSelect = document.getElementById('filter-month-select');
+                if (monthSelect.options.length <= 1 && data.available_months) {
+                    data.available_months.forEach(item => {
+                        const opt = document.createElement('option');
+                        opt.value = `${item.year}-${item.month}`;
+                        opt.innerText = item.label;
+                        monthSelect.appendChild(opt);
+                    });
                 }
 
-                renderTimelineChart(data.timeline);
-                renderProjectsChart(data.project_hours);
-            } catch (err) { console.error(err); }
-        }
-
-        function renderTimelineChart(timeline) {
-            const ctx = document.getElementById('chart-timeline').getContext('2d');
-            if (chartTimelineInstance) chartTimelineInstance.destroy();
-
-            chartTimelineInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: timeline.labels,
-                    datasets: [
-                        { label: 'Ore CAD Normale', data: timeline.regular, backgroundColor: '#2563eb', borderRadius: 4 },
-                        { label: 'Overtime Asumat', data: timeline.overtime, backgroundColor: '#f59e0b', borderRadius: 4 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-                        y: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
-                    },
-                    plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 11 } } } }
+                // Render Table Body
+                const tbody = document.getElementById('daily-table-body');
+                if (!data.logs.length) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500 italic text-xs">Nicio activitate găsită pentru filtrul selectat. Apasă pe "+ Notează Ziua"!</td></tr>`;
+                    return;
                 }
-            });
-        }
 
-        function renderProjectsChart(projects) {
-            const ctx = document.getElementById('chart-projects').getContext('2d');
-            if (chartProjectsInstance) chartProjectsInstance.destroy();
+                tbody.innerHTML = data.logs.map(log => {
+                    let statusBg = 'bg-slate-800 text-slate-300';
+                    if (log.status_tag === 'Finalizat') statusBg = 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30';
+                    else if (log.status_tag === 'Realizare Cheie ⭐') statusBg = 'bg-amber-950/80 text-amber-300 border border-amber-500/30';
+                    else if (log.status_tag === 'Modificare Client') statusBg = 'bg-rose-950/80 text-rose-300 border border-rose-500/30';
+                    else if (log.status_tag === 'Lansat Atelier') statusBg = 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/30';
 
-            const labels = projects.map(p => `[${p.pn} ${p.rev}] ${p.name}`);
-            const data = projects.map(p => p.hours);
-            const colors = projects.map(p => p.color || '#2563eb');
-
-            chartProjectsInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels.length ? labels : ['Fără date'],
-                    datasets: [{
-                        data: data.length ? data : [1],
-                        backgroundColor: colors.length ? colors : ['#334155'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 10 }, boxWidth: 12 } } },
-                    cutout: '65%'
-                }
-            });
-        }
-
-        // ================= KANBAN ETAPE PROIECTARE CAD =================
-        async function loadKanban() {
-            try {
-                const res = await fetch('/api/tasks');
-                const tasks = await res.json();
-
-                const cols = {
-                    'Concept 3D': { el: document.getElementById('kanban-col-concept'), cntEl: document.getElementById('kanban-cnt-concept'), count: 0 },
-                    'Modelare 3D': { el: document.getElementById('kanban-col-modelare'), cntEl: document.getElementById('kanban-cnt-modelare'), count: 0 },
-                    'Simulare FEA': { el: document.getElementById('kanban-col-fea'), cntEl: document.getElementById('kanban-cnt-fea'), count: 0 },
-                    'Desene 2D & BOM': { el: document.getElementById('kanban-col-2d'), cntEl: document.getElementById('kanban-cnt-2d'), count: 0 },
-                    'Lansat Atelier': { el: document.getElementById('kanban-col-atelier'), cntEl: document.getElementById('kanban-cnt-atelier'), count: 0 },
-                    'Prototip Validat': { el: document.getElementById('kanban-col-done'), cntEl: document.getElementById('kanban-cnt-done'), count: 0 },
-                };
-
-                Object.values(cols).forEach(c => { if(c.el) c.el.innerHTML = ''; });
-
-                tasks.forEach(t => {
-                    const target = cols[t.stage] || cols['Modelare 3D'];
-                    target.count++;
-
-                    const card = document.createElement('div');
-                    card.className = "bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs space-y-2 shadow";
-                    card.innerHTML = `
-                        <div class="flex items-start justify-between gap-1">
-                            <span class="font-bold text-white leading-tight">${t.title}</span>
-                            <button onclick="deleteTask(${t.id})" class="text-slate-600 hover:text-rose-400 text-[10px]"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                        <div class="flex items-center justify-between text-[10px] text-slate-400">
-                            <span class="font-mono text-blue-400">${t.part_number || 'P/N'}</span>
-                            <span>${t.due_date ? `Termen: ${t.due_date}` : ''}</span>
-                        </div>
-                        <div class="pt-1.5 border-t border-slate-900 flex items-center justify-between">
-                            <span class="text-[9px] text-slate-500 uppercase font-semibold">Mută etapă:</span>
-                            <select onchange="moveTaskStage(${t.id}, this.value)" class="bg-slate-900 border border-slate-700 text-slate-200 text-[10px] rounded px-1.5 py-0.5 focus:outline-none">
-                                <option value="Concept 3D" ${t.stage === 'Concept 3D' ? 'selected' : ''}>Concept 3D</option>
-                                <option value="Modelare 3D" ${t.stage === 'Modelare 3D' ? 'selected' : ''}>Modelare 3D</option>
-                                <option value="Simulare FEA" ${t.stage === 'Simulare FEA' ? 'selected' : ''}>Simulare FEA</option>
-                                <option value="Desene 2D & BOM" ${t.stage === 'Desene 2D & BOM' ? 'selected' : ''}>Desene 2D</option>
-                                <option value="Lansat Atelier" ${t.stage === 'Lansat Atelier' ? 'selected' : ''}>Lansat Atelier</option>
-                                <option value="Prototip Validat" ${t.stage === 'Prototip Validat' ? 'selected' : ''}>Validat ✓</option>
-                            </select>
-                        </div>
+                    return `
+                        <tr class="hover:bg-slate-900/60 transition ${log.is_highlight ? 'bg-amber-950/10' : ''}">
+                            <td class="p-3 font-mono font-bold text-white whitespace-nowrap">${log.date}</td>
+                            <td class="p-3 whitespace-nowrap">
+                                <span class="font-mono text-cyan-400 font-bold bg-cyan-950/60 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[10px]">${log.part_number || 'P/N'} ${log.revision || ''}</span>
+                                <div class="text-[11px] text-slate-400 truncate max-w-[130px]">${log.project_name || 'General'}</div>
+                            </td>
+                            <td class="p-3">
+                                <div class="text-xs text-slate-200 font-medium leading-relaxed">${log.description}</div>
+                            </td>
+                            <td class="p-3 whitespace-nowrap">
+                                <span class="text-[11px] bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">${log.activity_type}</span>
+                            </td>
+                            <td class="p-3 whitespace-nowrap">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBg}">${log.status_tag}</span>
+                            </td>
+                            <td class="p-3 text-center whitespace-nowrap">
+                                <button onclick="toggleDailyStar(${log.id})" class="p-1 text-sm hover:scale-125 transition">
+                                    <i class="fa-solid fa-star ${log.is_highlight ? 'text-amber-400' : 'text-slate-700 hover:text-slate-500'}"></i>
+                                </button>
+                                <button onclick="deleteDailyLog(${log.id})" class="p-1 text-slate-600 hover:text-rose-400 text-xs ml-1.5">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
                     `;
-                    target.el.appendChild(card);
-                });
+                }).join('');
 
-                Object.values(cols).forEach(c => {
-                    if (c.cntEl) c.cntEl.innerText = c.count;
-                    if (c.count === 0 && c.el) {
-                        c.el.innerHTML = `<div class="text-[10px] text-slate-600 italic text-center py-4">Fără repere</div>`;
-                    }
-                });
-
-            } catch (err) { console.error(err); }
+            } catch (err) {
+                console.error(err);
+            }
         }
 
-        async function moveTaskStage(id, stage) {
-            try {
-                const res = await fetch(`/api/tasks/${id}/move-stage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ stage })
-                });
-                if (res.ok) {
-                    showToast(`Piesă mutată în: ${stage}`);
-                    loadKanban();
-                }
-            } catch (err) { showToast('Eroare la mutare etapă', true); }
-        }
-
-        async function deleteTask(id) {
-            try {
-                const res = await fetch(`/api/tasks/${id}/delete`, { method: 'POST' });
-                if (res.ok) {
-                    showToast('Sarcină ștearsă');
-                    loadKanban();
-                }
-            } catch (err) { showToast('Eroare la ștergere', true); }
-        }
-
-        async function submitNewTask() {
-            const title = document.getElementById('task-title').value.trim();
-            if (!title) return showToast('Completează denumirea reperului!', true);
+        async function submitNewDailyLog() {
+            const desc = document.getElementById('log-desc').value.trim();
+            if (!desc) return showToast('Completează ce ai realizat!', true);
 
             const payload = {
-                title,
-                project_id: document.getElementById('task-project').value,
-                stage: document.getElementById('task-stage').value,
-                due_date: document.getElementById('task-due-date').value
+                date: document.getElementById('log-date').value,
+                project_id: document.getElementById('log-project').value,
+                activity_type: document.getElementById('log-type').value,
+                status_tag: document.getElementById('log-status').value,
+                description: desc,
+                is_highlight: document.getElementById('log-highlight').checked
             };
 
             try {
-                const res = await fetch('/api/tasks', {
+                const res = await fetch('/api/daily-logs', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 if (res.ok) {
-                    closeModal('modal-new-task');
-                    showToast('Reper adăugat pe panou!');
-                    loadKanban();
+                    closeModal('modal-new-daily-log');
+                    document.getElementById('log-desc').value = '';
+                    showToast('Activitate înregistrată în jurnal!');
+                    loadDailyLogs();
+                    loadSalaryCalculator();
                 }
-            } catch (err) { showToast('Eroare la adăugare', true); }
+            } catch (err) { showToast('Eroare la salvare', true); }
+        }
+
+        async function toggleDailyStar(id) {
+            try {
+                const res = await fetch(`/api/daily-logs/${id}/toggle-star`, { method: 'POST' });
+                if (res.ok) loadDailyLogs();
+            } catch (err) { console.error(err); }
+        }
+
+        async function deleteDailyLog(id) {
+            if (!confirm('Sigur dorești să ștergi această înregistrare?')) return;
+            try {
+                const res = await fetch(`/api/daily-logs/${id}/delete`, { method: 'POST' });
+                if (res.ok) {
+                    showToast('Înregistrare ștearsă');
+                    loadDailyLogs();
+                }
+            } catch (err) { console.error(err); }
         }
 
         // ================= SCUT & BLOCAJE =================
         async function loadBlockers() {
             try {
                 const res = await fetch('/api/blockers');
+                if (res.status === 401) return;
                 const blockers = await res.json();
                 document.getElementById('blocker-count-badge').innerText = blockers.length;
 
                 const container = document.getElementById('blockers-list');
                 if (!blockers.length) {
-                    container.innerHTML = `<div class="bg-slate-900 border border-slate-800 rounded-xl p-6 text-center text-xs text-slate-500">Niciun blocaj înregistrat. Apasă butonul de mai sus pentru a adăuga situațiile neprevăzute din proiecte!</div>`;
+                    container.innerHTML = `<div class="bg-slate-900 border border-slate-800 rounded-xl p-6 text-center text-xs text-slate-500">Niciun blocaj înregistrat.</div>`;
                     return;
                 }
 
@@ -1283,13 +1013,13 @@
                                 <h3 class="text-sm font-bold text-white">${b.title}</h3>
                             </div>
                             <span class="text-xs font-bold text-rose-400 whitespace-nowrap bg-rose-950/60 px-2 py-1 rounded-lg border border-rose-500/20">
-                                ⏱️ ${b.time_lost_hours}h pierdute
+                                ⚠️ ${b.time_lost_days} zile impact
                             </span>
                         </div>
 
                         <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs space-y-2">
                             <div>
-                                <span class="font-bold text-slate-400 uppercase text-[10px]">Ce a cauzat blocajul:</span>
+                                <span class="font-bold text-slate-400 uppercase text-[10px]">Cauza externă:</span>
                                 <p class="text-slate-300 mt-0.5">${b.description}</p>
                             </div>
                             <div class="pt-2 border-t border-slate-800/60">
@@ -1323,7 +1053,7 @@
                 cause_type: document.getElementById('blk-cause').value,
                 description,
                 solution_applied,
-                time_lost_hours: document.getElementById('blk-hours').value,
+                time_lost_days: document.getElementById('blk-days').value,
                 prevented_risk: document.getElementById('blk-risk').value.trim()
             };
 
@@ -1337,7 +1067,6 @@
                     closeModal('modal-new-blocker');
                     showToast('Blocaj înregistrat în Scut!');
                     loadBlockers();
-                    loadStats();
                 }
             } catch (err) { showToast('Eroare la salvare', true); }
         }
@@ -1346,6 +1075,7 @@
         async function loadProjects() {
             try {
                 const res = await fetch('/api/projects');
+                if (res.status === 401) return;
                 projectsList = await res.json();
                 renderProjects(projectsList);
                 populateProjectDropdowns();
@@ -1359,61 +1089,51 @@
                 return;
             }
 
-            grid.innerHTML = projects.map(p => {
-                const progressPct = p.target_hours > 0 ? Math.min(100, Math.round((p.logged_hours / p.target_hours) * 100)) : 0;
-                let priorityClass = p.priority === 'Critic' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40' :
-                                    p.priority === 'Ridicată' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' :
-                                    'bg-blue-500/20 text-blue-300 border border-blue-500/40';
-
-                return `
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3 relative overflow-hidden shadow-lg">
-                        <div class="absolute top-0 left-0 w-1.5 h-full" style="background-color: ${p.color};"></div>
-                        <div>
-                            <div class="flex items-center justify-between gap-2 mb-1">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="text-[10px] font-mono font-bold bg-slate-800 text-blue-300 border border-slate-700 px-2 py-0.5 rounded">${p.part_number} ${p.revision}</span>
-                                    <span class="text-[10px] font-bold uppercase ${priorityClass} px-2 py-0.5 rounded-full">${p.priority}</span>
-                                </div>
-                                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md ${p.status === 'Finalizat' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-300'}">${p.status}</span>
+            grid.innerHTML = projects.map(p => `
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3 relative overflow-hidden shadow-lg">
+                    <div class="absolute top-0 left-0 w-1.5 h-full" style="background-color: ${p.color};"></div>
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[10px] font-mono font-bold bg-slate-800 text-blue-300 border border-slate-700 px-2 py-0.5 rounded">${p.part_number} ${p.revision}</span>
+                                <span class="text-[10px] font-bold uppercase bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full">${p.priority}</span>
                             </div>
-                            <h3 class="text-sm font-bold text-white mt-1.5">${p.name}</h3>
-                            <p class="text-xs text-slate-400 font-medium">${p.client || 'Atelier / Intern'} • <span class="text-slate-300 font-mono">${p.cad_software}</span></p>
-                            ${p.description ? `<p class="text-xs text-slate-300 mt-1 line-clamp-2">${p.description}</p>` : ''}
+                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md ${p.status === 'Finalizat' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-300'}">${p.status}</span>
                         </div>
+                        <h3 class="text-sm font-bold text-white mt-1.5">${p.name}</h3>
+                        <p class="text-xs text-slate-400 font-medium">${p.client || 'Atelier / Intern'} • <span class="text-slate-300 font-mono">${p.cad_software}</span></p>
+                        ${p.description ? `<p class="text-xs text-slate-300 mt-1 line-clamp-2">${p.description}</p>` : ''}
+                    </div>
 
-                        <div class="space-y-1">
-                            <div class="flex justify-between text-xs text-slate-400">
-                                <span>Timp lucrat: <strong class="text-white">${p.logged_hours}h</strong></span>
-                                <span>Țintă: ${p.target_hours}h (${progressPct}%)</span>
-                            </div>
-                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                                <div class="h-full rounded-full transition-all duration-500" style="width: ${progressPct}%; background-color: ${p.color};"></div>
-                            </div>
-                        </div>
-
-                        <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
-                            <span class="text-slate-500 text-[11px]"><i class="fa-regular fa-calendar"></i> ${p.deadline ? `Lansare: ${p.deadline}` : 'Fără deadline'}</span>
-                            <div class="flex items-center gap-2">
-                                <button onclick="quickLogTime(${p.id})" class="px-2.5 py-1 rounded-lg bg-blue-600/30 text-blue-300 hover:bg-blue-600/50 text-[11px] font-bold transition">
-                                    + Pontaj
-                                </button>
-                                <button onclick="quickAddBlocker(${p.id})" class="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 text-[11px] font-bold transition">
-                                    + Blocaj
-                                </button>
-                            </div>
+                    <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
+                        <span class="text-slate-400 text-[11px]"><i class="fa-solid fa-calendar-check"></i> ${p.days_active || 0} zile active</span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="quickLogFromProject(${p.id})" class="px-2.5 py-1 rounded-lg bg-blue-600/30 text-blue-300 hover:bg-blue-600/50 text-[11px] font-bold transition">
+                                + Notează
+                            </button>
                         </div>
                     </div>
-                `;
-            }).join('');
+                </div>
+            `).join('');
         }
 
         function populateProjectDropdowns() {
-            ['timer-modal-project', 'manual-project', 'ach-project', 'blk-project', 'task-project'].forEach(id => {
+            ['log-project', 'ach-project', 'blk-project'].forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
                 el.innerHTML = '<option value="">(Selectează Ansamblu)</option>' +
                     projectsList.map(p => `<option value="${p.id}">[${p.part_number} ${p.revision}] ${p.name}</option>`).join('');
             });
+
+            const filterProj = document.getElementById('filter-project-select');
+            if (filterProj && filterProj.options.length <= 1) {
+                projectsList.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.innerText = `[${p.part_number}] ${p.name}`;
+                    filterProj.appendChild(opt);
+                });
+            }
         }
 
         async function submitNewProject() {
@@ -1428,9 +1148,7 @@
                 cad_software: document.getElementById('proj-cad').value,
                 description: document.getElementById('proj-desc').value.trim(),
                 status: document.getElementById('proj-status').value,
-                priority: document.getElementById('proj-priority').value,
-                target_hours: document.getElementById('proj-target-hours').value,
-                deadline: document.getElementById('proj-deadline').value
+                priority: document.getElementById('proj-priority').value
             };
 
             try {
@@ -1443,111 +1161,27 @@
                     closeModal('modal-new-project');
                     showToast('Ansamblu PDM adăugat!');
                     loadProjects();
-                    loadStats();
                 }
             } catch (err) { showToast('Eroare la adăugare', true); }
         }
 
-        function quickLogTime(projectId) {
+        function quickLogFromProject(projectId) {
             populateProjectDropdowns();
-            document.getElementById('manual-project').value = projectId;
-            openModal('modal-manual-time');
-        }
-
-        function quickAddBlocker(projectId) {
-            populateProjectDropdowns();
-            document.getElementById('blk-project').value = projectId;
-            openModal('modal-new-blocker');
-        }
-
-        // ================= PONTAJ =================
-        function debounceLoadTimeEntries() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(loadTimeEntries, 300);
-        }
-
-        async function loadTimeEntries() {
-            const search = document.getElementById('time-search-input')?.value || '';
-            const category = document.getElementById('time-filter-category')?.value || '';
-
-            try {
-                const res = await fetch(`/api/time-entries?search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`);
-                const entries = await res.json();
-                const list = document.getElementById('time-entries-list');
-
-                if (!entries.length) {
-                    list.innerHTML = `<div class="text-center py-6 text-xs text-slate-500">Nicio înregistrare găsită.</div>`;
-                    return;
-                }
-
-                list.innerHTML = entries.map(e => {
-                    const hoursDec = (e.duration_minutes / 60).toFixed(1);
-                    return `
-                        <div class="pt-2.5 pb-1 flex items-start justify-between gap-3 text-xs">
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-1.5 flex-wrap">
-                                    <span class="font-bold text-white">${e.date}</span>
-                                    <span class="font-mono text-cyan-300 bg-cyan-950/60 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[10px]">${e.part_number || 'P/N'} ${e.revision || ''}</span>
-                                    <span class="font-semibold text-blue-400">${e.project_name || 'General'}</span>
-                                    <span class="bg-slate-800 text-slate-300 border border-slate-700 px-1.5 py-0.5 rounded text-[10px]">${e.category}</span>
-                                    ${e.is_overtime ? `<span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded text-[10px] font-bold">OVERTIME</span>` : ''}
-                                </div>
-                                <p class="text-slate-300 text-[11px]">${e.description || 'Fără descriere'}</p>
-                            </div>
-                            <div class="text-right whitespace-nowrap">
-                                <div class="text-sm font-black ${e.is_overtime ? 'text-amber-400' : 'text-blue-400'}">${hoursDec}h</div>
-                                <div class="text-[10px] text-slate-500">${e.duration_minutes} min</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            } catch (err) { console.error(err); }
-        }
-
-        async function submitManualTime() {
-            const date = document.getElementById('manual-date').value;
-            const project_id = document.getElementById('manual-project').value;
-            const hours = parseInt(document.getElementById('manual-hours').value || 0);
-            const minutes = parseInt(document.getElementById('manual-minutes').value || 0);
-            const totalMin = (hours * 60) + minutes;
-
-            if (totalMin <= 0) return showToast('Durata trebuie să fie mai mare de 0!', true);
-
-            const payload = {
-                date,
-                project_id,
-                duration_minutes: totalMin,
-                category: document.getElementById('manual-category').value,
-                description: document.getElementById('manual-desc').value.trim(),
-                is_overtime: document.getElementById('manual-overtime').checked
-            };
-
-            try {
-                const res = await fetch('/api/time-entries', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (res.ok) {
-                    closeModal('modal-manual-time');
-                    showToast('Ore salvate cu succes!');
-                    loadTimeEntries();
-                    loadStats();
-                    loadSalaryCalculator();
-                }
-            } catch (err) { showToast('Eroare la salvare', true); }
+            document.getElementById('log-project').value = projectId;
+            openNewDailyLogModal();
         }
 
         // ================= CALCULATOR SALARIU & MĂRIRE =================
         async function loadSalaryCalculator() {
             try {
                 const res = await fetch('/api/salary-calculator');
+                if (res.status === 401) return;
                 const data = await res.json();
 
                 document.getElementById('calc-current-salary').value = data.current_net_salary;
                 document.getElementById('calc-raise-pct').value = data.target_raise_pct;
                 document.getElementById('calc-total-savings').innerText = `${Number(data.total_savings).toLocaleString()} ${data.currency}`;
-                document.getElementById('calc-overtime-value').innerText = `${Number(data.overtime_total_value).toLocaleString()} ${data.currency}`;
+                document.getElementById('calc-active-days').innerText = `${data.active_days} zile`;
                 document.getElementById('calc-yearly-cost').innerText = `+${Number(data.requested_raise_yearly).toLocaleString()} ${data.currency}`;
                 document.getElementById('calc-roi-multiple').innerText = `${data.roi_multiple}x`;
             } catch (err) { console.error(err); }
@@ -1574,6 +1208,7 @@
         async function loadAchievements() {
             try {
                 const res = await fetch('/api/achievements');
+                if (res.status === 401) return;
                 const list = await res.json();
                 const container = document.getElementById('achievements-list');
 
@@ -1618,10 +1253,7 @@
         async function toggleStar(id) {
             try {
                 const res = await fetch(`/api/achievements/${id}/toggle-star`, { method: 'POST' });
-                if (res.ok) {
-                    loadAchievements();
-                    loadStats();
-                }
+                if (res.ok) loadAchievements();
             } catch (err) { console.error(err); }
         }
 
@@ -1637,7 +1269,6 @@
                 date: document.getElementById('ach-date').value,
                 project_id: document.getElementById('ach-project').value,
                 category: document.getElementById('ach-category').value,
-                feedback_received: document.getElementById('ach-feedback').value.trim(),
                 is_highlight: document.getElementById('ach-highlight').checked
             };
 
@@ -1651,7 +1282,6 @@
                     closeModal('modal-new-achievement');
                     showToast('Realizare salvată!');
                     loadAchievements();
-                    loadStats();
                     loadSalaryCalculator();
                 }
             } catch (err) { showToast('Eroare la salvare', true); }
@@ -1664,17 +1294,17 @@
 
             try {
                 const res = await fetch(`/api/report?start_date=${startDate}&end_date=${endDate}`);
+                if (res.status === 401) return;
                 const data = await res.json();
 
                 document.getElementById('report-period-tag').innerText = `Perioadă: ${data.start_date} → ${data.end_date}`;
                 document.getElementById('report-gen-date').innerText = `Data: ${new Date().toLocaleDateString('ro-RO')}`;
 
-                document.getElementById('rep-total-hours').innerText = data.overview.total_hours || '0';
-                document.getElementById('rep-overtime-hours').innerText = data.overview.overtime_hours || '0';
+                document.getElementById('rep-days-worked').innerText = data.overview.active_days || '0';
+                document.getElementById('rep-total-actions').innerText = data.overview.total_actions || '0';
                 document.getElementById('rep-savings').innerText = `${Number(data.period_savings || 0).toLocaleString()} RON`;
-                document.getElementById('rep-days-worked').innerText = data.overview.days_worked || '0';
 
-                // Blockers in report (Scut)
+                // Blockers in report
                 const blkContainer = document.getElementById('rep-blockers-list');
                 if (data.blockers && data.blockers.length > 0) {
                     blkContainer.innerHTML = data.blockers.map((b, i) => `
@@ -1705,7 +1335,6 @@
                                 </div>
                             </div>
                             <p class="text-slate-700 font-semibold mb-1">Rezultat Tehnic: <span class="font-normal">${a.impact_value}</span></p>
-                            ${a.feedback_received ? `<p class="text-[11px] text-emerald-700 italic">Feedback: "${a.feedback_received}"</p>` : ''}
                         </div>
                     `).join('');
                 } else {
@@ -1724,7 +1353,7 @@
                                     <th class="p-2 border-r border-slate-200">CAD</th>
                                     <th class="p-2 border-r border-slate-200">Client / Atelier</th>
                                     <th class="p-2 border-r border-slate-200">Status</th>
-                                    <th class="p-2 text-right">Ore Alocate</th>
+                                    <th class="p-2 text-right">Zile Alocate</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1735,7 +1364,7 @@
                                         <td class="p-2 text-slate-600 border-r border-slate-200 font-mono">${p.cad_software || 'CAD'}</td>
                                         <td class="p-2 text-slate-600 border-r border-slate-200">${p.client || '-'}</td>
                                         <td class="p-2 text-slate-600 border-r border-slate-200">${p.status}</td>
-                                        <td class="p-2 text-right font-black text-blue-700">${p.hours}h</td>
+                                        <td class="p-2 text-right font-black text-blue-700">${p.days_spent} zile</td>
                                     </tr>
                                 `).join('')}
                             </tbody>

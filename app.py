@@ -2,14 +2,48 @@ import os
 import json
 import csv
 import io
-import time
+import secrets
 from datetime import datetime, date, timedelta
-from flask import Flask, render_template, request, jsonify, Response, send_file
+from functools import wraps
+from flask import Flask, render_template, request, jsonify, Response, send_file, session
+from werkzeug.security import generate_password_hash, check_password_hash
 from database import init_db, get_connection
 
 app = Flask(__name__)
 
+# Persistent Secret Key for Sessions
+SECRET_FILE = os.path.join(os.path.dirname(__file__), '.secret_key')
+if not os.path.exists(SECRET_FILE):
+    with open(SECRET_FILE, 'w') as f:
+        f.write(secrets.token_hex(32))
+with open(SECRET_FILE, 'r') as f:
+    app.secret_key = f.read().strip()
+
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.permanent_session_lifetime = timedelta(days=60)
+
+# In-memory brute-force rate limiter (IP -> [fail_timestamps])
+FAILED_LOGINS = {}
+
 init_db()
+
+# Cybersecurity Response Headers
+@app.after_request
+def set_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    return response
+
+# Auth Decorator
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('user_id'):
+            return jsonify({'error': 'Autentificare necesară'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/')
 def index():
@@ -19,113 +53,243 @@ def index():
 def service_worker():
     return send_file(os.path.join(app.static_folder, 'sw.js'), mimetype='application/javascript')
 
-# ----------------- API STATS (WAR ROOM CAD) -----------------
-@app.route('/api/stats')
-def api_stats():
+# ----------------- CYBERSECURITY & AUTH -----------------
+@app.route('/api/auth/login', methods=['POST'])
+def api_login():
+    ip = request.remote_addr or '127.0.0.1'
+    now = datetime.now()
+    
+    # Clean old failed attempts (> 15 min)
+    if ip in FAILED_LOGINS:
+        FAILED_LOGINS[ip] = [t for t in FAILED_LOGINS[ip] if now - t < timedelta(minutes=15)]
+        if len(FAILED_LOGINS[ip]) >= 5:
+            return jsonify({'error': 'Prea multe încercări eșuate. Cont blocat temporar 15 minute.'}), 429
+
+    data = request.json or {}
+    username = data.get('username', '').strip()
+    password = data.get('password', '')
+    remember = data.get('remember', True)
+
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('SELECT * FROM users WHERE username = ?', (username,))
+    user = c.fetchone()
+
+    if user and check_password_hash(user['password_hash'], password):
+        session.clear()
+        session['user_id'] = user['id']
+        session['username'] = user['username']
+        session['role'] = user['role']
+        if remember:
+            session.permanent = True
+
+        c.execute('UPDATE users SET last_login = ? WHERE id = ?', (now.isoformat(), user['id']))
+        conn.commit()
+        conn.close()
+
+        if ip in FAILED_LOGINS:
+            del FAILED_LOGINS[ip]
+
+        return jsonify({'success': True, 'username': user['username'], 'role': user['role']})
+
+    conn.close()
+    if ip not in FAILED_LOGINS:
+        FAILED_LOGINS[ip] = []
+    FAILED_LOGINS[ip].append(now)
+
+    remaining = max(0, 5 - len(FAILED_LOGINS[ip]))
+    return jsonify({'error': f'Utilizator sau parolă incorectă. Încercări rămase: {remaining}'}), 401
+
+@app.route('/api/auth/logout', methods=['POST'])
+def api_logout():
+    session.clear()
+    return jsonify({'success': True})
+
+@app.route('/api/auth/me')
+def api_auth_me():
+    if session.get('user_id'):
+        return jsonify({
+            'authenticated': True,
+            'user_id': session.get('user_id'),
+            'username': session.get('username'),
+            'role': session.get('role')
+        })
+    return jsonify({'authenticated': False})
+
+@app.route('/api/auth/change-password', methods=['POST'])
+@login_required
+def api_change_password():
+    data = request.json or {}
+    old_pwd = data.get('old_password', '')
+    new_pwd = data.get('new_password', '').strip()
+
+    if len(new_pwd) < 4:
+        return jsonify({'error': 'Parola nouă trebuie să aibă minim 4 caractere'}), 400
+
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],))
+    user = c.fetchone()
+
+    if not user or not check_password_hash(user['password_hash'], old_pwd):
+        conn.close()
+        return jsonify({'error': 'Parola actuală este incorectă'}), 400
+
+    new_hash = generate_password_hash(new_pwd)
+    c.execute('UPDATE users SET password_hash = ? WHERE id = ?', (new_hash, session['user_id']))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True, 'message': 'Parola a fost schimbată cu succes!'})
+
+# ----------------- JURNAL ACTIVITĂȚI TABELAR (PE ZILE / LUNI / ANI) -----------------
+MONTH_NAMES = {
+    1: 'Ianuarie', 2: 'Februarie', 3: 'Martie', 4: 'Aprilie',
+    5: 'Mai', 6: 'Iunie', 7: 'Iulie', 8: 'August',
+    9: 'Septembrie', 10: 'Octombrie', 11: 'Noiembrie', 12: 'Decembrie'
+}
+
+@app.route('/api/daily-logs', methods=['GET', 'POST'])
+@login_required
+def api_daily_logs():
     conn = get_connection()
     c = conn.cursor()
 
-    c.execute('SELECT SUM(duration_minutes) as total_min, SUM(CASE WHEN is_overtime = 1 THEN duration_minutes ELSE 0 END) as overtime_min FROM time_entries')
-    time_row = c.fetchone()
-    total_minutes = time_row['total_min'] or 0
-    overtime_minutes = time_row['overtime_min'] or 0
+    if request.method == 'POST':
+        data = request.json or {}
+        entry_date = data.get('date') or date.today().isoformat()
+        try:
+            d_obj = datetime.strptime(entry_date, '%Y-%m-%d').date()
+        except Exception:
+            d_obj = date.today()
+            entry_date = d_obj.isoformat()
 
-    c.execute("SELECT COUNT(*) as total, SUM(CASE WHEN status = 'În Lucru' THEN 1 ELSE 0 END) as active, SUM(CASE WHEN status = 'Finalizat' THEN 1 ELSE 0 END) as completed FROM projects")
-    proj_row = c.fetchone()
+        project_id = data.get('project_id')
+        part_number = 'ASM-001'
+        revision = 'Rev A'
 
-    c.execute("SELECT COUNT(*) as total, SUM(CASE WHEN is_highlight = 1 THEN 1 ELSE 0 END) as highlights, COALESCE(SUM(money_saved_est), 0) as total_money_saved FROM achievements")
-    ach_row = c.fetchone()
+        if project_id in ('', 'null', None):
+            project_id = None
+        else:
+            project_id = int(project_id)
+            c.execute('SELECT part_number, revision FROM projects WHERE id = ?', (project_id,))
+            p = c.fetchone()
+            if p:
+                part_number = p['part_number']
+                revision = p['revision']
 
-    c.execute("SELECT COUNT(*) as total, COALESCE(SUM(time_lost_hours), 0) as hours_saved FROM blockers")
-    blockers_row = c.fetchone()
+        desc = data.get('description', '').strip()
+        if not desc:
+            conn.close()
+            return jsonify({'error': 'Descrierea activității este obligatorie'}), 400
 
-    # Hours by project
-    c.execute('''
-        SELECT p.name, p.part_number, p.revision, p.color, p.cad_software, ROUND(SUM(t.duration_minutes) / 60.0, 1) as hours
-        FROM projects p
-        LEFT JOIN time_entries t ON p.id = t.project_id
-        GROUP BY p.id
-        HAVING hours > 0
-        ORDER BY hours DESC
-    ''')
-    project_hours = [{'name': r['name'], 'pn': r['part_number'], 'rev': r['revision'], 'color': r['color'], 'cad': r['cad_software'], 'hours': r['hours']} for r in c.fetchall()]
-
-    # Hours by category
-    c.execute('''
-        SELECT category, ROUND(SUM(duration_minutes) / 60.0, 1) as hours
-        FROM time_entries
-        GROUP BY category
-        ORDER BY hours DESC
-    ''')
-    category_hours = [{'category': r['category'], 'hours': r['hours']} for r in c.fetchall()]
-
-    # Last 14 days activity trend
-    today = date.today()
-    days_labels = []
-    days_regular = []
-    days_overtime = []
-
-    for i in range(13, -1, -1):
-        day_date = (today - timedelta(days=i)).isoformat()
-        days_labels.append(day_date[5:])
         c.execute('''
-            SELECT 
-                ROUND(SUM(CASE WHEN is_overtime = 0 THEN duration_minutes ELSE 0 END) / 60.0, 1) as reg,
-                ROUND(SUM(CASE WHEN is_overtime = 1 THEN duration_minutes ELSE 0 END) / 60.0, 1) as ovt
-            FROM time_entries
-            WHERE date = ?
-        ''', (day_date,))
-        row = c.fetchone()
-        days_regular.append(row['reg'] or 0)
-        days_overtime.append(row['ovt'] or 0)
+            INSERT INTO daily_logs (project_id, part_number, revision, date, year, month, activity_type, description, status_tag, is_highlight)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            project_id,
+            part_number,
+            revision,
+            entry_date,
+            d_obj.year,
+            d_obj.month,
+            data.get('activity_type', 'Modelare CAD 3D'),
+            desc,
+            data.get('status_tag', 'Finalizat'),
+            1 if data.get('is_highlight') else 0
+        ))
+        conn.commit()
+        log_id = c.lastrowid
+        conn.close()
+        return jsonify({'success': True, 'id': log_id})
 
-    # Top achievements for review showcase
-    c.execute('''
-        SELECT a.*, p.name as project_name, p.part_number, p.revision
-        FROM achievements a
-        LEFT JOIN projects p ON a.project_id = p.id
-        WHERE a.is_highlight = 1
-        ORDER BY a.date DESC
-        LIMIT 5
-    ''')
-    top_achievements = [dict(r) for r in c.fetchall()]
+    # GET filters
+    year = request.args.get('year')
+    month = request.args.get('month')
+    project_id = request.args.get('project_id')
+    search = request.args.get('search', '').strip()
 
-    # Top blockers resolved (Scut)
+    query = '''
+        SELECT d.*, p.name as project_name, p.color as project_color, p.cad_software
+        FROM daily_logs d
+        LEFT JOIN projects p ON d.project_id = p.id
+        WHERE 1=1
+    '''
+    params = []
+
+    if year and year != 'all':
+        query += " AND d.year = ?"
+        params.append(int(year))
+    if month and month != 'all':
+        query += " AND d.month = ?"
+        params.append(int(month))
+    if project_id and project_id != 'all':
+        query += " AND d.project_id = ?"
+        params.append(int(project_id))
+    if search:
+        query += " AND (d.description LIKE ? OR d.part_number LIKE ? OR p.name LIKE ?)"
+        params.extend([f"%{search}%", f"%{search}%", f"%{search}%"])
+
+    query += " ORDER BY d.date DESC, d.id DESC"
+
+    c.execute(query, params)
+    logs = [dict(r) for r in c.fetchall()]
+
+    # Available months in DB
     c.execute('''
-        SELECT b.*, p.name as project_name, p.part_number, p.revision
-        FROM blockers b
-        LEFT JOIN projects p ON b.project_id = p.id
-        ORDER BY b.date DESC
-        LIMIT 4
+        SELECT DISTINCT year, month
+        FROM daily_logs
+        ORDER BY year DESC, month DESC
     ''')
-    recent_blockers = [dict(r) for r in c.fetchall()]
+    available_months = []
+    for r in c.fetchall():
+        y, m = r['year'], r['month']
+        available_months.append({
+            'year': y,
+            'month': m,
+            'label': f"{MONTH_NAMES.get(m, m)} {y}"
+        })
+
+    # Summary metrics for selected filter
+    unique_dates = len(set(l['date'] for l in logs))
+    unique_projects = len(set(l['project_id'] for l in logs if l['project_id']))
+    highlights_count = sum(1 for l in logs if l['is_highlight'])
 
     conn.close()
 
     return jsonify({
-        'total_hours': round(total_minutes / 60.0, 1),
-        'overtime_hours': round(overtime_minutes / 60.0, 1),
-        'active_projects': proj_row['active'] or 0,
-        'completed_projects': proj_row['completed'] or 0,
-        'total_projects': proj_row['total'] or 0,
-        'total_achievements': ach_row['total'] or 0,
-        'highlight_achievements': ach_row['highlights'] or 0,
-        'total_money_saved': round(ach_row['total_money_saved'], 0),
-        'total_blockers': blockers_row['total'] or 0,
-        'blocker_hours_managed': round(blockers_row['hours_saved'] or 0, 1),
-        'project_hours': project_hours,
-        'category_hours': category_hours,
-        'timeline': {
-            'labels': days_labels,
-            'regular': days_regular,
-            'overtime': days_overtime
-        },
-        'top_achievements': top_achievements,
-        'recent_blockers': recent_blockers
+        'logs': logs,
+        'available_months': available_months,
+        'summary': {
+            'total_entries': len(logs),
+            'unique_days': unique_dates,
+            'unique_projects': unique_projects,
+            'highlights': highlights_count
+        }
     })
 
-# ----------------- PROIECTE & ANSAMBLURI PDM -----------------
+@app.route('/api/daily-logs/<int:log_id>/toggle-star', methods=['POST'])
+@login_required
+def api_daily_log_toggle_star(log_id):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('UPDATE daily_logs SET is_highlight = 1 - is_highlight WHERE id = ?', (log_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+@app.route('/api/daily-logs/<int:log_id>/delete', methods=['POST'])
+@login_required
+def api_daily_log_delete(log_id):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('DELETE FROM daily_logs WHERE id = ?', (log_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+# ----------------- PROIECTE PDM -----------------
 @app.route('/api/projects', methods=['GET', 'POST'])
+@login_required
 def api_projects():
     conn = get_connection()
     c = conn.cursor()
@@ -138,8 +302,8 @@ def api_projects():
             return jsonify({'error': 'Numele ansamblului este obligatoriu'}), 400
 
         c.execute('''
-            INSERT INTO projects (part_number, revision, name, description, client, cad_software, status, priority, color, target_hours, start_date, deadline)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO projects (part_number, revision, name, description, client, cad_software, status, priority, color, start_date, deadline)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data.get('part_number', 'ASM-001').strip() or 'ASM-001',
             data.get('revision', 'Rev A').strip() or 'Rev A',
@@ -150,7 +314,6 @@ def api_projects():
             data.get('status', 'În Lucru'),
             data.get('priority', 'Medie'),
             data.get('color', '#2563eb'),
-            float(data.get('target_hours', 0) or 0),
             data.get('start_date', date.today().isoformat()),
             data.get('deadline', '')
         ))
@@ -161,240 +324,81 @@ def api_projects():
 
     c.execute('''
         SELECT p.*,
-               COALESCE(ROUND(SUM(t.duration_minutes) / 60.0, 1), 0) as logged_hours,
-               (SELECT COUNT(*) FROM tasks WHERE project_id = p.id) as total_tasks,
-               (SELECT COUNT(*) FROM tasks WHERE project_id = p.id AND status = 'done') as done_tasks,
+               (SELECT COUNT(DISTINCT date) FROM daily_logs WHERE project_id = p.id) as days_active,
+               (SELECT COUNT(*) FROM daily_logs WHERE project_id = p.id) as total_entries,
                (SELECT COUNT(*) FROM achievements WHERE project_id = p.id) as total_achievements,
                (SELECT COUNT(*) FROM blockers WHERE project_id = p.id) as total_blockers
         FROM projects p
-        LEFT JOIN time_entries t ON p.id = t.project_id
-        GROUP BY p.id
         ORDER BY CASE p.status WHEN 'În Lucru' THEN 1 WHEN 'Planificat' THEN 2 WHEN 'Finalizat' THEN 3 ELSE 4 END, p.id DESC
     ''')
     projects = [dict(r) for r in c.fetchall()]
     conn.close()
     return jsonify(projects)
 
-# ----------------- 1-TAP QUICK LOGGING (ERGONOMIE PE TELEFON) -----------------
-@app.route('/api/time-entries/quick', methods=['POST'])
-def api_quick_log():
-    conn = get_connection()
-    c = conn.cursor()
-    data = request.json or {}
-
-    project_id = data.get('project_id')
-    if not project_id:
-        c.execute('SELECT id, part_number, revision FROM projects WHERE status = "În Lucru" ORDER BY id DESC LIMIT 1')
-        first = c.fetchone()
-        if first:
-            project_id = first['id']
-            part_number = first['part_number']
-            revision = first['revision']
-        else:
-            project_id = None
-            part_number = 'ASM-001'
-            revision = 'Rev A'
-    else:
-        c.execute('SELECT part_number, revision FROM projects WHERE id = ?', (project_id,))
-        p = c.fetchone()
-        part_number = p['part_number'] if p else 'ASM-001'
-        revision = p['revision'] if p else 'Rev A'
-
-    minutes = int(data.get('duration_minutes', 60))
-    category = data.get('category', 'Modelare CAD 3D')
-    is_overtime = 1 if data.get('is_overtime') else 0
-    desc = data.get('description') or f"Sesiune rapidă: {category}"
-
-    c.execute('''
-        INSERT INTO time_entries (project_id, part_number, revision, date, duration_minutes, category, description, is_overtime)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (project_id, part_number, revision, date.today().isoformat(), minutes, category, desc, is_overtime))
-
-    conn.commit()
-    conn.close()
-    return jsonify({'success': True, 'minutes': minutes, 'category': category})
-
-# ----------------- PONTAJ COMPLET -----------------
-@app.route('/api/time-entries', methods=['GET', 'POST'])
-def api_time_entries():
+# ----------------- SCUT & BLOCAJE (PROBLEME LA EVALUARE) -----------------
+@app.route('/api/blockers', methods=['GET', 'POST'])
+@login_required
+def api_blockers():
     conn = get_connection()
     c = conn.cursor()
 
     if request.method == 'POST':
         data = request.json or {}
+        title = data.get('title', '').strip()
+        description = data.get('description', '').strip()
+        solution = data.get('solution_applied', '').strip()
+
+        if not title or not description:
+            conn.close()
+            return jsonify({'error': 'Titlul și Descrierea sunt obligatorii'}), 400
+
         project_id = data.get('project_id')
         if project_id in ('', 'null', None):
             project_id = None
-            part_number = 'GEN-01'
-            revision = 'Rev A'
         else:
             project_id = int(project_id)
-            c.execute('SELECT part_number, revision FROM projects WHERE id = ?', (project_id,))
-            p = c.fetchone()
-            part_number = p['part_number'] if p else 'ASM-001'
-            revision = p['revision'] if p else 'Rev A'
-
-        entry_date = data.get('date') or date.today().isoformat()
-        duration_minutes = int(data.get('duration_minutes', 0))
-        if duration_minutes <= 0:
-            conn.close()
-            return jsonify({'error': 'Durata trebuie să fie mai mare de 0 minute'}), 400
 
         c.execute('''
-            INSERT INTO time_entries (project_id, part_number, revision, date, duration_minutes, category, description, is_overtime)
+            INSERT INTO blockers (project_id, date, title, cause_type, description, solution_applied, time_lost_days, prevented_risk)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             project_id,
-            part_number,
-            revision,
-            entry_date,
-            duration_minutes,
-            data.get('category', 'Modelare CAD 3D'),
-            data.get('description', ''),
-            1 if data.get('is_overtime') else 0
+            data.get('date') or date.today().isoformat(),
+            title,
+            data.get('cause_type', 'Modificare Cerințe Client'),
+            description,
+            solution,
+            float(data.get('time_lost_days', 1) or 1),
+            data.get('prevented_risk', '')
         ))
         conn.commit()
-        entry_id = c.lastrowid
+        bid = c.lastrowid
         conn.close()
-        return jsonify({'success': True, 'id': entry_id})
-
-    # GET with filters
-    limit = int(request.args.get('limit', 60))
-    search = request.args.get('search', '').strip()
-    category = request.args.get('category', '').strip()
-    project_id = request.args.get('project_id', '').strip()
-
-    query = '''
-        SELECT t.*, p.name as project_name, p.color as project_color, p.cad_software
-        FROM time_entries t
-        LEFT JOIN projects p ON t.project_id = p.id
-        WHERE 1=1
-    '''
-    params = []
-    if search:
-        query += " AND (t.description LIKE ? OR p.name LIKE ? OR t.part_number LIKE ?)"
-        params.extend([f"%{search}%", f"%{search}%", f"%{search}%"])
-    if category:
-        query += " AND t.category = ?"
-        params.append(category)
-    if project_id:
-        query += " AND t.project_id = ?"
-        params.append(int(project_id))
-
-    query += " ORDER BY t.date DESC, t.id DESC LIMIT ?"
-    params.append(limit)
-
-    c.execute(query, params)
-    entries = [dict(r) for r in c.fetchall()]
-    conn.close()
-    return jsonify(entries)
-
-@app.route('/api/time-entries/<int:entry_id>/delete', methods=['POST'])
-def api_time_entry_delete(entry_id):
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute('DELETE FROM time_entries WHERE id = ?', (entry_id,))
-    conn.commit()
-    conn.close()
-    return jsonify({'success': True})
-
-# ----------------- CRONOMETRU LIVE -----------------
-@app.route('/api/timer')
-def api_timer():
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute('SELECT * FROM active_timer WHERE id = 1')
-    timer_row = dict(c.fetchone())
-    conn.close()
-
-    elapsed = 0
-    if timer_row['is_running'] and timer_row['start_timestamp']:
-        elapsed = int(time.time() - timer_row['start_timestamp'])
-
-    timer_row['elapsed_seconds'] = elapsed
-    return jsonify(timer_row)
-
-@app.route('/api/timer/start', methods=['POST'])
-def api_timer_start():
-    conn = get_connection()
-    c = conn.cursor()
-    data = request.json or {}
-
-    project_id = data.get('project_id')
-    if project_id in ('', 'null', None):
-        project_id = None
-    else:
-        project_id = int(project_id)
+        return jsonify({'success': True, 'id': bid})
 
     c.execute('''
-        UPDATE active_timer
-        SET is_running = 1,
-            project_id = ?,
-            category = ?,
-            description = ?,
-            is_overtime = ?,
-            start_timestamp = ?
-        WHERE id = 1
-    ''', (
-        project_id,
-        data.get('category', 'Modelare CAD 3D'),
-        data.get('description', ''),
-        1 if data.get('is_overtime') else 0,
-        time.time()
-    ))
-    conn.commit()
-    conn.close()
-    return jsonify({'success': True})
-
-@app.route('/api/timer/stop', methods=['POST'])
-def api_timer_stop():
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute('SELECT * FROM active_timer WHERE id = 1')
-    t = c.fetchone()
-
-    if not t['is_running'] or not t['start_timestamp']:
-        conn.close()
-        return jsonify({'error': 'Niciun timer activ'}), 400
-
-    elapsed_seconds = int(time.time() - t['start_timestamp'])
-    duration_minutes = max(1, round(elapsed_seconds / 60))
-
-    part_number = 'ASM-001'
-    revision = 'Rev A'
-    if t['project_id']:
-        c.execute('SELECT part_number, revision FROM projects WHERE id = ?', (t['project_id'],))
-        row = c.fetchone()
-        if row:
-            part_number = row['part_number']
-            revision = row['revision']
-
-    c.execute('''
-        INSERT INTO time_entries (project_id, part_number, revision, date, duration_minutes, category, description, is_overtime)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (
-        t['project_id'],
-        part_number,
-        revision,
-        date.today().isoformat(),
-        duration_minutes,
-        t['category'] or 'Modelare CAD 3D',
-        t['description'] or 'Sesiune activă înregistrată automat via Live Timer',
-        t['is_overtime']
-    ))
-
-    c.execute('''
-        UPDATE active_timer
-        SET is_running = 0, start_timestamp = NULL, description = ''
-        WHERE id = 1
+        SELECT b.*, p.name as project_name, p.part_number, p.revision, p.color as project_color
+        FROM blockers b
+        LEFT JOIN projects p ON b.project_id = p.id
+        ORDER BY b.date DESC, b.id DESC
     ''')
+    blockers = [dict(r) for r in c.fetchall()]
+    conn.close()
+    return jsonify(blockers)
 
+@app.route('/api/blockers/<int:blocker_id>/delete', methods=['POST'])
+@login_required
+def api_blocker_delete(blocker_id):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('DELETE FROM blockers WHERE id = ?', (blocker_id,))
     conn.commit()
     conn.close()
-    return jsonify({'success': True, 'duration_minutes': duration_minutes})
+    return jsonify({'success': True})
 
-# ----------------- REALIZĂRI & ECONOMII MONETARE (BRAG SHEET) -----------------
+# ----------------- REALIZĂRI & BRAG SHEET -----------------
 @app.route('/api/achievements', methods=['GET', 'POST'])
+@login_required
 def api_achievements():
     conn = get_connection()
     c = conn.cursor()
@@ -442,6 +446,7 @@ def api_achievements():
     return jsonify(achievements)
 
 @app.route('/api/achievements/<int:ach_id>/toggle-star', methods=['POST'])
+@login_required
 def api_achievement_toggle_star(ach_id):
     conn = get_connection()
     c = conn.cursor()
@@ -451,6 +456,7 @@ def api_achievement_toggle_star(ach_id):
     return jsonify({'success': True})
 
 @app.route('/api/achievements/<int:ach_id>/delete', methods=['POST'])
+@login_required
 def api_achievement_delete(ach_id):
     conn = get_connection()
     c = conn.cursor()
@@ -459,144 +465,9 @@ def api_achievement_delete(ach_id):
     conn.close()
     return jsonify({'success': True})
 
-# ----------------- SCUT & BLOCAJE TEHNICE -----------------
-@app.route('/api/blockers', methods=['GET', 'POST'])
-def api_blockers():
-    conn = get_connection()
-    c = conn.cursor()
-
-    if request.method == 'POST':
-        data = request.json or {}
-        title = data.get('title', '').strip()
-        description = data.get('description', '').strip()
-        solution = data.get('solution_applied', '').strip()
-
-        if not title or not description:
-            conn.close()
-            return jsonify({'error': 'Titlul și Descrierea sunt obligatorii'}), 400
-
-        project_id = data.get('project_id')
-        if project_id in ('', 'null', None):
-            project_id = None
-        else:
-            project_id = int(project_id)
-
-        c.execute('''
-            INSERT INTO blockers (project_id, date, title, cause_type, description, solution_applied, time_lost_hours, prevented_risk)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            project_id,
-            data.get('date') or date.today().isoformat(),
-            title,
-            data.get('cause_type', 'Modificare Cerințe Client'),
-            description,
-            solution,
-            float(data.get('time_lost_hours', 0) or 0),
-            data.get('prevented_risk', '')
-        ))
-        conn.commit()
-        bid = c.lastrowid
-        conn.close()
-        return jsonify({'success': True, 'id': bid})
-
-    c.execute('''
-        SELECT b.*, p.name as project_name, p.part_number, p.revision, p.color as project_color
-        FROM blockers b
-        LEFT JOIN projects p ON b.project_id = p.id
-        ORDER BY b.date DESC, b.id DESC
-    ''')
-    blockers = [dict(r) for r in c.fetchall()]
-    conn.close()
-    return jsonify(blockers)
-
-@app.route('/api/blockers/<int:blocker_id>/delete', methods=['POST'])
-def api_blocker_delete(blocker_id):
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute('DELETE FROM blockers WHERE id = ?', (blocker_id,))
-    conn.commit()
-    conn.close()
-    return jsonify({'success': True})
-
-# ----------------- KANBAN ETAPE PROIECTARE CAD -----------------
-@app.route('/api/tasks', methods=['GET', 'POST'])
-def api_tasks():
-    conn = get_connection()
-    c = conn.cursor()
-
-    if request.method == 'POST':
-        data = request.json or {}
-        title = data.get('title', '').strip()
-        if not title:
-            conn.close()
-            return jsonify({'error': 'Titlul sarcinii este obligatoriu'}), 400
-
-        project_id = data.get('project_id')
-        if project_id in ('', 'null', None):
-            project_id = None
-        else:
-            project_id = int(project_id)
-
-        c.execute('''
-            INSERT INTO tasks (project_id, title, stage, status, due_date)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (
-            project_id,
-            title,
-            data.get('stage', 'Modelare 3D'),
-            data.get('status', 'todo'),
-            data.get('due_date', '')
-        ))
-        conn.commit()
-        task_id = c.lastrowid
-        conn.close()
-        return jsonify({'success': True, 'id': task_id})
-
-    c.execute('''
-        SELECT t.*, p.name as project_name, p.part_number, p.revision, p.color as project_color
-        FROM tasks t
-        LEFT JOIN projects p ON t.project_id = p.id
-        ORDER BY CASE t.stage 
-            WHEN 'Concept 3D' THEN 1 
-            WHEN 'Modelare 3D' THEN 2 
-            WHEN 'Simulare FEA' THEN 3 
-            WHEN 'Desene 2D & BOM' THEN 4 
-            WHEN 'Lansat Atelier' THEN 5 
-            WHEN 'Prototip Validat' THEN 6 
-            ELSE 7 END, t.id DESC
-    ''')
-    tasks = [dict(r) for r in c.fetchall()]
-    conn.close()
-    return jsonify(tasks)
-
-@app.route('/api/tasks/<int:task_id>/move-stage', methods=['POST'])
-def api_task_move_stage(task_id):
-    conn = get_connection()
-    c = conn.cursor()
-    data = request.json or {}
-    new_stage = data.get('stage', 'Modelare 3D')
-    is_done = 1 if new_stage == 'Prototip Validat' else 0
-
-    c.execute('UPDATE tasks SET stage = ?, status = ? WHERE id = ?', (
-        new_stage,
-        'done' if is_done else 'in_progress',
-        task_id
-    ))
-    conn.commit()
-    conn.close()
-    return jsonify({'success': True, 'stage': new_stage})
-
-@app.route('/api/tasks/<int:task_id>/delete', methods=['POST'])
-def api_task_delete(task_id):
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute('DELETE FROM tasks WHERE id = ?', (task_id,))
-    conn.commit()
-    conn.close()
-    return jsonify({'success': True})
-
 # ----------------- CALCULATOR ROI & JUSTIFICARE MĂRIRE -----------------
 @app.route('/api/salary-calculator', methods=['GET', 'POST'])
+@login_required
 def api_salary_calculator():
     conn = get_connection()
     c = conn.cursor()
@@ -617,21 +488,18 @@ def api_salary_calculator():
     c.execute('SELECT * FROM salary_settings WHERE id = 1')
     settings = dict(c.fetchone())
 
-    c.execute('SELECT COALESCE(SUM(duration_minutes), 0) / 60.0 as overtime_hours FROM time_entries WHERE is_overtime = 1')
-    overtime_hours = round(c.fetchone()['overtime_hours'], 1)
-
+    # Total savings from achievements
     c.execute('SELECT COALESCE(SUM(money_saved_est), 0) as total_savings FROM achievements')
     total_savings = round(c.fetchone()['total_savings'], 0)
 
-    hourly_net = round(settings['current_net_salary'] / 168.0, 2)
-    overtime_hourly_rate = round(hourly_net * 1.75, 2)
-    overtime_total_value = round(overtime_hours * overtime_hourly_rate, 2)
+    # Active workdays logged
+    c.execute('SELECT COUNT(DISTINCT date) as active_days FROM daily_logs')
+    active_days = c.fetchone()['active_days']
 
     requested_raise_monthly = round(settings['current_net_salary'] * (settings['target_raise_pct'] / 100.0), 2)
     requested_raise_yearly = round(requested_raise_monthly * 12, 2)
     new_target_salary = round(settings['current_net_salary'] + requested_raise_monthly, 2)
 
-    # Undeniable ROI ratio
     roi_multiple = round(total_savings / (requested_raise_yearly or 1), 1)
 
     conn.close()
@@ -640,19 +508,17 @@ def api_salary_calculator():
         'current_net_salary': settings['current_net_salary'],
         'target_raise_pct': settings['target_raise_pct'],
         'currency': settings['currency'],
-        'hourly_net': hourly_net,
-        'overtime_hours': overtime_hours,
-        'overtime_hourly_rate': overtime_hourly_rate,
-        'overtime_total_value': overtime_total_value,
+        'active_days': active_days,
+        'total_savings': total_savings,
         'requested_raise_monthly': requested_raise_monthly,
         'requested_raise_yearly': requested_raise_yearly,
         'new_target_salary': new_target_salary,
-        'total_savings': total_savings,
         'roi_multiple': roi_multiple
     })
 
-# ----------------- DOSAR DE EVALUARE & EXPORTURI -----------------
+# ----------------- RAPORT DE EVALUARE & EXPORTURI -----------------
 @app.route('/api/report')
+@login_required
 def api_report():
     conn = get_connection()
     c = conn.cursor()
@@ -661,27 +527,24 @@ def api_report():
     end_date = request.args.get('end_date', date.today().isoformat())
 
     c.execute('''
-        SELECT 
-            ROUND(SUM(duration_minutes) / 60.0, 1) as total_hours,
-            ROUND(SUM(CASE WHEN is_overtime = 1 THEN duration_minutes ELSE 0 END) / 60.0, 1) as overtime_hours,
-            COUNT(DISTINCT date) as days_worked
-        FROM time_entries
+        SELECT COUNT(DISTINCT date) as active_days, COUNT(*) as total_actions
+        FROM daily_logs
         WHERE date BETWEEN ? AND ?
     ''', (start_date, end_date))
     overview = dict(c.fetchone() or {})
 
     c.execute('''
-        SELECT p.name, p.part_number, p.revision, p.client, p.cad_software, p.status, ROUND(SUM(t.duration_minutes) / 60.0, 1) as hours
+        SELECT p.name, p.part_number, p.revision, p.client, p.cad_software, p.status, COUNT(d.id) as log_count, COUNT(DISTINCT d.date) as days_spent
         FROM projects p
-        JOIN time_entries t ON p.id = t.project_id
-        WHERE t.date BETWEEN ? AND ?
+        JOIN daily_logs d ON p.id = d.project_id
+        WHERE d.date BETWEEN ? AND ?
         GROUP BY p.id
-        ORDER BY hours DESC
+        ORDER BY days_spent DESC
     ''', (start_date, end_date))
     projects_breakdown = [dict(r) for r in c.fetchall()]
 
     c.execute('''
-        SELECT a.*, p.name as project_name, p.part_number, p.revision, p.cad_software
+        SELECT a.*, p.name as project_name, p.part_number, p.revision
         FROM achievements a
         LEFT JOIN projects p ON a.project_id = p.id
         WHERE a.date BETWEEN ? AND ?
@@ -698,7 +561,6 @@ def api_report():
     ''', (start_date, end_date))
     blockers = [dict(r) for r in c.fetchall()]
 
-    # Sum savings
     c.execute('SELECT COALESCE(SUM(money_saved_est), 0) as period_savings FROM achievements WHERE date BETWEEN ? AND ?', (start_date, end_date))
     period_savings = c.fetchone()['period_savings']
 
@@ -714,53 +576,55 @@ def api_report():
         'blockers': blockers
     })
 
-# Export to CSV
+# Export CSV
 @app.route('/export/csv')
+@login_required
 def export_csv():
     conn = get_connection()
     c = conn.cursor()
     c.execute('''
-        SELECT t.date, p.part_number, p.revision, p.name as ansamblu, p.cad_software, t.duration_minutes, ROUND(t.duration_minutes/60.0, 2) as ore,
-               t.category as etapa_inginerie, t.description as descriere,
-               CASE WHEN t.is_overtime = 1 THEN 'DA' ELSE 'NU' END as ore_suplimentare
-        FROM time_entries t
-        LEFT JOIN projects p ON t.project_id = p.id
-        ORDER BY t.date DESC
+        SELECT d.date, d.part_number, d.revision, p.name as ansamblu, p.cad_software,
+               d.activity_type, d.description, d.status_tag,
+               CASE WHEN d.is_highlight = 1 THEN 'DA' ELSE 'NU' END as realizare_cheie
+        FROM daily_logs d
+        LEFT JOIN projects p ON d.project_id = p.id
+        ORDER BY d.date DESC
     ''')
     rows = c.fetchall()
     conn.close()
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['Data', 'Part Number', 'Revizie', 'Ansamblu Mecanic', 'Software CAD', 'Minute', 'Ore', 'Etapa Inginerie', 'Descriere Reper', 'Overtime'])
+    writer.writerow(['Data', 'Part Number', 'Revizie', 'Ansamblu Mecanic', 'Software CAD', 'Tip Activitate', 'Ce am Livrat / Lucrat', 'Stare', 'Realizare Cheie'])
     for r in rows:
-        writer.writerow([r['date'], r['part_number'] or '-', r['revision'] or '-', r['ansamblu'] or 'General', r['cad_software'] or '-', r['duration_minutes'], r['ore'], r['etapa_inginerie'], r['descriere'], r['ore_suplimentare']])
+        writer.writerow([r['date'], r['part_number'] or '-', r['revision'] or '-', r['ansamblu'] or 'General', r['cad_software'] or '-', r['activity_type'], r['description'], r['status_tag'], r['realizare_cheie']])
 
     return Response(
         output.getvalue(),
         mimetype="text/csv; charset=utf-8",
-        headers={"Content-disposition": f"attachment; filename=WorkPulse_Inginerie_{date.today().isoformat()}.csv"}
+        headers={"Content-disposition": f"attachment; filename=WorkPulse_Jurnal_Mecanic_{date.today().isoformat()}.csv"}
     )
 
-# Export Full Dossier in Markdown
+# Export Markdown Dossier
 @app.route('/export/markdown')
+@login_required
 def export_markdown():
     conn = get_connection()
     c = conn.cursor()
 
     today_str = date.today().isoformat()
-    c.execute("SELECT ROUND(SUM(duration_minutes)/60.0, 1) as tot, ROUND(SUM(CASE WHEN is_overtime=1 THEN duration_minutes ELSE 0 END)/60.0, 1) as ovt FROM time_entries")
+    c.execute("SELECT COUNT(DISTINCT date) as days, COUNT(*) as cnt FROM daily_logs")
     stats = c.fetchone()
 
     c.execute("SELECT COALESCE(SUM(money_saved_est), 0) as tot_sav FROM achievements")
     tot_sav = c.fetchone()['tot_sav']
 
     c.execute('''
-        SELECT p.name, p.part_number, p.revision, p.cad_software, p.status, ROUND(SUM(t.duration_minutes)/60.0, 1) as hours
+        SELECT p.name, p.part_number, p.revision, p.cad_software, p.status, COUNT(DISTINCT d.date) as days
         FROM projects p
-        LEFT JOIN time_entries t ON p.id = t.project_id
+        LEFT JOIN daily_logs d ON p.id = d.project_id
         GROUP BY p.id
-        ORDER BY hours DESC
+        ORDER BY days DESC
     ''')
     projects = c.fetchall()
 
@@ -782,62 +646,52 @@ def export_markdown():
     conn.close()
 
     lines = [
-        f"# 📋 Dosar de Performanță Tehnică & Justificare Mărire Salarială (v3.0)",
+        f"# 📋 Dosar de Activitate & Justificare Mărire Salarială",
         f"**Titular:** Inginer Proiectant Mecanic",
-        f"**Data Generării:** {today_str}\n",
+        f"**Data:** {today_str}\n",
         f"---",
-        f"## 1. 📊 Indicatori Executivi de Volum & Implicare",
-        f"- **Total Ore Dedicate Proiectării & Asistenței Tehnice:** {stats['tot'] or 0} ore",
-        f"- **Ore Suplimentare (Overtime Asumat):** {stats['ovt'] or 0} ore",
-        f"- **Economii Directe Generate (Rebuturi Evitate & Optimizări):** {tot_sav:,.0f} RON",
-        f"- **Ansambluri & Proiecte Gestionate:** {len(projects)}\n",
-        f"## 2. 🚀 Repartizare Efort pe Ansambluri & Revizii CAD"
+        f"## 1. 📊 Indicatori Generali",
+        f"- **Zile Active de Proiectare:** {stats['days'] or 0} zile",
+        f"- **Activități & Livrabile Înregistrate:** {stats['cnt'] or 0}",
+        f"- **Economii Directe Generate:** {tot_sav:,.0f} RON\n",
+        f"## 2. 🚀 Ansambluri & Proiecte Gestionate"
     ]
 
     for p in projects:
-        lines.append(f"- **[{p['part_number']} {p['revision']}] {p['name']}** [CAD: {p['cad_software']}] ({p['status']}): {p['hours'] or 0} ore")
+        lines.append(f"- **[{p['part_number']} {p['revision']}] {p['name']}** [CAD: {p['cad_software']}] ({p['status']}): {p['days'] or 0} zile active")
 
-    lines.append("\n## 3. 🛡️ Scut de Apărare: Blocaje & Incidente Rezolvate Fără Vina Proiectantului")
-    lines.append("*Dovezi clare pentru situații neprevăzute cauzate de clienți, furnizori sau atelier pe care le-am gestionat și deblocat:*\n")
-
+    lines.append("\n## 3. 🛡️ Scut de Apărare: Blocaje & Incidente Rezolvate")
     for b in blockers:
-        lines.append(f"### ⚠️ [{b['part_number'] or 'General'}] {b['title']} ({b['date']}) - Tip: {b['cause_type']}")
-        lines.append(f"- **Cauză Externă:** {b['description']}")
-        lines.append(f"- **Intervenția Inginerească:** {b['solution_applied']}")
-        lines.append(f"- **Timp Pierdut Gestionat:** {b['time_lost_hours']} ore")
+        lines.append(f"### ⚠️ [{b['part_number'] or 'P/N'}] {b['title']} ({b['date']}) - {b['cause_type']}")
+        lines.append(f"- **Situație:** {b['description']}")
+        lines.append(f"- **Soluția Inginerească:** {b['solution_applied']}")
         if b['prevented_risk']:
-            lines.append(f"- **Risc / Cost Prevenit:** {b['prevented_risk']}")
+            lines.append(f"- **Risc Prevenit:** {b['prevented_risk']}")
         lines.append("")
 
-    lines.append("## 4. 🏆 Realizări de Impact: Economii de Costuri, Materiale & Rebuturi Evitate")
-    lines.append("*Valoare cuantificabilă demonstrată prin cifre și economii:*\n")
-
+    lines.append("## 4. 🏆 Realizări de Impact & Economii Generate")
     for a in achievements:
         star = "⭐ [TOP ARGUMENT MĂRIRE] " if a['is_highlight'] else ""
         sav = f" [Economie: {a['money_saved_est']:,.0f} RON]" if a['money_saved_est'] > 0 else ""
         lines.append(f"### {star}{a['title']} ({a['date']}){sav}")
         lines.append(f"- **Ansamblu:** [{a['part_number'] or '-'}] {a['project_name'] or 'General'}")
-        lines.append(f"- **Categorie:** {a['category']}")
-        lines.append(f"- **Rezultat Măsurabil:** {a['impact_value']}")
+        lines.append(f"- **Rezultat Tehnic:** {a['impact_value']}")
         if a['feedback_received']:
-            lines.append(f"- **Feedback / Aprecieri:** _{a['feedback_received']}_")
+            lines.append(f"- **Feedback:** _{a['feedback_received']}_")
         lines.append("")
 
-    lines.append("## 5. 💡 Concluzii Matematice pentru Negocierea Măririi Salariale")
-    lines.append("1. **ROI Garantat:** Economiile de material și piesele salvate de la rebut depășesc cu mult costul anual al măririi solicitate.")
-    lines.append("2. **Protecția Termenelor de Livrare:** Blocajele cauzate de clienți și furnizori au fost soluționate în medie sub 24h.")
-    lines.append("3. **Disponibilitate:** Orele de overtime au asigurat lansarea la timp a reperelor pe mașinile cu comandă numerică și asamblarea prototipului.")
-    lines.append("\n---\n*Generat de WorkPulse pe Termux.*")
+    lines.append("---\n*Generat de WorkPulse pe Termux.*")
 
     md_content = "\n".join(lines)
     return Response(
         md_content,
         mimetype="text/markdown; charset=utf-8",
-        headers={"Content-disposition": f"attachment; filename=Dosar_Evaluare_Inginer_Mecanic_{today_str}.md"}
+        headers={"Content-disposition": f"attachment; filename=Dosar_Evaluare_Mecanic_{today_str}.md"}
     )
 
 # Save backup directly to Phone Storage
 @app.route('/api/backup/save-to-storage', methods=['POST'])
+@login_required
 def save_to_storage():
     conn = get_connection()
     c = conn.cursor()
@@ -845,8 +699,8 @@ def save_to_storage():
     c.execute('SELECT * FROM projects')
     projects = [dict(r) for r in c.fetchall()]
 
-    c.execute('SELECT * FROM time_entries')
-    time_entries = [dict(r) for r in c.fetchall()]
+    c.execute('SELECT * FROM daily_logs')
+    daily_logs = [dict(r) for r in c.fetchall()]
 
     c.execute('SELECT * FROM achievements')
     achievements = [dict(r) for r in c.fetchall()]
@@ -854,26 +708,22 @@ def save_to_storage():
     c.execute('SELECT * FROM blockers')
     blockers = [dict(r) for r in c.fetchall()]
 
-    c.execute('SELECT * FROM tasks')
-    tasks = [dict(r) for r in c.fetchall()]
-
     conn.close()
 
     backup_data = {
-        'version': '3.0-war-room-mechanical',
+        'version': '4.0-secure-table-mechanical',
         'created_at': datetime.now().isoformat(),
         'projects': projects,
-        'time_entries': time_entries,
+        'daily_logs': daily_logs,
         'achievements': achievements,
-        'blockers': blockers,
-        'tasks': tasks
+        'blockers': blockers
     }
 
     target_dir = os.path.expanduser('~/storage/shared/Download')
     if not os.path.exists(target_dir):
         target_dir = os.path.dirname(os.path.dirname(__file__))
 
-    filename = f"workpulse_war_room_backup_{date.today().isoformat()}.json"
+    filename = f"workpulse_secure_backup_{date.today().isoformat()}.json"
     full_path = os.path.join(target_dir, filename)
 
     with open(full_path, 'w', encoding='utf-8') as f:

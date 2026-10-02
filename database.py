@@ -1,6 +1,7 @@
 import sqlite3
 import os
 from datetime import datetime, date, timedelta
+from werkzeug.security import generate_password_hash, check_password_hash
 
 DATA_DIR = os.environ.get('DATA_DIR', os.path.dirname(__file__))
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -16,14 +17,47 @@ def init_db(force_reseed=False):
     c = conn.cursor()
 
     if force_reseed:
+        c.execute('DROP TABLE IF EXISTS daily_logs')
         c.execute('DROP TABLE IF EXISTS blockers')
         c.execute('DROP TABLE IF EXISTS tasks')
         c.execute('DROP TABLE IF EXISTS achievements')
         c.execute('DROP TABLE IF EXISTS time_entries')
         c.execute('DROP TABLE IF EXISTS projects')
         c.execute('DROP TABLE IF EXISTS salary_settings')
+        c.execute('DROP TABLE IF EXISTS users')
 
-    # Projects / Assemblies (Inginerie Mecanică & PDM)
+    # Users & Cybersecurity (Admin account)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            role TEXT DEFAULT 'admin',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_login TIMESTAMP
+        )
+    ''')
+
+    # Daily Activity Logs (Jurnal Lejer pe Zile, Luni, Ani, Proiecte)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS daily_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project_id INTEGER,
+            part_number TEXT DEFAULT 'ASM-001',
+            revision TEXT DEFAULT 'Rev A',
+            date TEXT NOT NULL,
+            year INTEGER NOT NULL,
+            month INTEGER NOT NULL,
+            activity_type TEXT DEFAULT 'Proiectare CAD 3D',
+            description TEXT NOT NULL,
+            status_tag TEXT DEFAULT 'Finalizat',
+            is_highlight INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE SET NULL
+        )
+    ''')
+
+    # Projects / Assemblies
     c.execute('''
         CREATE TABLE IF NOT EXISTS projects (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,31 +70,30 @@ def init_db(force_reseed=False):
             status TEXT DEFAULT 'În Lucru',
             priority TEXT DEFAULT 'Medie',
             color TEXT DEFAULT '#2563eb',
-            target_hours REAL DEFAULT 0,
             start_date TEXT,
             deadline TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
 
-    # Time entries (Pontaj pe etape de proiectare inginerească)
+    # Blockers (Scut de Apărare)
     c.execute('''
-        CREATE TABLE IF NOT EXISTS time_entries (
+        CREATE TABLE IF NOT EXISTS blockers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             project_id INTEGER,
-            part_number TEXT,
-            revision TEXT DEFAULT 'Rev A',
             date TEXT NOT NULL,
-            duration_minutes INTEGER NOT NULL,
-            category TEXT DEFAULT 'Modelare CAD 3D',
-            description TEXT,
-            is_overtime INTEGER DEFAULT 0,
+            title TEXT NOT NULL,
+            cause_type TEXT DEFAULT 'Modificare Cerințe Client',
+            description TEXT NOT NULL,
+            solution_applied TEXT NOT NULL,
+            time_lost_days REAL DEFAULT 1,
+            prevented_risk TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE SET NULL
         )
     ''')
 
-    # Achievements / Brag Document (pentru Evaluare & Marire)
+    # Achievements (Brag Sheet pentru Mărire)
     c.execute('''
         CREATE TABLE IF NOT EXISTS achievements (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,51 +110,7 @@ def init_db(force_reseed=False):
         )
     ''')
 
-    # Blockers & Incidents (Scut de apărare la evaluare în caz de probleme/întârzieri)
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS blockers (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            project_id INTEGER,
-            date TEXT NOT NULL,
-            title TEXT NOT NULL,
-            cause_type TEXT DEFAULT 'Modificare Cerințe Client',
-            description TEXT NOT NULL,
-            solution_applied TEXT NOT NULL,
-            time_lost_hours REAL DEFAULT 0,
-            prevented_risk TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE SET NULL
-        )
-    ''')
-
-    # Tasks / Kanban CAD Etape
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS tasks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            project_id INTEGER,
-            title TEXT NOT NULL,
-            stage TEXT DEFAULT 'Modelare 3D',
-            status TEXT DEFAULT 'todo',
-            due_date TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
-        )
-    ''')
-
-    # Active timer state
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS active_timer (
-            id INTEGER PRIMARY KEY CHECK (id = 1),
-            is_running INTEGER DEFAULT 0,
-            project_id INTEGER,
-            category TEXT,
-            description TEXT,
-            is_overtime INTEGER DEFAULT 0,
-            start_timestamp REAL
-        )
-    ''')
-
-    # Salary & ROI settings
+    # Salary Settings & ROI
     c.execute('''
         CREATE TABLE IF NOT EXISTS salary_settings (
             id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -131,53 +120,77 @@ def init_db(force_reseed=False):
         )
     ''')
 
-    c.execute('''
-        INSERT OR IGNORE INTO active_timer (id, is_running, project_id, category, description, is_overtime, start_timestamp)
-        VALUES (1, 0, NULL, 'Modelare CAD 3D', '', 0, NULL)
-    ''')
+    # Default Admin User (username: admin, default password: admin)
+    c.execute('SELECT COUNT(*) as cnt FROM users WHERE username = "admin"')
+    if c.fetchone()['cnt'] == 0:
+        c.execute('''
+            INSERT INTO users (username, password_hash, role)
+            VALUES (?, ?, ?)
+        ''', ('admin', generate_password_hash('admin'), 'admin'))
 
     c.execute('''
         INSERT OR IGNORE INTO salary_settings (id, current_net_salary, target_raise_pct, currency)
         VALUES (1, 6500, 20, 'RON')
     ''')
 
-    # Seed data if empty
-    c.execute('SELECT COUNT(*) as cnt FROM projects')
-    if c.fetchone()['cnt'] == 0:
-        seed_mechanical_data(conn)
+    # Check if daily_logs has data
+    c.execute('SELECT COUNT(*) as cnt FROM daily_logs')
+    if c.fetchone()['cnt'] == 0 or force_reseed:
+        seed_data(conn)
 
     conn.commit()
     conn.close()
 
-def seed_mechanical_data(conn):
+def seed_data(conn):
     c = conn.cursor()
-    c.execute('DELETE FROM time_entries')
-    c.execute('DELETE FROM achievements')
+    c.execute('DELETE FROM daily_logs')
     c.execute('DELETE FROM blockers')
-    c.execute('DELETE FROM tasks')
+    c.execute('DELETE FROM achievements')
     c.execute('DELETE FROM projects')
-    
+
     today = date.today()
 
-    # Mechanical Engineering Projects
+    # Projects
     projects = [
-        ('ASM-100', 'Rev B', 'Sistem Transportor Robotic Modular', 'Proiectare mecanică completă bandă cu role conice, ghidaje reglabile și cadru profile Al', 'Linie Automatizare Auto', 'SolidWorks', 'În Lucru', 'Critic', '#ef4444', 140, (today - timedelta(days=45)).isoformat(), (today + timedelta(days=15)).isoformat()),
-        ('ASM-204', 'Rev A', 'Șasiu & Carcase Sheet Metal Dispozitiv Testare', 'Proiectare ansamblu tablă îndoită, toleranțe decupare laser, optimizare linii îndoire și elemente PEM', 'Client Industrial', 'Autodesk Inventor', 'În Lucru', 'Ridicată', '#2563eb', 95, (today - timedelta(days=35)).isoformat(), (today + timedelta(days=20)).isoformat()),
-        ('TOOL-05', 'Rev C', 'Dispozitiv Modular Fixare Prelucrare CNC', 'Jig & fixture pentru frezare piese turnate Al cu prindere rapidă pneumatică și opritori reglabili', 'Atelier Prelucrări Mecanice', 'SolidWorks', 'Finalizat', 'Ridicată', '#10b981', 65, (today - timedelta(days=60)).isoformat(), (today - timedelta(days=5)).isoformat()),
-        ('GEAR-02', 'Rev A', 'Redesign Reductor & Ax Transmisie Putere', 'Calcul angrenaje cilindrice dințate, rulmenți, verificări FEA la torsiune și oboseală, fișe tratamente termice', 'Sector Energetic', 'SolidWorks / FEA', 'În Lucru', 'Medie', '#f59e0b', 80, (today - timedelta(days=20)).isoformat(), (today + timedelta(days=25)).isoformat())
+        ('ASM-100', 'Rev B', 'Sistem Transportor Robotic Modular', 'Bandă cu role conice, ghidaje reglabile și cadru aluminiu', 'Linie Automatizare Auto', 'SolidWorks', 'În Lucru', 'Critic', '#ef4444', (today - timedelta(days=50)).isoformat(), (today + timedelta(days=20)).isoformat()),
+        ('ASM-204', 'Rev A', 'Șasiu & Carcase Sheet Metal Dispozitiv Testare', 'Ansamblu tablă îndoită laser, toleranțe îndoire și elemente PEM', 'Client Industrial', 'Autodesk Inventor', 'În Lucru', 'Ridicată', '#2563eb', (today - timedelta(days=40)).isoformat(), (today + timedelta(days=25)).isoformat()),
+        ('TOOL-05', 'Rev C', 'Dispozitiv Modular Fixare Prelucrare CNC', 'Jig & fixture pentru frezare piese turnate Al cu prindere rapidă', 'Atelier Prelucrări Mecanice', 'SolidWorks', 'Finalizat', 'Ridicată', '#10b981', (today - timedelta(days=65)).isoformat(), (today - timedelta(days=5)).isoformat()),
+        ('GEAR-02', 'Rev A', 'Redesign Reductor & Ax Transmisie Putere', 'Calcul angrenaje cilindrice, rulmenți, verificări FEA torsiune', 'Sector Energetic', 'SolidWorks / FEA', 'În Lucru', 'Medie', '#f59e0b', (today - timedelta(days=25)).isoformat(), (today + timedelta(days=30)).isoformat())
     ]
 
     c.executemany('''
-        INSERT INTO projects (part_number, revision, name, description, client, cad_software, status, priority, color, target_hours, start_date, deadline)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO projects (part_number, revision, name, description, client, cad_software, status, priority, color, start_date, deadline)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', projects)
 
-    # Achievements / Brag Sheet
+    # Daily Logs (Jurnalul Lejer pe Zile & Luni)
+    logs = [
+        (1, 'ASM-100', 'Rev B', (today - timedelta(days=1)).isoformat(), today.year, today.month, 'Modelare CAD 3D', 'Finalizat modelarea ansamblului ghidaje laterale și suporți senzori optici', 'Finalizat', 0),
+        (1, 'ASM-100', 'Rev B', (today - timedelta(days=2)).isoformat(), today.year, today.month, 'Verificare 3D', 'Rulat detecție de coliziune; identificat interferență braț-motoreductor și corectat modelul', 'Realizare Cheie ⭐', 1),
+        (2, 'ASM-204', 'Rev A', (today - timedelta(days=3)).isoformat(), today.year, today.month, 'Desene 2D & BOM', 'Generat desenele de execuție pentru carcasele de tablă, cotare toleranțe și export fișiere DXF debitare', 'Finalizat', 0),
+        (4, 'GEAR-02', 'Rev A', (today - timedelta(days=4)).isoformat(), today.year, today.month, 'Simulare FEA', 'Calcul rezistență și simulare FEA torsiune arbore principal. Factor siguranță validat la 2.45', 'Finalizat', 0),
+        (3, 'TOOL-05', 'Rev C', (today - timedelta(days=6)).isoformat(), today.year, today.month, 'Asistență Atelier', 'Coborât în atelier pentru proba pe mașina CNC; probat prinderea piesei brute și validat prima piesă', 'Finalizat', 1),
+        (1, 'ASM-100', 'Rev B', (today - timedelta(days=7)).isoformat(), today.year, today.month, 'Modificare ECN', 'Adaptat cotele flanșei motorului conform noii specificații transmise de client', 'Modificare Client', 0),
+        (2, 'ASM-204', 'Rev A', (today - timedelta(days=9)).isoformat(), today.year, today.month, 'Modelare CAD 3D', 'Proiectat sistemul de balamale interioare și prinderi rapide pentru panourile de vizitare', 'În curs', 0),
+        (3, 'TOOL-05', 'Rev C', (today - timedelta(days=12)).isoformat(), today.year, today.month, 'Standardizare BOM', 'Standardizat șuruburile și plăcuțele de uzură din dispozitiv (reducere de la 18 repere la 5 repere)', 'Realizare Cheie ⭐', 1),
+        (1, 'ASM-100', 'Rev B', (today - timedelta(days=15)).isoformat(), today.year, today.month, 'Documentație', 'Întocmit caietul tehnic și fișa de montaj pentru linia de asamblare a transportorului', 'Finalizat', 0),
+        # Luna trecuta (Septembrie)
+        (3, 'TOOL-05', 'Rev B', (today - timedelta(days=22)).isoformat(), today.year, (today - timedelta(days=22)).month, 'Concept CAD', 'Definit conceptul cinematic de prindere rapidă pneumatică cu pârghie', 'Finalizat', 0),
+        (2, 'ASM-204', 'Rev A', (today - timedelta(days=26)).isoformat(), today.year, (today - timedelta(days=26)).month, 'Calcule Tablă', 'Calculat factorii K de îndoire pentru tabla de 2.0 mm oțel pe prisma R=4', 'Finalizat', 0),
+        (1, 'ASM-100', 'Rev A', (today - timedelta(days=32)).isoformat(), today.year, (today - timedelta(days=32)).month, 'Ședință Tehnică', 'Clarificat cerințele funcționale și viteza de transport cu echipa de automatizări', 'Finalizat', 0)
+    ]
+
+    c.executemany('''
+        INSERT INTO daily_logs (project_id, part_number, revision, date, year, month, activity_type, description, status_tag, is_highlight)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', logs)
+
+    # Achievements
     achievements = [
-        (1, (today - timedelta(days=10)).isoformat(), 'Detecție & Eliminare Coliziuni Cinematice 3D', 'Identificat interferență critică braț oscilant - motoreductor înainte de debitare laser. Prevenit rebutarea a 4 subansamble.', 18000.0, 'Eliminare Rebuturi & Calitate', 'Seful de producție: "Ne-ai salvat de 2 săptămâni de întârziere în atelier!"', 1),
-        (3, (today - timedelta(days=18)).isoformat(), 'Proiectare Dispozitiv Prindere Rapidă CNC', 'Redus timpul de montare și centrare a piesei brute de la 14 min la 3 min per ciclu (creștere productivitate atelier cu 300%).', 12500.0, 'Optimizare Producție & Timp', 'Maistrul atelierului a cerut standardizarea pe toate frezele CNC.', 1),
-        (4, (today - timedelta(days=7)).isoformat(), 'Optimizare Topologică & Calcul FEA Ax Transmisie', 'Redus masa arborelui cu 18% menținând factorul de siguranță peste 2.4. Economie oțel aliat și inerție redusă.', 6400.0, 'Calcul Tehnic & FEA', 'Validat de inginerul șef fără obiecții.', 1),
-        (2, (today - timedelta(days=14)).isoformat(), 'Standardizare Organe de Asamblare & BOM', 'Redus diversitatea de șuruburi și șaibe din ansamblul Sheet Metal de la 26 dimensiuni la 6 tipuri standardizate ISO.', 4200.0, 'Standardizare & Achiziții', 'Responsabil achiziții: "A scăzut considerabil stocul mort."', 1)
+        (1, (today - timedelta(days=2)).isoformat(), 'Detecție & Eliminare Coliziuni 3D Înainte de Fabricație', 'Identificat interferență critică braț oscilant - motoreductor înainte de debitare laser. Prevenit rebutarea a 4 subansamble.', 18000.0, 'Eliminare Rebuturi & Calitate', 'Seful de producție: "Ne-ai salvat de la 2 săptămâni de întârziere în atelier!"', 1),
+        (3, (today - timedelta(days=6)).isoformat(), 'Proiectare Dispozitiv Prindere Rapidă CNC', 'Redus timpul de montare și centrare a piesei brute de la 14 min la 3 min per ciclu (creștere productivitate atelier cu 300%).', 12500.0, 'Optimizare Producție & Timp', 'Maistrul atelierului a cerut standardizarea pe toate frezele CNC.', 1),
+        (4, (today - timedelta(days=4)).isoformat(), 'Optimizare Topologică & Calcul FEA Ax Transmisie', 'Redus masa arborelui cu 18% menținând factorul de siguranță peste 2.4. Economie oțel aliat și inerție redusă.', 6400.0, 'Calcul Tehnic & FEA', 'Validat de inginerul șef fără obiecții.', 1),
+        (3, (today - timedelta(days=12)).isoformat(), 'Standardizare Organe de Asamblare & BOM', 'Redus diversitatea de șuruburi și șaibe din ansamblul Sheet Metal de la 26 dimensiuni la 6 tipuri standardizate ISO.', 4200.0, 'Standardizare & Achiziții', 'Responsabil achiziții: "A scăzut considerabil stocul mort."', 1)
     ]
 
     c.executemany('''
@@ -185,47 +198,14 @@ def seed_mechanical_data(conn):
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ''', achievements)
 
-    # Scut de Apărare & Blocaje
+    # Blockers (Scut de Apărare)
     blockers = [
-        (1, (today - timedelta(days=12)).isoformat(), 'Modificare Specificații Motor de către Client', 'Modificare Cerințe Client', 'Clientul a schimbat furnizorul de motoare în fază finală (flanșă B14 în loc de B5 și ax diferit).', 'Am reproiectat suportul și cuplajul elastic în 24h, actualizat desenele 2D fără decalarea montajului general.', 16.0, 'Prevenit întârzierea livrării utilajului către client.' ),
-        (2, (today - timedelta(days=22)).isoformat(), 'Lipsă Model 3D Senzor de la Furnizor', 'Întârziere Furnizor', 'Furnizorul nu a trimis fișierele CAD STEP ale senzorilor la data convenită.', 'Am generat model preliminar din fișa PDF cu găuri oblongi de reglaj pe carcasă, permițând lansarea debitării tablei.', 8.0, 'Atelierul a debitat tabla fără pauze de producție.' ),
-        (3, (today - timedelta(days=30)).isoformat(), 'Rază Îndoire Neconformă în Atelier', 'Limitare Tehnologică Atelier', 'Abkant-ul nu avea prisma R=2 montată, fiind disponibilă doar R=4.', 'Am recalculat toleranțele de îndoire (K-Factor) pentru R=4 și am refăcut desenele 2D în aceeași zi.', 6.0, 'Evitat oprirea liniei de fabricație.' )
+        (1, (today - timedelta(days=7)).isoformat(), 'Modificare Specificații Motor de către Client', 'Modificare Cerințe Client', 'Clientul a schimbat furnizorul de motoare în fază finală (flanșă B14 în loc de B5 și ax diferit).', 'Am reproiectat suportul și cuplajul elastic în 24h, actualizat desenele 2D fără decalarea montajului general.', 2.0, 'Prevenit întârzierea livrării utilajului către client.' ),
+        (2, (today - timedelta(days=18)).isoformat(), 'Lipsă Model 3D Senzor de la Furnizor', 'Întârziere Furnizor', 'Furnizorul nu a trimis fișierele CAD STEP ale senzorilor la data convenită.', 'Am generat model preliminar din fișa PDF cu găuri oblongi de reglaj pe carcasă, permițând lansarea debitării tablei.', 1.0, 'Atelierul a debitat tabla fără pauze de producție.' ),
+        (3, (today - timedelta(days=28)).isoformat(), 'Rază Îndoire Neconformă în Atelier', 'Limitare Tehnologică Atelier', 'Abkant-ul nu avea prisma R=2 montată, fiind disponibilă doar R=4.', 'Am recalculat toleranțele de îndoire (K-Factor) pentru R=4 și am refăcut desenele 2D în aceeași zi.', 1.0, 'Evitat oprirea liniei de fabricație.' )
     ]
 
     c.executemany('''
-        INSERT INTO blockers (project_id, date, title, cause_type, description, solution_applied, time_lost_hours, prevented_risk)
+        INSERT INTO blockers (project_id, date, title, cause_type, description, solution_applied, time_lost_days, prevented_risk)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ''', blockers)
-
-    # Tasks / Kanban
-    tasks = [
-        (1, 'Modelare 3D ansamblu role conice și rulmenți', 'Concept 3D', 'done', (today - timedelta(days=5)).isoformat()),
-        (1, 'Verificare interferențe cinematice ansamblu general', 'Modelare 3D', 'done', (today - timedelta(days=3)).isoformat()),
-        (1, 'Generare desene de execuție 2D cu toleranțe H7/g6', 'Desene 2D & BOM', 'in_progress', (today + timedelta(days=3)).isoformat()),
-        (1, 'Extragere BOM complet (listă repere și piese standard)', 'Lansat Atelier', 'todo', (today + timedelta(days=6)).isoformat()),
-        (2, 'Verificare deschideri tablă (sheet metal flat pattern)', 'Desene 2D & BOM', 'done', (today - timedelta(days=2)).isoformat()),
-        (4, 'Rulare simulare FEA de eforturi von Mises pe flanșă', 'Simulare FEA', 'in_progress', (today + timedelta(days=5)).isoformat()),
-        (3, 'Asistență montaj prototip pe linia de asamblare', 'Prototip Validat', 'done', (today - timedelta(days=6)).isoformat())
-    ]
-
-    c.executemany('''
-        INSERT INTO tasks (project_id, title, stage, status, due_date)
-        VALUES (?, ?, ?, ?, ?)
-    ''', tasks)
-
-    # Time entries
-    time_samples = [
-        (1, 'ASM-100', 'Rev B', (today - timedelta(days=1)).isoformat(), 270, 'Modelare CAD 3D', 'Modelare ansamblu ghidaje laterale și suporți senzori', 0),
-        (1, 'ASM-100', 'Rev B', (today - timedelta(days=1)).isoformat(), 90, 'Ore Suplimentare', 'Corectat interferențe 3D urgente semnalate din atelier', 1),
-        (2, 'ASM-204', 'Rev A', (today - timedelta(days=2)).isoformat(), 300, 'Desene de Execuție 2D & BOM', 'Generat vederi, secțiuni și cote de execuție cu rugozități Ra 3.2', 0),
-        (4, 'GEAR-02', 'Rev A', (today - timedelta(days=3)).isoformat(), 240, 'Calcule & Simulări FEA', 'Condiții de frontieră, cuplu torsiune și generare mesh tetraedric', 0),
-        (3, 'TOOL-05', 'Rev C', (today - timedelta(days=4)).isoformat(), 180, 'Asistență Tehnică Atelier', 'Verificare prima piesă etalon pe mașina CMM de măsurat', 0),
-        (1, 'ASM-100', 'Rev B', (today - timedelta(days=5)).isoformat(), 240, 'Modelare CAD 3D', 'Configurații alternative pentru reglare pe lățime bandă', 0),
-        (2, 'ASM-204', 'Rev A', (today - timedelta(days=6)).isoformat(), 150, 'Modificări Proiectare (ECN)', 'Actualizat desene tablă în urma schimbării grosimii 2.0 -> 2.5 mm', 0),
-        (1, 'ASM-100', 'Rev B', (today - timedelta(days=7)).isoformat(), 120, 'Ore Suplimentare', 'Finalizat BOM urgent pt. lansare comenzi rulmenți la furnizor', 1)
-    ]
-
-    c.executemany('''
-        INSERT INTO time_entries (project_id, part_number, revision, date, duration_minutes, category, description, is_overtime)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', time_samples)
