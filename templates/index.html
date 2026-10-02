@@ -33,6 +33,22 @@
             background-color: #2563eb;
             color: white !important;
         }
+        .chip-act, .chip-mfg {
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+        .chip-act:hover, .chip-mfg:hover {
+            background-color: #1e293b;
+            color: #f8fafc;
+        }
+        .active-chip {
+            background-color: rgba(6, 182, 212, 0.2) !important;
+            border-color: rgba(6, 182, 212, 0.7) !important;
+            color: #22d3ee !important;
+            font-weight: 700 !important;
+        }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -129,7 +145,7 @@
                     <i class="fa-solid fa-cubes-stacked text-blue-400"></i> Ansambluri PDM
                 </button>
                 <button onclick="switchTab('brag')" id="nav-brag" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-trophy text-amber-400"></i> Dosar Mărire & ROI
+                    <i class="fa-solid fa-award text-amber-400"></i> Dosar Mărire & Realizări
                 </button>
                 <button onclick="switchTab('report')" id="nav-report" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
                     <i class="fa-solid fa-file-contract text-emerald-400"></i> Raport Evaluare
@@ -163,7 +179,7 @@
                                 <i class="fa-solid fa-file-csv text-emerald-400"></i> Export CSV
                             </a>
                             <button onclick="openNewDailyLogModal()" class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-600/30 transition">
-                                <i class="fa-solid fa-plus"></i> + Notează Ziua
+                                <i class="fa-solid fa-compass-drafting text-cyan-300"></i> + Notează Sarcină
                             </button>
                         </div>
                     </div>
@@ -215,7 +231,8 @@
                                     <th class="p-3 whitespace-nowrap">Data</th>
                                     <th class="p-3 whitespace-nowrap">Ansamblu / P/N</th>
                                     <th class="p-3">Ce am realizat / Livrabil (Apasă pt detalii)</th>
-                                    <th class="p-3 whitespace-nowrap">Etapă</th>
+                                    <th class="p-3 whitespace-nowrap">Disciplină</th>
+                                    <th class="p-3 whitespace-nowrap">Planșe / Piese</th>
                                     <th class="p-3 whitespace-nowrap">Stare</th>
                                     <th class="p-3 text-center whitespace-nowrap">Acțiuni & ⭐</th>
                                 </tr>
@@ -294,18 +311,18 @@
                         <div class="text-[10px] text-slate-400 mt-1">Pe <strong class="text-white" id="kpi-projects-count">0</strong> ansambluri PDM</div>
                     </div>
 
-                    <!-- Card 3: Valoare Economisită & ROI -->
+                    <!-- Card 3: Volum Desene & Planșe 2D -->
                     <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-emerald-500/30 rounded-2xl p-3.5 relative overflow-hidden shadow-xl">
                         <div class="flex items-center justify-between text-slate-400 mb-1">
-                            <span class="text-[10px] font-bold uppercase tracking-wider">Economii Generate</span>
-                            <i class="fa-solid fa-coins text-emerald-400 text-sm"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-wider">Planșe 2D & BOM</span>
+                            <i class="fa-solid fa-file-lines text-emerald-400 text-sm"></i>
                         </div>
-                        <div class="text-2xl font-black text-emerald-400 tracking-tight" id="kpi-total-savings">0 RON</div>
+                        <div class="text-2xl font-black text-emerald-400 tracking-tight" id="kpi-total-drawings">0 planșe</div>
                         <div class="text-[11px] text-emerald-300 font-semibold mt-1 flex items-center gap-1">
-                            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded font-bold text-[10px]" id="kpi-roi-multi">0x ROI</span>
-                            <span>față de mărire</span>
+                            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded font-bold text-[10px]">Validat Producție</span>
+                            <span>PDF & DXF lansate</span>
                         </div>
-                        <div class="text-[10px] text-slate-400 mt-1">Optimizări & rebuturi eliminate</div>
+                        <div class="text-[10px] text-slate-400 mt-1">Toleranțe ISO & cote funcționale</div>
                     </div>
 
                     <!-- Card 4: Scut Reziliență & Realizări -->
@@ -357,7 +374,7 @@
                     </div>
                 </div>
 
-                <!-- Charts Row 2: Efort Ansambluri PDM & Economii Cumulate -->
+                <!-- Charts Row 2: Efort Ansambluri PDM & Tehnologii de Fabricație -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <!-- Chart 3: Horizontal Bar Efort Ansambluri -->
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
@@ -373,17 +390,17 @@
                         </div>
                     </div>
 
-                    <!-- Chart 4: Glowing Area Chart Economii ROI -->
+                    <!-- Chart 4: Tehnologii de Fabricație -->
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
                         <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5 mb-3">
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                                <h3 class="text-xs font-bold text-white uppercase tracking-wider">Evoluție Economii Validate (ROI)</h3>
+                                <h3 class="text-xs font-bold text-white uppercase tracking-wider">Distribuție Tehnologii de Fabricație</h3>
                             </div>
-                            <span class="text-[10px] text-emerald-400 font-bold">Valoare financiară generată</span>
+                            <span class="text-[10px] text-emerald-400 font-bold">Tablă, CNC, Sudură, Profile</span>
                         </div>
-                        <div class="h-64 relative">
-                            <canvas id="chart-savings-area"></canvas>
+                        <div class="h-64 relative flex items-center justify-center">
+                            <canvas id="chart-mfg-donut"></canvas>
                         </div>
                     </div>
                 </div>
@@ -443,52 +460,55 @@
                 <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
             </section>
 
-            <!-- ================= TAB 4: DOSAR MĂRIRE & CALCULATOR ROI ================= -->
+            <!-- ================= TAB 4: DOSAR MĂRIRE & REALIZĂRI TEHNICE ================= -->
             <section id="tab-brag" class="hidden space-y-4">
-                <div class="bg-slate-900 border border-emerald-500/40 rounded-2xl p-4 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/20">
-                    <div class="flex items-center gap-2 mb-3 border-b border-slate-800 pb-2">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
-                            <i class="fa-solid fa-calculator"></i>
+                <div class="bg-slate-900 border border-amber-500/40 rounded-2xl p-4 bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/20 shadow-xl">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3 flex-wrap gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-base border border-amber-500/30">
+                                <i class="fa-solid fa-trophy"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-white">Sinteză Realizări Tehnice pentru Evaluare & Mărire</h3>
+                                <p class="text-[11px] text-slate-400">Livrabile validate, desene de execuție și zero riscuri de rebut</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-white">Calculator ROI & Justificare Financiară Mărire</h3>
-                            <p class="text-[10px] text-slate-400">Comparație matematică între mărirea cerută și economiile aduse</p>
+                        <button onclick="generateAIEvalSynthesis()" id="btn-ai-eval" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> ✨ Generează Puncte Tari cu AI
+                        </button>
+                    </div>
+
+                    <!-- Technical KPI Cards -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                            <div class="text-[10px] text-slate-400 font-semibold uppercase">Total Planșe 2D & BOM</div>
+                            <div class="text-xl font-black text-cyan-400 mt-0.5" id="brag-tot-drawings">0</div>
+                            <span class="text-[9px] text-slate-400">Lansate în producție</span>
+                        </div>
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                            <div class="text-[10px] text-slate-400 font-semibold uppercase">Zile Active Lucrate</div>
+                            <div class="text-xl font-black text-white mt-0.5" id="brag-active-days">0</div>
+                            <span class="text-[9px] text-slate-400">Consistență proiectare</span>
+                        </div>
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                            <div class="text-[10px] text-slate-400 font-semibold uppercase">Reușite Cheie ⭐</div>
+                            <div class="text-xl font-black text-amber-300 mt-0.5" id="brag-highlights">0</div>
+                            <span class="text-[9px] text-amber-400">Argumente majore</span>
+                        </div>
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                            <div class="text-[10px] text-slate-400 font-semibold uppercase">Blocaje Rezolvate</div>
+                            <div class="text-xl font-black text-rose-400 mt-0.5" id="brag-blockers">0</div>
+                            <span class="text-[9px] text-emerald-400">Soluții inginerești</span>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 text-xs">
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Salariul Tău Net Lunar (RON):</label>
-                            <input type="number" id="calc-current-salary" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold">
+                    <!-- AI Synthesis Result Area -->
+                    <div id="ai-eval-box" class="hidden mt-3.5 p-3.5 bg-slate-950 border border-amber-500/40 rounded-xl text-xs space-y-2">
+                        <div class="flex items-center justify-between text-amber-400 font-bold text-[11px]">
+                            <span class="flex items-center gap-1.5"><i class="fa-solid fa-robot"></i> Sinteză AI Copilot pentru Evaluarea Salarială:</span>
+                            <button onclick="document.getElementById('ai-eval-box').classList.add('hidden')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
                         </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Mărire Dorită (%):</label>
-                            <input type="number" id="calc-raise-pct" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-emerald-400 font-bold">
-                        </div>
-                        <div class="flex items-end">
-                            <button onclick="saveSalarySettings()" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
-                                Recalculează
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-800 text-center">
-                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                            <div class="text-[10px] text-slate-400">Total Economii Generate</div>
-                            <div class="text-base font-black text-emerald-400 mt-0.5" id="calc-total-savings">0 RON</div>
-                        </div>
-                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                            <div class="text-[10px] text-slate-400">Zile Active Lucrate</div>
-                            <div class="text-base font-black text-white mt-0.5" id="calc-active-days">0 zile</div>
-                        </div>
-                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                            <div class="text-[10px] text-blue-400">Cost Anual Mărire Cerută</div>
-                            <div class="text-base font-black text-blue-400 mt-0.5" id="calc-yearly-cost">0 RON/an</div>
-                        </div>
-                        <div class="bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/40">
-                            <div class="text-[10px] text-emerald-300 font-bold">Multiplicator ROI</div>
-                            <div class="text-base font-black text-emerald-400 mt-0.5" id="calc-roi-multiple">0x</div>
-                        </div>
+                        <div id="ai-eval-text" class="text-slate-200 leading-relaxed space-y-1.5"></div>
                     </div>
                 </div>
 
@@ -558,9 +578,9 @@
                             <div class="text-[10px] text-slate-500 font-bold uppercase">Zile Lucrate</div>
                             <div class="text-xl font-black text-slate-900 mt-0.5" id="rep-days-worked">0</div>
                         </div>
-                        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5">
-                            <div class="text-[10px] text-emerald-800 font-bold uppercase">Economii Generate</div>
-                            <div class="text-xl font-black text-emerald-700 mt-0.5" id="rep-savings">0 RON</div>
+                        <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-2.5">
+                            <div class="text-[10px] text-cyan-800 font-bold uppercase">Total Planșe 2D & BOM</div>
+                            <div class="text-xl font-black text-cyan-700 mt-0.5" id="rep-drawings-count">0</div>
                         </div>
                         <div class="bg-blue-50 border border-blue-200 rounded-xl p-2.5">
                             <div class="text-[10px] text-blue-800 font-bold uppercase">Activități Notate</div>
@@ -632,22 +652,36 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tip Activitate:</label>
-                        <select id="edit-modal-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                        <select id="edit-modal-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
                             <option value="Modelare CAD 3D">Modelare CAD 3D</option>
                             <option value="Desene 2D & BOM">Desene 2D & BOM</option>
                             <option value="Calcule & Cotare">Calcule Mecanice & Cotare</option>
                             <option value="Modificare ECN">Modificare ECN</option>
                             <option value="Asistență Atelier">Asistență Atelier</option>
                             <option value="Documentație Tehnică">Documentație Tehnică</option>
-                            <option value="Ședință Tehnică / Furnizori">Ședință Tehnică / Furnizori</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Stare / Progres:</label>
-                        <select id="edit-modal-status" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Planșe / Piese:</label>
+                        <input type="number" id="edit-modal-drawings-count" min="1" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white font-bold text-center focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tehnologie:</label>
+                        <select id="edit-modal-mfg" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                            <option value="Tablă Sheet Metal">Tablă Sheet Metal</option>
+                            <option value="Prelucrare CNC">Prelucrare CNC</option>
+                            <option value="Confecție Sudată">Confecție Sudată</option>
+                            <option value="Profile Aluminiu">Profile Aluminiu</option>
+                            <option value="Asamblare Mecanică">Asamblare Mecanică</option>
+                            <option value="Organe Asamblare ISO">Organe Asamblare ISO</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Stare:</label>
+                        <select id="edit-modal-status" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
                             <option value="Finalizat">Finalizat</option>
                             <option value="În curs">În curs</option>
                             <option value="Lansat Atelier">Lansat Atelier</option>
@@ -657,9 +691,25 @@
                     </div>
                 </div>
 
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Material:</label>
+                        <input type="text" id="edit-modal-material" placeholder="ex: Oțel S235, Inox 304, Al 6060" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Sursă Modificare ECN:</label>
+                        <input type="text" id="edit-modal-ecn-source" placeholder="ex: Modificare Client, Atelier..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                    </div>
+                </div>
+
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ce am realizat / Livrabil detaliat:</label>
-                    <textarea id="edit-modal-desc" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-cyan-500 leading-relaxed"></textarea>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase">Ce am realizat / Livrabil detaliat:</label>
+                        <button type="button" onclick="triggerAIEditSuggestion()" class="px-2 py-0.5 rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 font-bold text-[10px] flex items-center gap-1 transition">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> ✨ Îmbunătățește cu AI
+                        </button>
+                    </div>
+                    <textarea id="edit-modal-desc" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-cyan-500 leading-relaxed"></textarea>
                 </div>
 
                 <div class="flex items-center space-x-2 pt-1">
@@ -682,66 +732,207 @@
         </div>
     </div>
 
-    <!-- Modal: Notează Activitatea Zilei (Lejer) -->
-    <div id="modal-new-daily-log" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-blue-500/40 w-full max-w-md rounded-2xl p-5 space-y-3.5 shadow-2xl">
+    <!-- ================= MODAL: CONFIGURATOR SARCINI INGINEREȘTI ================= -->
+    <div id="modal-new-daily-log" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-cyan-500/50 w-full max-w-xl rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xl my-auto max-h-[95vh] overflow-y-auto">
+            <!-- Header -->
             <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-blue-400"></i> Înregistrare Activitate Zi
-                </h3>
-                <button onclick="closeModal('modal-new-daily-log')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center font-bold text-sm">
+                        <i class="fa-solid fa-compass-drafting"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+                            Configurator Sarcină Inginerească
+                        </h3>
+                        <p class="text-[10px] text-slate-400">Livrabile CAD 3D, desene 2D, BOM și asistență atelier</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('modal-new-daily-log')" class="text-slate-400 hover:text-white p-1 text-base"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="space-y-2.5 text-xs">
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block font-medium text-slate-300 mb-1">Data:</label>
-                        <input type="date" id="log-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+
+            <div class="space-y-3.5 text-xs">
+                <!-- SECȚIUNEA 1: IDENTIFICARE PDM & REPER -->
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <div class="text-[10px] font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-folder-tree"></i> 1. Identificare PDM & Reper
                     </div>
-                    <div>
-                        <label class="block font-medium text-slate-300 mb-1">Ansamblu / PDM:</label>
-                        <select id="log-project" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500"></select>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div>
+                            <div class="flex items-center justify-between mb-0.5">
+                                <label class="block text-[10px] font-semibold text-slate-400">Ansamblu PDM *:</label>
+                                <button type="button" onclick="closeModal('modal-new-daily-log'); openNewProjectModal();" class="text-[9px] text-blue-400 hover:text-blue-300 font-bold">+ Nou</button>
+                            </div>
+                            <select id="log-project" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white font-medium focus:outline-none focus:border-cyan-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Part Number / Reper:</label>
+                            <input type="text" id="log-part-number" placeholder="ex: ASM-001, BRK-05" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white font-mono focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Revizie:</label>
+                                <input type="text" id="log-revision" value="Rev A" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2 py-1.5 text-white font-mono text-center focus:outline-none focus:border-cyan-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Data:</label>
+                                <input type="date" id="log-date" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-1.5 py-1.5 text-white focus:outline-none focus:border-cyan-500 text-[11px]">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block font-medium text-slate-300 mb-1">Tip Activitate:</label>
-                        <select id="log-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
-                            <option value="Modelare CAD 3D">Modelare CAD 3D</option>
-                            <option value="Desene 2D & BOM">Desene 2D & BOM</option>
-                            <option value="Calcule & Cotare">Calcule Mecanice & Cotare</option>
-                            <option value="Modificare ECN">Modificare ECN (Client/Atelier)</option>
-                            <option value="Asistență Atelier">Asistență Atelier / Montaj</option>
-                            <option value="Documentație Tehnică">Documentație Tehnică</option>
-                            <option value="Ședință Tehnică / Furnizori">Ședință Tehnică / Furnizori</option>
-                        </select>
+                <!-- SECȚIUNEA 2: DISCIPLINĂ LIVRABIL & VOLUM -->
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="text-[10px] font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-shapes"></i> 2. Disciplină Livrabil & Volum
+                        </div>
+                        <span class="text-[10px] text-slate-400 font-medium">Selectează etapa</span>
                     </div>
-                    <div>
-                        <label class="block font-medium text-slate-300 mb-1">Stare / Progres:</label>
-                        <select id="log-status" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
-                            <option value="Finalizat">Finalizat</option>
-                            <option value="În curs">În curs</option>
-                            <option value="Lansat Atelier">Lansat Atelier</option>
-                            <option value="Realizare Cheie ⭐">Realizare Cheie ⭐</option>
-                            <option value="Modificare Client">Modificare Client</option>
-                        </select>
+
+                    <!-- Activity chips -->
+                    <input type="hidden" id="log-type" value="Modelare CAD 3D">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5" id="activity-chips-container">
+                        <button type="button" onclick="selectConfigActivity('Modelare CAD 3D')" class="chip-act active-chip px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
+                            <span>📐</span> Modelare 3D CAD
+                        </button>
+                        <button type="button" onclick="selectConfigActivity('Desene 2D & BOM')" class="chip-act px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
+                            <span>📋</span> Desene 2D & BOM
+                        </button>
+                        <button type="button" onclick="selectConfigActivity('Calcule & Cotare')" class="chip-act px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
+                            <span>⚙️</span> Calcule & Cotare
+                        </button>
+                        <button type="button" onclick="selectConfigActivity('Modificare ECN')" class="chip-act px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
+                            <span>🔄</span> Modificare ECN
+                        </button>
+                        <button type="button" onclick="selectConfigActivity('Asistență Atelier')" class="chip-act px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
+                            <span>🏭</span> Atelier / Montaj
+                        </button>
+                        <button type="button" onclick="selectConfigActivity('Documentație Tehnică')" class="chip-act px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
+                            <span>📁</span> Documentație PDM
+                        </button>
+                    </div>
+
+                    <!-- Volume Stepper Counter -->
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
+                        <span class="text-[11px] text-slate-300 font-medium">Volum Livrabil (Planșe 2D / Piese Modelate):</span>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="stepDrawingsCount(-1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center text-sm transition">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                            <input type="number" id="log-drawings-count" value="1" min="1" max="100" class="w-14 h-8 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-white text-xs focus:outline-none focus:border-cyan-500">
+                            <button type="button" onclick="stepDrawingsCount(1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center text-sm transition">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block font-medium text-slate-300 mb-1">Ce ai realizat / livrat concret *:</label>
-                    <textarea id="log-desc" rows="3" placeholder="ex: Finalizat ansamblul de role, verificat coliziuni cinematice și exportat desenele 2D pentru debitare..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500"></textarea>
+                <!-- SECȚIUNEA 3: TEHNOLOGIE DE FABRICAȚIE & MATERIAL -->
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-industry"></i> 3. Tehnologie de Fabricație & Material
+                    </div>
+
+                    <input type="hidden" id="log-mfg" value="Tablă Sheet Metal">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5" id="mfg-chips-container">
+                        <button type="button" onclick="selectConfigMfg('Tablă Sheet Metal')" class="chip-mfg active-chip px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
+                            <span>⚙️</span> Tablă (Laser/Abkant)
+                        </button>
+                        <button type="button" onclick="selectConfigMfg('Prelucrare CNC')" class="chip-mfg px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
+                            <span>🔩</span> Prelucrare CNC
+                        </button>
+                        <button type="button" onclick="selectConfigMfg('Confecție Sudată')" class="chip-mfg px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
+                            <span>⚡</span> Confecție Sudată
+                        </button>
+                        <button type="button" onclick="selectConfigMfg('Profile Aluminiu')" class="chip-mfg px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
+                            <span>🔲</span> Profile Aluminiu
+                        </button>
+                        <button type="button" onclick="selectConfigMfg('Asamblare Mecanică')" class="chip-mfg px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
+                            <span>🛠️</span> Asamblare Mecanică
+                        </button>
+                        <button type="button" onclick="selectConfigMfg('Organe Asamblare ISO')" class="chip-mfg px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
+                            <span>📦</span> Standarde / BOM
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Material Utilizat:</label>
+                            <select id="log-material" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white text-xs focus:outline-none focus:border-cyan-500">
+                                <option value="Oțel (S235 / S355)">Oțel (S235 / S355)</option>
+                                <option value="Inox (AISI 304 / 316)">Inox (AISI 304 / 316)</option>
+                                <option value="Aluminiu (EN AW-6060 / 6082)">Aluminiu (EN AW-6060 / 6082)</option>
+                                <option value="Plastic Tehnic (POM / PA6)">Plastic Tehnic (POM / PA6)</option>
+                                <option value="Organe Asamblare ISO 8.8 / 10.9">Organe Asamblare ISO 8.8 / 10.9</option>
+                                <option value="Alt Material">Alt Material / Mixt</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Sursă Modificare / ECN (dacă e cazul):</label>
+                            <select id="log-ecn-source" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white text-xs focus:outline-none focus:border-cyan-500">
+                                <option value="">Proiect Nou (Fără ECN)</option>
+                                <option value="Modificare Cerințe Client">Modificare Cerințe Client</option>
+                                <option value="Sesizare Atelier / Montaj">Sesizare Atelier / Montaj</option>
+                                <option value="Optimizare Proiectant (DFM)">Optimizare Proiectant (DFM)</option>
+                                <option value="Limitare Furnizor / Cotă Lipsă">Limitare Furnizor / Cotă Lipsă</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="flex items-center space-x-2 pt-1">
-                    <input type="checkbox" id="log-highlight" class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-800 focus:ring-0">
-                    <label for="log-highlight" class="font-bold text-amber-300">⭐ Evidențiază ca realizare importantă pentru mărire</label>
+                <!-- SECȚIUNEA 4: DESCRIERE LIVRABIL & ASISTENT AI GEMINI -->
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-pen-nib"></i> 4. Ce Ai Realizat / Livrabil Concret *
+                        </div>
+                        <button type="button" onclick="triggerAISuggestion()" id="btn-ai-polish" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-[10px] flex items-center gap-1 shadow-sm transition">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> ✨ Îmbunătățește cu AI
+                        </button>
+                    </div>
+
+                    <textarea id="log-desc" rows="3" placeholder="ex: Finalizat modelul 3D, verificat coliziuni cinematice și exportat planșele 2D..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-cyan-500 leading-relaxed text-xs"></textarea>
+
+                    <!-- Quick Snippets -->
+                    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 text-[10px]">
+                        <span class="text-slate-500 whitespace-nowrap">Inserare rapidă:</span>
+                        <button type="button" onclick="insertQuickSnippet('Verificat coliziuni cinematice 3D.')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap">+ Coliziuni 3D</button>
+                        <button type="button" onclick="insertQuickSnippet('Definit toleranțe ISO 2768-mK și ajustaje funcționale.')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap">+ Toleranțe ISO</button>
+                        <button type="button" onclick="insertQuickSnippet('Exportat pachet de fabricație PDF și fișiere DXF debitare.')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap">+ PDF & DXF</button>
+                        <button type="button" onclick="insertQuickSnippet('Sincronizat nomenclatorul BOM cu baza PDM.')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap">+ Sincronizat BOM</button>
+                    </div>
+                </div>
+
+                <!-- SECȚIUNEA 5: MARCAJ EVALUARE & STARE -->
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Stare Livrabil:</label>
+                            <select id="log-status" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white text-xs focus:outline-none focus:border-cyan-500">
+                                <option value="Finalizat">Finalizat</option>
+                                <option value="În curs">În curs</option>
+                                <option value="Lansat Atelier">Lansat în Atelier</option>
+                                <option value="Realizare Cheie ⭐">Realizare Tehnică Cheie ⭐</option>
+                                <option value="Modificare Client">Modificare Client</option>
+                            </select>
+                        </div>
+                        <div class="pt-2 sm:pt-4">
+                            <label class="flex items-center gap-2 cursor-pointer bg-slate-900 border border-amber-500/30 p-2 rounded-xl">
+                                <input type="checkbox" id="log-highlight" class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-700 focus:ring-0">
+                                <span class="font-bold text-amber-300 text-[11px]">⭐ Evidențiază pentru Mărire Salarială</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-                <button onclick="closeModal('modal-new-daily-log')" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Anulează</button>
-                <button onclick="submitNewDailyLog()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs">
-                    Salvează în Tabel
+
+            <!-- Footer Buttons -->
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <button type="button" onclick="closeModal('modal-new-daily-log')" class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Anulează</button>
+                <button type="button" onclick="submitNewDailyLog()" id="btn-save-log" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-floppy-disk"></i> Salvează în Jurnal
                 </button>
             </div>
         </div>
@@ -937,8 +1128,8 @@
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block font-medium text-emerald-400 mb-1">Economie Estimată (RON):</label>
-                        <input type="number" id="ach-savings" placeholder="ex: 15000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-emerald-400 font-bold focus:outline-none focus:border-emerald-500">
+                        <label class="block font-medium text-cyan-400 mb-1">Ore / Rebuturi Prevenite:</label>
+                        <input type="text" id="ach-savings" placeholder="ex: 20 ore / zero rebuturi montaj" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-cyan-300 font-bold focus:outline-none focus:border-cyan-500">
                     </div>
                     <div>
                         <label class="block font-medium text-slate-300 mb-1">Categorie:</label>
@@ -952,7 +1143,7 @@
                 </div>
                 <div>
                     <label class="block font-medium text-amber-300 mb-1">Rezultat Tehnic Cuantificabil *:</label>
-                    <textarea id="ach-impact" rows="2" placeholder="ex: Eliminat coliziune ax-flanșă, salvat piese de ~12.000 RON..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
+                    <textarea id="ach-impact" rows="2" placeholder="ex: Eliminat coliziune ax-flanșă, optimizat desfășuratele fără deformare..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
                 </div>
                 <div class="flex items-center space-x-2 pt-1">
                     <input type="checkbox" id="ach-highlight" checked class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-800 focus:ring-0">
@@ -965,6 +1156,67 @@
                     Salvează Realizarea
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- ================= FLOATING AI ENGINEERING COPILOT WIDGET ================= -->
+    <!-- Floating Trigger Button -->
+    <button id="btn-floating-ai" onclick="toggleAIChatDrawer()" class="fixed bottom-4 right-4 z-40 bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold p-3 sm:px-4 sm:py-2.5 rounded-full shadow-2xl flex items-center gap-2 border border-cyan-300/40 hover:scale-105 active:scale-95 transition group">
+        <div class="relative">
+            <i class="fa-solid fa-robot text-base sm:text-lg"></i>
+            <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-slate-900 animate-pulse"></span>
+        </div>
+        <span class="hidden sm:inline text-xs font-bold tracking-wide">AI Copilot</span>
+    </button>
+
+    <!-- Floating Chat Window / Drawer -->
+    <div id="ai-chat-drawer" class="fixed bottom-16 right-3 sm:right-6 w-[94vw] sm:w-[430px] max-w-[430px] h-[540px] max-h-[78vh] bg-slate-900/95 backdrop-blur-md border border-cyan-500/50 rounded-2xl shadow-2xl z-50 flex flex-col hidden overflow-hidden transition-all duration-300">
+        <!-- Drawer Header -->
+        <div class="p-3 bg-gradient-to-r from-slate-950 via-slate-900 to-cyan-950/60 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center font-bold text-sm">
+                    <i class="fa-solid fa-microchip"></i>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
+                        AI Copilot Inginerie Mecanică
+                        <span class="text-[9px] bg-emerald-950 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded-full font-mono">Gemini</span>
+                    </h4>
+                    <p class="text-[10px] text-slate-400">SolidWorks, DFM, ISO, toleranțe & evaluare</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-1">
+                <button onclick="clearAIChat()" class="text-slate-400 hover:text-white p-1 text-xs" title="Șterge istoricul"><i class="fa-solid fa-rotate-left"></i></button>
+                <button onclick="toggleAIChatDrawer()" class="text-slate-400 hover:text-white p-1 text-sm"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+
+        <!-- Quick Prompts Chips -->
+        <div class="p-2 border-b border-slate-800/80 bg-slate-950/60 flex items-center gap-1.5 overflow-x-auto no-scrollbar text-[10px]">
+            <button onclick="sendQuickPrompt('Ce toleranță ISO recomanzi pentru alezaj și arbore la un rulment (ajustaj intermediar vs cu strângere)?')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">📐 Toleranțe ISO</button>
+            <button onclick="sendQuickPrompt('Care sunt regulile de bază pentru factorul K și raza de îndoire la tablă de oțel 2mm și 3mm?')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">⚙️ K-Factor Tablă</button>
+            <button onclick="sendQuickPrompt('Cum pot sintetiza realizările mele tehnice și calitatea desenelor pentru cererea de mărire salarială?')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">⭐ Argumente Mărire</button>
+            <button onclick="sendQuickPrompt('Ce recomandări DFM ai pentru piese frezate CNC pentru a reduce timpul de prelucrare?')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">🔩 DFM CNC</button>
+        </div>
+
+        <!-- Chat Messages Thread -->
+        <div id="ai-chat-messages" class="flex-1 p-3 space-y-3 overflow-y-auto text-xs leading-relaxed">
+            <div class="flex items-start gap-2">
+                <div class="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 mt-0.5 text-xs">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="bg-slate-800 text-slate-200 p-2.5 rounded-2xl rounded-tl-none border border-slate-700/60 max-w-[90%] shadow-sm">
+                    Salut! Sunt Copilotul tău AI pentru proiectare mecanică. Te pot ajuta să formulezi sarcini inginerești, să verifici norme/toleranțe ISO, factorul K pentru tablă sau să sintetizezi realizările tehnice pentru evaluarea de mărire.
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-2 bg-slate-950 border-t border-slate-800 flex items-center gap-2">
+            <input type="text" id="ai-chat-input" onkeydown="if(event.key==='Enter') sendAIChatMessage()" placeholder="Întreabă AI Copilot sau cere sfat..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+            <button onclick="sendAIChatMessage()" id="btn-send-ai-chat" class="w-9 h-9 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white flex items-center justify-center transition shadow-md shadow-cyan-600/30 shrink-0">
+                <i class="fa-solid fa-paper-plane text-xs"></i>
+            </button>
         </div>
     </div>
 
@@ -1219,7 +1471,29 @@
                 // Render Table Body
                 const tbody = document.getElementById('daily-table-body');
                 if (!data.logs.length) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500 italic text-xs">Nicio activitate găsită pentru filtrul selectat. Apasă pe "+ Notează Ziua"!</td></tr>`;
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="p-8 text-center">
+                                <div class="max-w-md mx-auto space-y-3">
+                                    <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto text-xl shadow-lg">
+                                        <i class="fa-solid fa-compass-drafting"></i>
+                                    </div>
+                                    <h4 class="text-sm font-bold text-white">Nicio sarcină înregistrată încă</h4>
+                                    <p class="text-xs text-slate-400 leading-relaxed">
+                                        Baza de date este curată și gata pentru activitatea ta reală. Folosește configuratorul detaliat pentru a adăuga prima ta lucrare de proiectare!
+                                    </p>
+                                    <div class="flex items-center justify-center gap-2 pt-2">
+                                        <button onclick="openNewProjectModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs border border-slate-700 transition flex items-center gap-1.5">
+                                            <i class="fa-solid fa-plus text-blue-400"></i> + Ansamblu PDM
+                                        </button>
+                                        <button onclick="openNewDailyLogModal()" class="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/30 transition flex items-center gap-1.5">
+                                            <i class="fa-solid fa-pen-to-square"></i> + Notează Sarcină
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
                     return;
                 }
 
@@ -1239,9 +1513,17 @@
                             </td>
                             <td class="p-3 cursor-pointer" onclick="openDailyDetailModal(${log.id})">
                                 <div class="text-xs text-slate-200 font-medium leading-relaxed group-hover:text-cyan-300 transition">${log.description}</div>
+                                <div class="flex items-center gap-1.5 mt-1 text-[10px] text-slate-400 flex-wrap">
+                                    <span class="bg-slate-800/80 px-1.5 py-0.5 rounded text-cyan-300 font-medium"><i class="fa-solid fa-industry text-[9px]"></i> ${log.manufacturing_process || 'Tablă'}</span>
+                                    ${log.material ? `<span class="bg-slate-800/80 px-1.5 py-0.5 rounded text-slate-300">${log.material}</span>` : ''}
+                                    ${log.ecn_source ? `<span class="bg-rose-950/60 text-rose-300 border border-rose-500/20 px-1.5 py-0.5 rounded font-mono">ECN: ${log.ecn_source}</span>` : ''}
+                                </div>
                             </td>
                             <td class="p-3 whitespace-nowrap cursor-pointer" onclick="openDailyDetailModal(${log.id})">
                                 <span class="text-[11px] bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">${log.activity_type}</span>
+                            </td>
+                            <td class="p-3 whitespace-nowrap cursor-pointer text-center" onclick="openDailyDetailModal(${log.id})">
+                                <span class="font-mono font-bold text-white bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-xs">📄 ${log.drawings_count || 1}</span>
                             </td>
                             <td class="p-3 whitespace-nowrap cursor-pointer" onclick="openDailyDetailModal(${log.id})">
                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBg}">${log.status_tag}</span>
@@ -1268,6 +1550,116 @@
             }
         }
 
+        // ================= CONFIGURATOR SARCINI LOGIC =================
+        function selectConfigActivity(type) {
+            document.getElementById('log-type').value = type;
+            const container = document.getElementById('activity-chips-container');
+            if (container) {
+                container.querySelectorAll('button').forEach(btn => {
+                    if (btn.innerText.includes(type.split(' ')[0])) {
+                        btn.classList.add('active-chip');
+                    } else {
+                        btn.classList.remove('active-chip');
+                    }
+                });
+            }
+        }
+
+        function selectConfigMfg(proc) {
+            document.getElementById('log-mfg').value = proc;
+            const container = document.getElementById('mfg-chips-container');
+            if (container) {
+                container.querySelectorAll('button').forEach(btn => {
+                    if (btn.innerText.includes(proc.split(' ')[0])) {
+                        btn.classList.add('active-chip');
+                    } else {
+                        btn.classList.remove('active-chip');
+                    }
+                });
+            }
+        }
+
+        function stepDrawingsCount(delta) {
+            const input = document.getElementById('log-drawings-count');
+            let val = parseInt(input.value, 10) || 1;
+            val = Math.max(1, Math.min(100, val + delta));
+            input.value = val;
+        }
+
+        function insertQuickSnippet(text) {
+            const area = document.getElementById('log-desc');
+            if (area.value.trim().length > 0) {
+                area.value = area.value.trim() + ' ' + text;
+            } else {
+                area.value = text;
+            }
+            area.focus();
+        }
+
+        async function triggerAISuggestion() {
+            const btn = document.getElementById('btn-ai-polish');
+            const descArea = document.getElementById('log-desc');
+            const originalText = descArea.value.trim();
+            const actType = document.getElementById('log-type').value;
+            const pn = document.getElementById('log-part-number').value.trim() || 'ASM-001';
+            const mfg = document.getElementById('log-mfg').value;
+
+            btn.disabled = true;
+            const originalBtnHtml = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Se optimizează...`;
+
+            try {
+                const res = await fetch('/api/ai/suggest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        raw_text: originalText,
+                        activity_type: actType,
+                        part_number: pn,
+                        manufacturing_process: mfg
+                    })
+                });
+                const data = await res.json();
+                if (data.refined) {
+                    descArea.value = data.refined;
+                    showToast('Descriere optimizată profesional de AI Copilot!');
+                }
+            } catch (err) {
+                showToast('Eroare AI Copilot', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+            }
+        }
+
+        async function triggerAIEditSuggestion() {
+            const descArea = document.getElementById('edit-modal-desc');
+            const originalText = descArea.value.trim();
+            const actType = document.getElementById('edit-modal-type').value;
+            const pn = document.getElementById('view-modal-pn').innerText || 'ASM-001';
+            const mfg = document.getElementById('edit-modal-mfg').value;
+
+            try {
+                const res = await fetch('/api/ai/suggest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        raw_text: originalText,
+                        activity_type: actType,
+                        part_number: pn,
+                        manufacturing_process: mfg
+                    })
+                });
+                const data = await res.json();
+                if (data.refined) {
+                    descArea.value = data.refined;
+                    showToast('Descriere optimizată cu AI Copilot!');
+                }
+            } catch (err) {
+                showToast('Eroare AI Copilot', true);
+            }
+        }
+
         async function submitNewDailyLog() {
             const desc = document.getElementById('log-desc').value.trim();
             if (!desc) return showToast('Completează ce ai realizat!', true);
@@ -1275,7 +1667,13 @@
             const payload = {
                 date: document.getElementById('log-date').value,
                 project_id: document.getElementById('log-project').value,
+                part_number: document.getElementById('log-part-number').value.trim(),
+                revision: document.getElementById('log-revision').value.trim(),
                 activity_type: document.getElementById('log-type').value,
+                drawings_count: parseInt(document.getElementById('log-drawings-count').value, 10) || 1,
+                manufacturing_process: document.getElementById('log-mfg').value,
+                material: document.getElementById('log-material').value,
+                ecn_source: document.getElementById('log-ecn-source').value,
                 status_tag: document.getElementById('log-status').value,
                 description: desc,
                 is_highlight: document.getElementById('log-highlight').checked
@@ -1292,8 +1690,11 @@
                     document.getElementById('log-desc').value = '';
                     showToast('Activitate înregistrată în jurnal!');
                     loadDailyLogs();
-                    loadSalaryCalculator();
-                    if (currentTab === 'analytics') loadAnalyticsData();
+                    loadAnalyticsData();
+                    if (currentTab === 'brag') loadAchievements();
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    showToast(errData.error || 'Eroare la salvare', true);
                 }
             } catch (err) { showToast('Eroare la salvare', true); }
         }
@@ -1304,6 +1705,7 @@
                 if (res.ok) {
                     loadDailyLogs();
                     if (currentTab === 'analytics') loadAnalyticsData();
+                    if (currentTab === 'brag') loadAchievements();
                 }
             } catch (err) { console.error(err); }
         }
@@ -1316,6 +1718,7 @@
                     showToast('Înregistrare ștearsă');
                     loadDailyLogs();
                     if (currentTab === 'analytics') loadAnalyticsData();
+                    if (currentTab === 'brag') loadAchievements();
                 }
             } catch (err) { console.error(err); }
         }
@@ -1336,6 +1739,10 @@
                 document.getElementById('view-modal-project').innerText = `${log.project_name || 'General'} (${log.cad_software || 'CAD'})`;
 
                 document.getElementById('edit-modal-type').value = log.activity_type || 'Modelare CAD 3D';
+                document.getElementById('edit-modal-drawings-count').value = log.drawings_count || 1;
+                document.getElementById('edit-modal-mfg').value = log.manufacturing_process || 'Tablă Sheet Metal';
+                document.getElementById('edit-modal-material').value = log.material || 'Oțel';
+                document.getElementById('edit-modal-ecn-source').value = log.ecn_source || '';
                 document.getElementById('edit-modal-status').value = log.status_tag || 'Finalizat';
                 document.getElementById('edit-modal-desc').value = log.description || '';
                 document.getElementById('edit-modal-highlight').checked = Boolean(log.is_highlight);
@@ -1353,6 +1760,10 @@
 
             const payload = {
                 activity_type: document.getElementById('edit-modal-type').value,
+                drawings_count: parseInt(document.getElementById('edit-modal-drawings-count').value, 10) || 1,
+                manufacturing_process: document.getElementById('edit-modal-mfg').value,
+                material: document.getElementById('edit-modal-material').value,
+                ecn_source: document.getElementById('edit-modal-ecn-source').value,
                 status_tag: document.getElementById('edit-modal-status').value,
                 description: desc,
                 is_highlight: document.getElementById('edit-modal-highlight').checked
@@ -1369,6 +1780,7 @@
                     showToast('Modificări salvate cu succes!');
                     loadDailyLogs();
                     if (currentTab === 'analytics') loadAnalyticsData();
+                    if (currentTab === 'brag') loadAchievements();
                 } else {
                     showToast('Eroare la salvare', true);
                 }
@@ -1387,6 +1799,7 @@
                     showToast('Înregistrare ștearsă');
                     loadDailyLogs();
                     if (currentTab === 'analytics') loadAnalyticsData();
+                    if (currentTab === 'brag') loadAchievements();
                 }
             } catch (err) { console.error(err); }
         }
@@ -1414,8 +1827,9 @@
                 document.getElementById('kpi-active-days').innerText = k.total_active_days;
                 document.getElementById('kpi-deliverables-count').innerText = `${k.total_deliverables} activități livrate`;
                 document.getElementById('kpi-projects-count').innerText = k.total_projects;
-                document.getElementById('kpi-total-savings').innerText = `${Number(k.total_savings).toLocaleString()} ${k.currency}`;
-                document.getElementById('kpi-roi-multi').innerText = `${k.roi_multiple}x ROI`;
+                if (document.getElementById('kpi-total-drawings')) {
+                    document.getElementById('kpi-total-drawings').innerText = `${k.total_drawings || 0} planșe`;
+                }
                 document.getElementById('kpi-highlights-count').innerText = `${k.total_highlights} ⭐`;
                 document.getElementById('kpi-blockers-count').innerText = `${k.total_blockers} blocaje`;
                 document.getElementById('kpi-blocker-impact').innerText = `${k.total_blocker_days} zile impact soluționate`;
@@ -1534,48 +1948,27 @@
                     });
                 }
 
-                // 4. Chart: Cumulative ROI Savings Area Chart
-                destroyChart('chart-savings-area');
-                const ctxSavings = document.getElementById('chart-savings-area')?.getContext('2d');
-                if (ctxSavings && data.savings_entries && data.savings_entries.length) {
-                    let runningTotal = 0;
-                    const cumLabels = [];
-                    const cumData = [];
-                    data.savings_entries.forEach(e => {
-                        runningTotal += e.money_saved_est;
-                        cumLabels.push(e.date);
-                        cumData.push(runningTotal);
-                    });
-
-                    chartInstances['chart-savings-area'] = new Chart(ctxSavings, {
-                        type: 'line',
+                // 4. Chart: Manufacturing Process Breakdown (Doughnut)
+                destroyChart('chart-mfg-donut');
+                const ctxMfg = document.getElementById('chart-mfg-donut')?.getContext('2d');
+                if (ctxMfg && data.mfg_breakdown && data.mfg_breakdown.length) {
+                    chartInstances['chart-mfg-donut'] = new Chart(ctxMfg, {
+                        type: 'doughnut',
                         data: {
-                            labels: cumLabels,
+                            labels: data.mfg_breakdown.map(m => m.manufacturing_process),
                             datasets: [{
-                                label: 'Total Economii Validate (RON)',
-                                data: cumData,
-                                borderColor: '#10b981',
-                                backgroundColor: 'rgba(16, 185, 129, 0.15)',
-                                fill: true,
-                                tension: 0.35,
-                                borderWidth: 2.5,
-                                pointBackgroundColor: '#10b981',
-                                pointRadius: 4
+                                data: data.mfg_breakdown.map(m => m.count),
+                                backgroundColor: ['#10b981', '#06b6d4', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899'],
+                                borderWidth: 2,
+                                borderColor: '#0f172a'
                             }]
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
+                            cutout: '60%',
                             plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    callbacks: {
-                                        label: (c) => `+${Number(c.raw).toLocaleString()} RON economisiți`
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: { beginAtZero: true }
+                                legend: { position: 'bottom', labels: { boxWidth: 10, padding: 6, font: { size: 10 } } }
                             }
                         }
                     });
@@ -1798,41 +2191,53 @@
             openNewDailyLogModal();
         }
 
-        // ================= CALCULATOR SALARIU & MĂRIRE =================
-        async function loadSalaryCalculator() {
+        // ================= DOSAR MĂRIRE & REALIZĂRI TEHNICE =================
+        async function updateBragScorecards() {
             try {
-                const res = await fetch('/api/salary-calculator');
-                if (res.status === 401) return;
+                const res = await fetch('/api/analytics?period=all');
+                if (!res.ok) return;
                 const data = await res.json();
-
-                document.getElementById('calc-current-salary').value = data.current_net_salary;
-                document.getElementById('calc-raise-pct').value = data.target_raise_pct;
-                document.getElementById('calc-total-savings').innerText = `${Number(data.total_savings).toLocaleString()} ${data.currency}`;
-                document.getElementById('calc-active-days').innerText = `${data.active_days} zile`;
-                document.getElementById('calc-yearly-cost').innerText = `+${Number(data.requested_raise_yearly).toLocaleString()} ${data.currency}`;
-                document.getElementById('calc-roi-multiple').innerText = `${data.roi_multiple}x`;
+                const k = data.kpis;
+                if (document.getElementById('brag-tot-drawings')) document.getElementById('brag-tot-drawings').innerText = k.total_drawings || 0;
+                if (document.getElementById('brag-active-days')) document.getElementById('brag-active-days').innerText = k.total_active_days || 0;
+                if (document.getElementById('brag-highlights')) document.getElementById('brag-highlights').innerText = k.total_highlights || 0;
+                if (document.getElementById('brag-blockers')) document.getElementById('brag-blockers').innerText = k.total_blockers || 0;
             } catch (err) { console.error(err); }
         }
 
-        async function saveSalarySettings() {
-            const current_net_salary = document.getElementById('calc-current-salary').value;
-            const target_raise_pct = document.getElementById('calc-raise-pct').value;
+        async function generateAIEvalSynthesis() {
+            const btn = document.getElementById('btn-ai-eval');
+            const box = document.getElementById('ai-eval-box');
+            const textEl = document.getElementById('ai-eval-text');
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Se generează...`;
 
             try {
-                const res = await fetch('/api/salary-calculator', {
+                const res = await fetch('/api/ai/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ current_net_salary, target_raise_pct })
+                    body: JSON.stringify({
+                        message: "Sintetizează un rezumat concis (3-4 puncte cheie) cu argumente tehnice forte pentru discuția mea anuală de evaluare și mărire salarială ca Inginer Proiectant Mecanic, bazat pe volumul de desene 2D lansate în producție, toleranțe ISO verificate, lipsa de rebuturi în atelier și viteza de soluționare a modificărilor ECN.",
+                        history: []
+                    })
                 });
-                if (res.ok) {
-                    showToast('Calcule ROI actualizate!');
-                    loadSalaryCalculator();
+                const data = await res.json();
+                if (data.reply) {
+                    textEl.innerHTML = formatAIMarkdown(data.reply);
+                    box.classList.remove('hidden');
                 }
-            } catch (err) { showToast('Eroare la recalculare', true); }
+            } catch (err) {
+                showToast('Eroare la generare sinteză', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> ✨ Generează Puncte Tari cu AI`;
+            }
         }
 
         // ================= REALIZĂRI =================
         async function loadAchievements() {
+            updateBragScorecards();
             try {
                 const res = await fetch('/api/achievements');
                 if (res.status === 401) return;
@@ -1840,7 +2245,7 @@
                 const container = document.getElementById('achievements-list');
 
                 if (!list.length) {
-                    container.innerHTML = `<div class="bg-slate-900 border border-slate-800 rounded-xl p-6 text-center text-xs text-slate-500">Nicio realizare înregistrată.</div>`;
+                    container.innerHTML = `<div class="bg-slate-900 border border-slate-800 rounded-xl p-6 text-center text-xs text-slate-500">Nicio realizare înregistrată încă. Apasă pe "+ Înregistrează Realizare" pentru a nota un reper sau o optimizare cheie!</div>`;
                     return;
                 }
 
@@ -1852,7 +2257,7 @@
                                     <span class="text-[10px] uppercase font-bold tracking-wider bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">${a.category}</span>
                                     <span class="text-xs font-semibold text-blue-400 font-mono">[${a.part_number || 'P/N'} ${a.revision || ''}] ${a.project_name || ''}</span>
                                     <span class="text-xs text-slate-500">• ${a.date}</span>
-                                    ${a.money_saved_est > 0 ? `<span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded-full font-bold border border-emerald-500/40">+${Number(a.money_saved_est).toLocaleString()} RON salvați</span>` : ''}
+                                    ${a.money_saved_est ? `<span class="text-[10px] bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded-full font-bold border border-cyan-500/40">${a.money_saved_est}</span>` : ''}
                                 </div>
                                 <h3 class="text-sm font-bold text-white">${a.title}</h3>
                             </div>
@@ -1862,7 +2267,7 @@
                         </div>
 
                         <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs">
-                            <div class="text-[10px] uppercase font-bold text-amber-400 mb-0.5">Impact Cuantificabil & Valoare Adusă:</div>
+                            <div class="text-[10px] uppercase font-bold text-amber-400 mb-0.5">Impact Cuantificabil & Valoare Tehnică:</div>
                             <p class="text-slate-200 font-medium leading-relaxed">${a.impact_value}</p>
                         </div>
 
@@ -1909,7 +2314,6 @@
                     closeModal('modal-new-achievement');
                     showToast('Realizare salvată!');
                     loadAchievements();
-                    loadSalaryCalculator();
                 }
             } catch (err) { showToast('Eroare la salvare', true); }
         }
@@ -1929,7 +2333,9 @@
 
                 document.getElementById('rep-days-worked').innerText = data.overview.active_days || '0';
                 document.getElementById('rep-total-actions').innerText = data.overview.total_actions || '0';
-                document.getElementById('rep-savings').innerText = `${Number(data.period_savings || 0).toLocaleString()} RON`;
+                if (document.getElementById('rep-drawings-count')) {
+                    document.getElementById('rep-drawings-count').innerText = data.overview.total_drawings || '0';
+                }
 
                 // Blockers in report
                 const blkContainer = document.getElementById('rep-blockers-list');
@@ -1957,7 +2363,7 @@
                             <div class="flex items-center justify-between mb-1">
                                 <h4 class="font-bold text-slate-900">[${a.part_number || 'P/N'}] ${i+1}. ${a.title}</h4>
                                 <div class="flex items-center gap-1">
-                                    ${a.money_saved_est > 0 ? `<span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">+${Number(a.money_saved_est).toLocaleString()} RON</span>` : ''}
+                                    ${a.money_saved_est ? `<span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">${escapeHtml(a.money_saved_est)}</span>` : ''}
                                     <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded">${a.category}</span>
                                 </div>
                             </div>
@@ -2012,6 +2418,175 @@
 
         function installPWA() {
             alert('Pentru a instala aplicația pe ecranul telefonului:\n1. Apasă pe cele 3 puncte ⋮ din colțul Chrome.\n2. Alege "Instalează aplicația" sau "Adaugă pe ecran".');
+        }
+
+        // ================= AI COPILOT CHAT WIDGET =================
+        let aiChatHistory = [];
+
+        function toggleAIChatDrawer() {
+            const drawer = document.getElementById('ai-chat-drawer');
+            if (!drawer) return;
+            const isHidden = drawer.classList.contains('hidden');
+            if (isHidden) {
+                drawer.classList.remove('hidden');
+                setTimeout(() => {
+                    const input = document.getElementById('ai-chat-input');
+                    if (input) input.focus();
+                }, 100);
+            } else {
+                drawer.classList.add('hidden');
+            }
+        }
+
+        function clearAIChat() {
+            aiChatHistory = [];
+            const msgBox = document.getElementById('ai-chat-messages');
+            if (msgBox) {
+                msgBox.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <div class="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 mt-0.5 text-xs">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div class="bg-slate-800 text-slate-200 p-2.5 rounded-2xl rounded-tl-none border border-slate-700/60 max-w-[90%] shadow-sm">
+                            Istoricul a fost șters. Cu ce te pot asista astăzi în proiectare mecanică sau optimizări?
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function sendQuickPrompt(promptText) {
+            const input = document.getElementById('ai-chat-input');
+            if (input) {
+                input.value = promptText;
+                sendAIChatMessage();
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function formatAIMarkdown(text) {
+            if (!text) return '';
+            let html = escapeHtml(text);
+            // Bold
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>');
+            // Inline code
+            html = html.replace(/`([^`]+)`/g, '<code class="px-1 py-0.5 rounded bg-slate-900 text-cyan-300 font-mono text-[11px]">$1</code>');
+            // Headings ###
+            html = html.replace(/^###\s*(.*$)/gim, '<h4 class="font-bold text-cyan-300 text-xs mt-2 mb-1">$1</h4>');
+            html = html.replace(/^##\s*(.*$)/gim, '<h3 class="font-bold text-white text-sm mt-2.5 mb-1">$1</h3>');
+            // Bullet points
+            html = html.replace(/^\s*[\-\*]\s+(.*$)/gim, '<div class="flex items-start gap-1.5 ml-1 my-0.5"><span class="text-cyan-400 mt-1">•</span><span>$1</span></div>');
+            // Numbered lists
+            html = html.replace(/^\s*(\d+)\.\s+(.*$)/gim, '<div class="flex items-start gap-1.5 ml-1 my-0.5"><span class="text-amber-400 font-bold">$1.</span><span>$2</span></div>');
+            // Line breaks
+            html = html.replace(/\n\n/g, '<br class="my-1.5" />');
+            html = html.replace(/\n/g, '<br />');
+            return html;
+        }
+
+        async function sendAIChatMessage() {
+            const input = document.getElementById('ai-chat-input');
+            const msgBox = document.getElementById('ai-chat-messages');
+            const sendBtn = document.getElementById('btn-send-ai-chat');
+            if (!input || !msgBox) return;
+
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Append user message
+            const userMsgHtml = `
+                <div class="flex items-start justify-end gap-2">
+                    <div class="bg-cyan-600 text-white p-2.5 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm text-xs break-words">
+                        ${escapeHtml(message)}
+                    </div>
+                    <div class="w-6 h-6 rounded-lg bg-cyan-600 text-white flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
+                        Tu
+                    </div>
+                </div>
+            `;
+            msgBox.insertAdjacentHTML('beforeend', userMsgHtml);
+            input.value = '';
+            msgBox.scrollTop = msgBox.scrollHeight;
+
+            // Append loading indicator
+            const loadingId = 'ai-loading-' + Date.now();
+            const loadingHtml = `
+                <div id="${loadingId}" class="flex items-start gap-2">
+                    <div class="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 mt-0.5 text-xs">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="bg-slate-800 text-slate-300 p-2.5 rounded-2xl rounded-tl-none border border-slate-700/60 text-xs flex items-center gap-2">
+                        <i class="fa-solid fa-circle-notch fa-spin text-cyan-400"></i> Se analizează cerința tehnică...
+                    </div>
+                </div>
+            `;
+            msgBox.insertAdjacentHTML('beforeend', loadingHtml);
+            msgBox.scrollTop = msgBox.scrollHeight;
+
+            if (sendBtn) sendBtn.disabled = true;
+
+            try {
+                const res = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message, history: aiChatHistory })
+                });
+
+                const loader = document.getElementById(loadingId);
+                if (loader) loader.remove();
+
+                if (!res.ok) {
+                    throw new Error('Eroare de răspuns de la server');
+                }
+
+                const data = await res.json();
+                const reply = data.reply || 'Nu am putut genera un răspuns tehnic în acest moment.';
+
+                // Store in history
+                aiChatHistory.push({ role: 'user', content: message });
+                aiChatHistory.push({ role: 'assistant', content: reply });
+                if (aiChatHistory.length > 20) aiChatHistory = aiChatHistory.slice(-20);
+
+                const aiMsgHtml = `
+                    <div class="flex items-start gap-2">
+                        <div class="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 mt-0.5 text-xs">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div class="bg-slate-800 text-slate-100 p-2.5 rounded-2xl rounded-tl-none border border-slate-700/60 max-w-[90%] shadow-sm text-xs leading-relaxed space-y-1">
+                            ${formatAIMarkdown(reply)}
+                        </div>
+                    </div>
+                `;
+                msgBox.insertAdjacentHTML('beforeend', aiMsgHtml);
+                msgBox.scrollTop = msgBox.scrollHeight;
+            } catch (err) {
+                const loader = document.getElementById(loadingId);
+                if (loader) loader.remove();
+
+                const errorHtml = `
+                    <div class="flex items-start gap-2">
+                        <div class="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 mt-0.5 text-xs">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div class="bg-slate-800 text-rose-300 p-2.5 rounded-2xl rounded-tl-none border border-rose-500/30 text-xs">
+                            A apărut o problemă de comunicare cu AI Copilot. Verifică conexiunea sau serverul.
+                        </div>
+                    </div>
+                `;
+                msgBox.insertAdjacentHTML('beforeend', errorHtml);
+                msgBox.scrollTop = msgBox.scrollHeight;
+            } finally {
+                if (sendBtn) sendBtn.disabled = false;
+            }
         }
     </script>
 </body>

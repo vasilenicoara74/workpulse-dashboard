@@ -48,14 +48,30 @@ def init_db(force_reseed=False):
             date TEXT NOT NULL,
             year INTEGER NOT NULL,
             month INTEGER NOT NULL,
-            activity_type TEXT DEFAULT 'Proiectare CAD 3D',
+            activity_type TEXT DEFAULT 'Modelare CAD 3D',
             description TEXT NOT NULL,
             status_tag TEXT DEFAULT 'Finalizat',
             is_highlight INTEGER DEFAULT 0,
+            drawings_count INTEGER DEFAULT 1,
+            manufacturing_process TEXT DEFAULT 'Tablă Sheet Metal',
+            material TEXT DEFAULT 'Oțel',
+            ecn_source TEXT DEFAULT '',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE SET NULL
         )
     ''')
+
+    # Migration check for existing tables
+    c.execute("PRAGMA table_info(daily_logs)")
+    cols = [r['name'] for r in c.fetchall()]
+    if 'drawings_count' not in cols:
+        c.execute("ALTER TABLE daily_logs ADD COLUMN drawings_count INTEGER DEFAULT 1")
+    if 'manufacturing_process' not in cols:
+        c.execute("ALTER TABLE daily_logs ADD COLUMN manufacturing_process TEXT DEFAULT 'Tablă Sheet Metal'")
+    if 'material' not in cols:
+        c.execute("ALTER TABLE daily_logs ADD COLUMN material TEXT DEFAULT 'Oțel'")
+    if 'ecn_source' not in cols:
+        c.execute("ALTER TABLE daily_logs ADD COLUMN ecn_source TEXT DEFAULT ''")
 
     # Projects / Assemblies
     c.execute('''
@@ -133,9 +149,8 @@ def init_db(force_reseed=False):
         VALUES (1, 6500, 20, 'RON')
     ''')
 
-    # Check if daily_logs has data
-    c.execute('SELECT COUNT(*) as cnt FROM daily_logs')
-    if c.fetchone()['cnt'] == 0 or force_reseed:
+    # Seed data only on explicit forced reseed
+    if force_reseed:
         seed_data(conn)
 
     conn.commit()
