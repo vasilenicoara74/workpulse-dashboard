@@ -190,7 +190,7 @@
                         <button onclick="setActivityFilter('all')" id="filt-all" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white font-bold whitespace-nowrap transition">Toate</button>
                         <button onclick="setActivityFilter('Modelare CAD 3D')" id="filt-cad" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">📐 CAD 3D</button>
                         <button onclick="setActivityFilter('Desene 2D & BOM')" id="filt-2d" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">📋 2D & BOM</button>
-                        <button onclick="setActivityFilter('Calcule & Simulare FEA')" id="filt-fea" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">⚙️ Simulare FEA</button>
+                        <button onclick="setActivityFilter('Calcule & Cotare')" id="filt-calc" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">⚙️ Calcule & Cotare</button>
                         <button onclick="setActivityFilter('Modificare ECN')" id="filt-ecn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">🔄 Modificări ECN</button>
                         <button onclick="setActivityFilter('Asistență Atelier')" id="filt-shop" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">🏭 Atelier / Montaj</button>
                         <button onclick="toggleHighlightFilter()" id="filt-star" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-amber-950/80 text-amber-400 border border-slate-700 whitespace-nowrap transition flex items-center gap-1">⭐ Doar Reușite Mărire</button>
@@ -638,7 +638,7 @@
                         <select id="edit-modal-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
                             <option value="Modelare CAD 3D">Modelare CAD 3D</option>
                             <option value="Desene 2D & BOM">Desene 2D & BOM</option>
-                            <option value="Calcule & Simulare FEA">Calcule & Simulare FEA</option>
+                            <option value="Calcule & Cotare">Calcule Mecanice & Cotare</option>
                             <option value="Modificare ECN">Modificare ECN</option>
                             <option value="Asistență Atelier">Asistență Atelier</option>
                             <option value="Documentație Tehnică">Documentație Tehnică</option>
@@ -709,7 +709,7 @@
                         <select id="log-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                             <option value="Modelare CAD 3D">Modelare CAD 3D</option>
                             <option value="Desene 2D & BOM">Desene 2D & BOM</option>
-                            <option value="Calcule & Simulare FEA">Calcule & Simulare FEA</option>
+                            <option value="Calcule & Cotare">Calcule Mecanice & Cotare</option>
                             <option value="Modificare ECN">Modificare ECN (Client/Atelier)</option>
                             <option value="Asistență Atelier">Asistență Atelier / Montaj</option>
                             <option value="Documentație Tehnică">Documentație Tehnică</option>
@@ -945,7 +945,7 @@
                         <select id="ach-category" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
                             <option value="Eliminare Rebuturi & Calitate">Eliminare Rebuturi & Calitate 3D</option>
                             <option value="Optimizare Producție & Timp">Optimizare Timp Montaj / Atelier</option>
-                            <option value="Calcul Tehnic & FEA">Calcul Tehnic & FEA</option>
+                            <option value="Optimizare Masă & Geometrie">Optimizare Masă & Geometrie</option>
                             <option value="Standardizare & Achiziții">Standardizare Organe Asamblare</option>
                         </select>
                     </div>
@@ -1148,7 +1148,7 @@
                 'all': 'filt-all',
                 'Modelare CAD 3D': 'filt-cad',
                 'Desene 2D & BOM': 'filt-2d',
-                'Calcule & Simulare FEA': 'filt-fea',
+                'Calcule & Cotare': 'filt-calc',
                 'Modificare ECN': 'filt-ecn',
                 'Asistență Atelier': 'filt-shop'
             };

@@ -155,7 +155,7 @@ def seed_data(conn):
         ('ASM-100', 'Rev B', 'Sistem Transportor Robotic Modular', 'Bandă cu role conice, ghidaje reglabile și cadru aluminiu', 'Linie Automatizare Auto', 'SolidWorks', 'În Lucru', 'Critic', '#ef4444', (today - timedelta(days=50)).isoformat(), (today + timedelta(days=20)).isoformat()),
         ('ASM-204', 'Rev A', 'Șasiu & Carcase Sheet Metal Dispozitiv Testare', 'Ansamblu tablă îndoită laser, toleranțe îndoire și elemente PEM', 'Client Industrial', 'Autodesk Inventor', 'În Lucru', 'Ridicată', '#2563eb', (today - timedelta(days=40)).isoformat(), (today + timedelta(days=25)).isoformat()),
         ('TOOL-05', 'Rev C', 'Dispozitiv Modular Fixare Prelucrare CNC', 'Jig & fixture pentru frezare piese turnate Al cu prindere rapidă', 'Atelier Prelucrări Mecanice', 'SolidWorks', 'Finalizat', 'Ridicată', '#10b981', (today - timedelta(days=65)).isoformat(), (today - timedelta(days=5)).isoformat()),
-        ('GEAR-02', 'Rev A', 'Redesign Reductor & Ax Transmisie Putere', 'Calcul angrenaje cilindrice, rulmenți, verificări FEA torsiune', 'Sector Energetic', 'SolidWorks / FEA', 'În Lucru', 'Medie', '#f59e0b', (today - timedelta(days=25)).isoformat(), (today + timedelta(days=30)).isoformat())
+        ('GEAR-02', 'Rev A', 'Redesign Reductor & Ax Transmisie Putere', 'Calcul cinematic angrenaje cilindrice, selecție rulmenți și cotare toleranțe', 'Sector Energetic', 'SolidWorks', 'În Lucru', 'Medie', '#f59e0b', (today - timedelta(days=25)).isoformat(), (today + timedelta(days=30)).isoformat())
     ]
 
     c.executemany('''
@@ -168,7 +168,7 @@ def seed_data(conn):
         (1, 'ASM-100', 'Rev B', (today - timedelta(days=1)).isoformat(), today.year, today.month, 'Modelare CAD 3D', 'Finalizat modelarea ansamblului ghidaje laterale și suporți senzori optici', 'Finalizat', 0),
         (1, 'ASM-100', 'Rev B', (today - timedelta(days=2)).isoformat(), today.year, today.month, 'Verificare 3D', 'Rulat detecție de coliziune; identificat interferență braț-motoreductor și corectat modelul', 'Realizare Cheie ⭐', 1),
         (2, 'ASM-204', 'Rev A', (today - timedelta(days=3)).isoformat(), today.year, today.month, 'Desene 2D & BOM', 'Generat desenele de execuție pentru carcasele de tablă, cotare toleranțe și export fișiere DXF debitare', 'Finalizat', 0),
-        (4, 'GEAR-02', 'Rev A', (today - timedelta(days=4)).isoformat(), today.year, today.month, 'Simulare FEA', 'Calcul rezistență și simulare FEA torsiune arbore principal. Factor siguranță validat la 2.45', 'Finalizat', 0),
+        (4, 'GEAR-02', 'Rev A', (today - timedelta(days=4)).isoformat(), today.year, today.month, 'Calcule & Cotare', 'Calculat rapoarte de transmitere, dimensionat arbore principal și stabilit lanțul de toleranțe ISO', 'Finalizat', 0),
         (3, 'TOOL-05', 'Rev C', (today - timedelta(days=6)).isoformat(), today.year, today.month, 'Asistență Atelier', 'Coborât în atelier pentru proba pe mașina CNC; probat prinderea piesei brute și validat prima piesă', 'Finalizat', 1),
         (1, 'ASM-100', 'Rev B', (today - timedelta(days=7)).isoformat(), today.year, today.month, 'Modificare ECN', 'Adaptat cotele flanșei motorului conform noii specificații transmise de client', 'Modificare Client', 0),
         (2, 'ASM-204', 'Rev A', (today - timedelta(days=9)).isoformat(), today.year, today.month, 'Modelare CAD 3D', 'Proiectat sistemul de balamale interioare și prinderi rapide pentru panourile de vizitare', 'În curs', 0),
@@ -189,7 +189,7 @@ def seed_data(conn):
     achievements = [
         (1, (today - timedelta(days=2)).isoformat(), 'Detecție & Eliminare Coliziuni 3D Înainte de Fabricație', 'Identificat interferență critică braț oscilant - motoreductor înainte de debitare laser. Prevenit rebutarea a 4 subansamble.', 18000.0, 'Eliminare Rebuturi & Calitate', 'Seful de producție: "Ne-ai salvat de la 2 săptămâni de întârziere în atelier!"', 1),
         (3, (today - timedelta(days=6)).isoformat(), 'Proiectare Dispozitiv Prindere Rapidă CNC', 'Redus timpul de montare și centrare a piesei brute de la 14 min la 3 min per ciclu (creștere productivitate atelier cu 300%).', 12500.0, 'Optimizare Producție & Timp', 'Maistrul atelierului a cerut standardizarea pe toate frezele CNC.', 1),
-        (4, (today - timedelta(days=4)).isoformat(), 'Optimizare Topologică & Calcul FEA Ax Transmisie', 'Redus masa arborelui cu 18% menținând factorul de siguranță peste 2.4. Economie oțel aliat și inerție redusă.', 6400.0, 'Calcul Tehnic & FEA', 'Validat de inginerul șef fără obiecții.', 1),
+        (4, (today - timedelta(days=4)).isoformat(), 'Optimizare Masă & Geometrie Ax Transmisie', 'Redus masa arborelui cu 18% prin reproiectare trepte și degajări optime. Economie oțel aliat și inerție redusă.', 6400.0, 'Optimizare Proiectare & Cost', 'Validat de inginerul șef fără obiecții.', 1),
         (3, (today - timedelta(days=12)).isoformat(), 'Standardizare Organe de Asamblare & BOM', 'Redus diversitatea de șuruburi și șaibe din ansamblul Sheet Metal de la 26 dimensiuni la 6 tipuri standardizate ISO.', 4200.0, 'Standardizare & Achiziții', 'Responsabil achiziții: "A scăzut considerabil stocul mort."', 1)
     ]
 
