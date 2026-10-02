@@ -15,6 +15,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js 4.4 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -117,6 +119,9 @@
                 <button onclick="switchTab('table')" id="nav-table" class="active-nav-btn px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
                     <i class="fa-solid fa-table-list text-cyan-400"></i> Jurnal Tabelar Zile
                 </button>
+                <button onclick="switchTab('analytics')" id="nav-analytics" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-chart-pie text-violet-400"></i> Grafice & Statistici
+                </button>
                 <button onclick="switchTab('blockers')" id="nav-blockers" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
                     <i class="fa-solid fa-shield-halved text-rose-400"></i> Scut & Blocaje
                 </button>
@@ -178,6 +183,18 @@
                             <div class="text-base font-black text-amber-400 mt-0.5" id="sum-highlights">0 ⭐</div>
                         </div>
                     </div>
+
+                    <!-- Quick Activity Filter Pills (Lejer & Detaliat) -->
+                    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-2 border-t border-slate-800/80 text-[11px]">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase whitespace-nowrap">Filtru:</span>
+                        <button onclick="setActivityFilter('all')" id="filt-all" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white font-bold whitespace-nowrap transition">Toate</button>
+                        <button onclick="setActivityFilter('Modelare CAD 3D')" id="filt-cad" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">📐 CAD 3D</button>
+                        <button onclick="setActivityFilter('Desene 2D & BOM')" id="filt-2d" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">📋 2D & BOM</button>
+                        <button onclick="setActivityFilter('Calcule & Simulare FEA')" id="filt-fea" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">⚙️ Simulare FEA</button>
+                        <button onclick="setActivityFilter('Modificare ECN')" id="filt-ecn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">🔄 Modificări ECN</button>
+                        <button onclick="setActivityFilter('Asistență Atelier')" id="filt-shop" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">🏭 Atelier / Montaj</button>
+                        <button onclick="toggleHighlightFilter()" id="filt-star" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-amber-950/80 text-amber-400 border border-slate-700 whitespace-nowrap transition flex items-center gap-1">⭐ Doar Reușite Mărire</button>
+                    </div>
                 </div>
 
                 <!-- Main Activity Table Card -->
@@ -197,16 +214,191 @@
                                 <tr>
                                     <th class="p-3 whitespace-nowrap">Data</th>
                                     <th class="p-3 whitespace-nowrap">Ansamblu / P/N</th>
-                                    <th class="p-3">Ce am realizat / Livrabil</th>
+                                    <th class="p-3">Ce am realizat / Livrabil (Apasă pt detalii)</th>
                                     <th class="p-3 whitespace-nowrap">Etapă</th>
                                     <th class="p-3 whitespace-nowrap">Stare</th>
-                                    <th class="p-3 text-center whitespace-nowrap">⭐ Mărire</th>
+                                    <th class="p-3 text-center whitespace-nowrap">Acțiuni & ⭐</th>
                                 </tr>
                             </thead>
                             <tbody id="daily-table-body" class="divide-y divide-slate-800/60 font-medium">
                                 <!-- Populated dynamically by JS -->
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= TAB: GRAFICE & STATISTICI INGINEREȘTI ================= -->
+            <section id="tab-analytics" class="hidden space-y-4">
+                <!-- Top Filter Controls Bar -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-violet-500/20">
+                            <i class="fa-solid fa-chart-line text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-bold text-white tracking-tight">Panou Analitic & Statistici Proiectare Mecanică</h2>
+                            <p class="text-[11px] text-slate-400">Performanță cuantificabilă, metrici PDM și impact tehnic demonstrabil</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <select id="analytics-period-select" onchange="loadAnalyticsData()" class="bg-slate-950 border border-slate-700 text-white font-bold text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-violet-500">
+                            <option value="all">Toată Perioada</option>
+                            <option value="1y">Ultimul An (12 Luni)</option>
+                            <option value="6m">Ultimele 6 Luni</option>
+                            <option value="3m">Ultimele 3 Luni</option>
+                            <option value="1m">Ultima Lună</option>
+                        </select>
+                        <button onclick="loadAnalyticsData()" class="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-violet-600/30 transition">
+                            <i class="fa-solid fa-arrows-rotate"></i> Reîmprospătează
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Executive KPI Grid (4 Glowing High-Tech Cards) -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <!-- Card 1: Scor Eficiență Inginerească -->
+                    <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-violet-950/40 border border-violet-500/30 rounded-2xl p-3.5 relative overflow-hidden shadow-xl">
+                        <div class="flex items-center justify-between text-slate-400 mb-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider">Scor Eficiență</span>
+                            <i class="fa-solid fa-bolt text-violet-400 text-sm"></i>
+                        </div>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-2xl font-black text-white" id="kpi-efficiency-score">0</span>
+                            <span class="text-xs text-violet-400 font-bold">/ 100</span>
+                        </div>
+                        <div class="w-full bg-slate-950 rounded-full h-1.5 mt-2 overflow-hidden border border-slate-800">
+                            <div id="kpi-efficiency-bar" class="bg-gradient-to-r from-cyan-400 to-violet-500 h-1.5 rounded-full transition-all duration-700" style="width: 0%"></div>
+                        </div>
+                        <div class="text-[10px] text-slate-400 mt-1.5 flex items-center justify-between">
+                            <span>Consistență livrabile</span>
+                            <span class="text-emerald-400 font-bold" id="kpi-avg-per-day">0 livrări/zi</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Zile Active & Activități -->
+                    <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-cyan-950/40 border border-cyan-500/30 rounded-2xl p-3.5 relative overflow-hidden shadow-xl">
+                        <div class="flex items-center justify-between text-slate-400 mb-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider">Zile Active Proiectare</span>
+                            <i class="fa-solid fa-calendar-check text-cyan-400 text-sm"></i>
+                        </div>
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="text-2xl font-black text-white" id="kpi-active-days">0</span>
+                            <span class="text-xs text-slate-400 font-medium">zile</span>
+                        </div>
+                        <div class="text-[11px] text-cyan-300 font-semibold mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-layer-group text-[10px]"></i>
+                            <span id="kpi-deliverables-count">0 activități</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400 mt-1">Pe <strong class="text-white" id="kpi-projects-count">0</strong> ansambluri PDM</div>
+                    </div>
+
+                    <!-- Card 3: Valoare Economisită & ROI -->
+                    <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-emerald-500/30 rounded-2xl p-3.5 relative overflow-hidden shadow-xl">
+                        <div class="flex items-center justify-between text-slate-400 mb-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider">Economii Generate</span>
+                            <i class="fa-solid fa-coins text-emerald-400 text-sm"></i>
+                        </div>
+                        <div class="text-2xl font-black text-emerald-400 tracking-tight" id="kpi-total-savings">0 RON</div>
+                        <div class="text-[11px] text-emerald-300 font-semibold mt-1 flex items-center gap-1">
+                            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded font-bold text-[10px]" id="kpi-roi-multi">0x ROI</span>
+                            <span>față de mărire</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400 mt-1">Optimizări & rebuturi eliminate</div>
+                    </div>
+
+                    <!-- Card 4: Scut Reziliență & Realizări -->
+                    <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/40 border border-amber-500/30 rounded-2xl p-3.5 relative overflow-hidden shadow-xl">
+                        <div class="flex items-center justify-between text-slate-400 mb-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider">Reușite & Scut</span>
+                            <i class="fa-solid fa-shield-halved text-amber-400 text-sm"></i>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-2xl font-black text-amber-300" id="kpi-highlights-count">0 ⭐</span>
+                            <span class="text-xs text-rose-400 font-bold" id="kpi-blockers-count">0 blocaje</span>
+                        </div>
+                        <div class="text-[11px] text-slate-300 font-semibold mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-clock-rotate-left text-rose-400 text-[10px]"></i>
+                            <span id="kpi-blocker-impact">0 zile întârziere externe</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400 mt-1">Argumente pregătite pt evaluare</div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 1: Distribuție Activități & Evoluție Lunară -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <!-- Chart 1: Donut Distribuție Activități Inginerești -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5 mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+                                <h3 class="text-xs font-bold text-white uppercase tracking-wider">Distribuția Activității CAD</h3>
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-medium">Ore/Efort pe tip lucrare</span>
+                        </div>
+                        <div class="h-64 relative flex items-center justify-center">
+                            <canvas id="chart-activities-donut"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Combo Bar/Line Evoluție Lunară -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5 mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                                <h3 class="text-xs font-bold text-white uppercase tracking-wider">Ritm Lunar: Livrabile & Zile Lucrate</h3>
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-medium">Evoluție pe luni</span>
+                        </div>
+                        <div class="h-64 relative">
+                            <canvas id="chart-monthly-trends"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 2: Efort Ansambluri PDM & Economii Cumulate -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <!-- Chart 3: Horizontal Bar Efort Ansambluri -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5 mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                <h3 class="text-xs font-bold text-white uppercase tracking-wider">Efort Investit per Ansamblu PDM</h3>
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-medium">Zile active / Proiect</span>
+                        </div>
+                        <div class="h-64 relative">
+                            <canvas id="chart-projects-bar"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 4: Glowing Area Chart Economii ROI -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5 mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                                <h3 class="text-xs font-bold text-white uppercase tracking-wider">Evoluție Economii Validate (ROI)</h3>
+                            </div>
+                            <span class="text-[10px] text-emerald-400 font-bold">Valoare financiară generată</span>
+                        </div>
+                        <div class="h-64 relative">
+                            <canvas id="chart-savings-area"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Row 3: Scut Blocaje Externe pe Cauze -->
+                <div class="bg-slate-900 border border-rose-500/30 rounded-2xl p-4 shadow-xl">
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                            <h3 class="text-xs font-bold text-white uppercase tracking-wider">Scut Evaluare: Cauze Întârzieri Externe Soluționate</h3>
+                        </div>
+                        <span class="text-[10px] text-rose-300 font-semibold bg-rose-950/60 border border-rose-500/30 px-2 py-0.5 rounded-full">Zile Impact Preluate & Rezolvate</span>
+                    </div>
+                    <div class="h-56 relative">
+                        <canvas id="chart-blockers-bar"></canvas>
                     </div>
                 </div>
             </section>
@@ -406,6 +598,89 @@
     </div>
 
     <!-- ================= MODALS ================= -->
+
+    <!-- Modal: Vizualizare Detaliată & Editare Rapidă Activitate -->
+    <div id="modal-view-daily-log" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-cyan-500/40 w-full max-w-lg rounded-2xl p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                        <i class="fa-solid fa-file-waveform"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-bold text-white" id="view-modal-title">Fișă Activitate Tehnică</h3>
+                        <p class="text-[10px] text-slate-400" id="view-modal-subtitle">Detalii Livrabil & Modificare</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('modal-view-daily-log')" class="text-slate-400 hover:text-white text-base"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <input type="hidden" id="edit-modal-id">
+            <div class="space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Data Calendaristică:</span>
+                        <div class="font-mono font-bold text-white mt-0.5 text-xs" id="view-modal-date">-</div>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Part Number & Rev:</span>
+                        <div class="font-mono font-bold text-cyan-400 mt-0.5 text-xs" id="view-modal-pn">-</div>
+                    </div>
+                    <div class="col-span-2 pt-2 border-t border-slate-800/80">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Ansamblu PDM:</span>
+                        <div class="text-white font-bold mt-0.5 text-xs" id="view-modal-project">-</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tip Activitate:</label>
+                        <select id="edit-modal-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                            <option value="Modelare CAD 3D">Modelare CAD 3D</option>
+                            <option value="Desene 2D & BOM">Desene 2D & BOM</option>
+                            <option value="Calcule & Simulare FEA">Calcule & Simulare FEA</option>
+                            <option value="Modificare ECN">Modificare ECN</option>
+                            <option value="Asistență Atelier">Asistență Atelier</option>
+                            <option value="Documentație Tehnică">Documentație Tehnică</option>
+                            <option value="Ședință Tehnică / Furnizori">Ședință Tehnică / Furnizori</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Stare / Progres:</label>
+                        <select id="edit-modal-status" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                            <option value="Finalizat">Finalizat</option>
+                            <option value="În curs">În curs</option>
+                            <option value="Lansat Atelier">Lansat Atelier</option>
+                            <option value="Realizare Cheie ⭐">Realizare Cheie ⭐</option>
+                            <option value="Modificare Client">Modificare Client</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ce am realizat / Livrabil detaliat:</label>
+                    <textarea id="edit-modal-desc" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-cyan-500 leading-relaxed"></textarea>
+                </div>
+
+                <div class="flex items-center space-x-2 pt-1">
+                    <input type="checkbox" id="edit-modal-highlight" class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-800">
+                    <label for="edit-modal-highlight" class="font-bold text-amber-300">⭐ Evidențiază ca realizare importantă pentru mărire</label>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-3 border-t border-slate-800 text-xs">
+                <button type="button" onclick="deleteCurrentLogFromModal()" class="px-3 py-1.5 rounded-xl bg-rose-950/60 hover:bg-rose-900 border border-rose-500/30 text-rose-300 font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-trash"></i> Șterge
+                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="closeModal('modal-view-daily-log')" class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-white">Închide</button>
+                    <button type="button" onclick="saveDailyLogEdits()" class="px-4 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold shadow-md shadow-cyan-600/30 transition flex items-center gap-1">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvează Modificările
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal: Notează Activitatea Zilei (Lejer) -->
     <div id="modal-new-daily-log" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
@@ -810,11 +1085,17 @@
             loadReportData();
         }
 
+        let currentActivityFilter = 'all';
+        let onlyHighlightsFilter = false;
+        let chartInstances = {};
+        let currentEditLogId = null;
+
         function switchTab(tabId) {
             currentTab = tabId;
-            ['table', 'blockers', 'projects', 'brag', 'report'].forEach(t => {
+            ['table', 'analytics', 'blockers', 'projects', 'brag', 'report'].forEach(t => {
                 const el = document.getElementById(`tab-${t}`);
                 const nav = document.getElementById(`nav-${t}`);
+                if (!el || !nav) return;
                 if (t === tabId) {
                     el.classList.remove('hidden');
                     nav.classList.add('active-nav-btn');
@@ -825,6 +1106,7 @@
             });
 
             if (tabId === 'table') loadDailyLogs();
+            else if (tabId === 'analytics') loadAnalyticsData();
             else if (tabId === 'blockers') loadBlockers();
             else if (tabId === 'projects') loadProjects();
             else if (tabId === 'brag') { loadAchievements(); loadSalaryCalculator(); }
@@ -854,10 +1136,45 @@
         function openNewAchievementModal() { populateProjectDropdowns(); openModal('modal-new-achievement'); }
         function openNewBlockerModal() { populateProjectDropdowns(); openModal('modal-new-blocker'); }
 
-        // ================= JURNAL TABELAR ZILE & LUNI =================
+        // ================= JURNAL TABELAR ZILE & FILTRE =================
         function debounceLoadDailyLogs() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(loadDailyLogs, 300);
+        }
+
+        function setActivityFilter(type) {
+            currentActivityFilter = type;
+            const btnMap = {
+                'all': 'filt-all',
+                'Modelare CAD 3D': 'filt-cad',
+                'Desene 2D & BOM': 'filt-2d',
+                'Calcule & Simulare FEA': 'filt-fea',
+                'Modificare ECN': 'filt-ecn',
+                'Asistență Atelier': 'filt-shop'
+            };
+            Object.entries(btnMap).forEach(([k, id]) => {
+                const btn = document.getElementById(id);
+                if (!btn) return;
+                if (k === type) {
+                    btn.className = 'px-2.5 py-1 rounded-lg bg-blue-600 text-white font-bold whitespace-nowrap transition shadow-sm';
+                } else {
+                    btn.className = 'px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition';
+                }
+            });
+            loadDailyLogs();
+        }
+
+        function toggleHighlightFilter() {
+            onlyHighlightsFilter = !onlyHighlightsFilter;
+            const btn = document.getElementById('filt-star');
+            if (btn) {
+                if (onlyHighlightsFilter) {
+                    btn.className = 'px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-black border border-amber-400 whitespace-nowrap transition flex items-center gap-1 shadow-md shadow-amber-500/20';
+                } else {
+                    btn.className = 'px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-amber-950/80 text-amber-400 border border-slate-700 whitespace-nowrap transition flex items-center gap-1';
+                }
+            }
+            loadDailyLogs();
         }
 
         async function loadDailyLogs() {
@@ -869,6 +1186,12 @@
             if (monthVal !== 'all') {
                 const [y, m] = monthVal.split('-');
                 url += `&year=${y}&month=${m}`;
+            }
+            if (currentActivityFilter !== 'all') {
+                url += `&activity_type=${encodeURIComponent(currentActivityFilter)}`;
+            }
+            if (onlyHighlightsFilter) {
+                url += `&highlight_only=1`;
             }
 
             try {
@@ -884,7 +1207,7 @@
 
                 // Populate available months dropdown once or update
                 const monthSelect = document.getElementById('filter-month-select');
-                if (monthSelect.options.length <= 1 && data.available_months) {
+                if (monthSelect && monthSelect.options.length <= 1 && data.available_months) {
                     data.available_months.forEach(item => {
                         const opt = document.createElement('option');
                         opt.value = `${item.year}-${item.month}`;
@@ -908,28 +1231,33 @@
                     else if (log.status_tag === 'Lansat Atelier') statusBg = 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/30';
 
                     return `
-                        <tr class="hover:bg-slate-900/60 transition ${log.is_highlight ? 'bg-amber-950/10' : ''}">
-                            <td class="p-3 font-mono font-bold text-white whitespace-nowrap">${log.date}</td>
-                            <td class="p-3 whitespace-nowrap">
+                        <tr class="hover:bg-slate-900/90 transition group ${log.is_highlight ? 'bg-amber-950/15' : ''}">
+                            <td class="p-3 font-mono font-bold text-white whitespace-nowrap cursor-pointer" onclick="openDailyDetailModal(${log.id})">${log.date}</td>
+                            <td class="p-3 whitespace-nowrap cursor-pointer" onclick="openDailyDetailModal(${log.id})">
                                 <span class="font-mono text-cyan-400 font-bold bg-cyan-950/60 border border-cyan-500/20 px-1.5 py-0.5 rounded text-[10px]">${log.part_number || 'P/N'} ${log.revision || ''}</span>
                                 <div class="text-[11px] text-slate-400 truncate max-w-[130px]">${log.project_name || 'General'}</div>
                             </td>
-                            <td class="p-3">
-                                <div class="text-xs text-slate-200 font-medium leading-relaxed">${log.description}</div>
+                            <td class="p-3 cursor-pointer" onclick="openDailyDetailModal(${log.id})">
+                                <div class="text-xs text-slate-200 font-medium leading-relaxed group-hover:text-cyan-300 transition">${log.description}</div>
                             </td>
-                            <td class="p-3 whitespace-nowrap">
+                            <td class="p-3 whitespace-nowrap cursor-pointer" onclick="openDailyDetailModal(${log.id})">
                                 <span class="text-[11px] bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">${log.activity_type}</span>
                             </td>
-                            <td class="p-3 whitespace-nowrap">
+                            <td class="p-3 whitespace-nowrap cursor-pointer" onclick="openDailyDetailModal(${log.id})">
                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBg}">${log.status_tag}</span>
                             </td>
                             <td class="p-3 text-center whitespace-nowrap">
-                                <button onclick="toggleDailyStar(${log.id})" class="p-1 text-sm hover:scale-125 transition">
-                                    <i class="fa-solid fa-star ${log.is_highlight ? 'text-amber-400' : 'text-slate-700 hover:text-slate-500'}"></i>
-                                </button>
-                                <button onclick="deleteDailyLog(${log.id})" class="p-1 text-slate-600 hover:text-rose-400 text-xs ml-1.5">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
+                                <div class="flex items-center justify-center gap-1">
+                                    <button onclick="openDailyDetailModal(${log.id})" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-cyan-950/70 text-slate-300 hover:text-cyan-300 text-[11px] font-semibold transition" title="Vezi / Editează Detalii">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button onclick="toggleDailyStar(${log.id})" class="p-1 text-sm hover:scale-125 transition" title="Marchează ca Reușită Mărire">
+                                        <i class="fa-solid fa-star ${log.is_highlight ? 'text-amber-400' : 'text-slate-700 hover:text-slate-500'}"></i>
+                                    </button>
+                                    <button onclick="deleteDailyLog(${log.id})" class="p-1 text-slate-600 hover:text-rose-400 text-xs transition" title="Șterge">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -965,6 +1293,7 @@
                     showToast('Activitate înregistrată în jurnal!');
                     loadDailyLogs();
                     loadSalaryCalculator();
+                    if (currentTab === 'analytics') loadAnalyticsData();
                 }
             } catch (err) { showToast('Eroare la salvare', true); }
         }
@@ -972,7 +1301,10 @@
         async function toggleDailyStar(id) {
             try {
                 const res = await fetch(`/api/daily-logs/${id}/toggle-star`, { method: 'POST' });
-                if (res.ok) loadDailyLogs();
+                if (res.ok) {
+                    loadDailyLogs();
+                    if (currentTab === 'analytics') loadAnalyticsData();
+                }
             } catch (err) { console.error(err); }
         }
 
@@ -983,8 +1315,303 @@
                 if (res.ok) {
                     showToast('Înregistrare ștearsă');
                     loadDailyLogs();
+                    if (currentTab === 'analytics') loadAnalyticsData();
                 }
             } catch (err) { console.error(err); }
+        }
+
+        // ================= VIZUALIZARE & EDITARE DETALIATĂ =================
+        async function openDailyDetailModal(logId) {
+            try {
+                const res = await fetch(`/api/daily-logs/${logId}`);
+                if (!res.ok) return showToast('Eroare la încărcare detalii', true);
+                const log = await res.json();
+
+                currentEditLogId = log.id;
+                document.getElementById('edit-modal-id').value = log.id;
+                document.getElementById('view-modal-title').innerText = `Activitate [${log.part_number || 'P/N'} ${log.revision || ''}]`;
+                document.getElementById('view-modal-subtitle').innerText = log.project_name || 'Ansamblu General';
+                document.getElementById('view-modal-date').innerText = log.date;
+                document.getElementById('view-modal-pn').innerText = `${log.part_number || '-'} ${log.revision || ''}`;
+                document.getElementById('view-modal-project').innerText = `${log.project_name || 'General'} (${log.cad_software || 'CAD'})`;
+
+                document.getElementById('edit-modal-type').value = log.activity_type || 'Modelare CAD 3D';
+                document.getElementById('edit-modal-status').value = log.status_tag || 'Finalizat';
+                document.getElementById('edit-modal-desc').value = log.description || '';
+                document.getElementById('edit-modal-highlight').checked = Boolean(log.is_highlight);
+
+                openModal('modal-view-daily-log');
+            } catch (err) {
+                showToast('Eroare de conexiune', true);
+            }
+        }
+
+        async function saveDailyLogEdits() {
+            if (!currentEditLogId) return;
+            const desc = document.getElementById('edit-modal-desc').value.trim();
+            if (!desc) return showToast('Descrierea este obligatorie!', true);
+
+            const payload = {
+                activity_type: document.getElementById('edit-modal-type').value,
+                status_tag: document.getElementById('edit-modal-status').value,
+                description: desc,
+                is_highlight: document.getElementById('edit-modal-highlight').checked
+            };
+
+            try {
+                const res = await fetch(`/api/daily-logs/${currentEditLogId}/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    closeModal('modal-view-daily-log');
+                    showToast('Modificări salvate cu succes!');
+                    loadDailyLogs();
+                    if (currentTab === 'analytics') loadAnalyticsData();
+                } else {
+                    showToast('Eroare la salvare', true);
+                }
+            } catch (err) {
+                showToast('Eroare de conexiune', true);
+            }
+        }
+
+        async function deleteCurrentLogFromModal() {
+            if (!currentEditLogId) return;
+            if (!confirm('Sigur dorești să ștergi această înregistrare?')) return;
+            try {
+                const res = await fetch(`/api/daily-logs/${currentEditLogId}/delete`, { method: 'POST' });
+                if (res.ok) {
+                    closeModal('modal-view-daily-log');
+                    showToast('Înregistrare ștearsă');
+                    loadDailyLogs();
+                    if (currentTab === 'analytics') loadAnalyticsData();
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        // ================= ANALYTICS & GRAFICE INGINEREȘTI =================
+        function destroyChart(id) {
+            if (chartInstances[id]) {
+                chartInstances[id].destroy();
+                delete chartInstances[id];
+            }
+        }
+
+        async function loadAnalyticsData() {
+            const period = document.getElementById('analytics-period-select')?.value || 'all';
+            try {
+                const res = await fetch(`/api/analytics?period=${period}`);
+                if (res.status === 401) return checkAuthStatus();
+                const data = await res.json();
+
+                // Update Executive KPI Grid
+                const k = data.kpis;
+                document.getElementById('kpi-efficiency-score').innerText = k.score;
+                document.getElementById('kpi-efficiency-bar').style.width = `${k.score}%`;
+                document.getElementById('kpi-avg-per-day').innerText = `${k.avg_per_day} livrări/zi`;
+                document.getElementById('kpi-active-days').innerText = k.total_active_days;
+                document.getElementById('kpi-deliverables-count').innerText = `${k.total_deliverables} activități livrate`;
+                document.getElementById('kpi-projects-count').innerText = k.total_projects;
+                document.getElementById('kpi-total-savings').innerText = `${Number(k.total_savings).toLocaleString()} ${k.currency}`;
+                document.getElementById('kpi-roi-multi').innerText = `${k.roi_multiple}x ROI`;
+                document.getElementById('kpi-highlights-count').innerText = `${k.total_highlights} ⭐`;
+                document.getElementById('kpi-blockers-count').innerText = `${k.total_blockers} blocaje`;
+                document.getElementById('kpi-blocker-impact').innerText = `${k.total_blocker_days} zile impact soluționate`;
+
+                // Chart.js Theme Defaults
+                Chart.defaults.color = '#94a3b8';
+                Chart.defaults.borderColor = 'rgba(51, 65, 85, 0.3)';
+                Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+                // 1. Chart: Donut Distribuție Activități
+                destroyChart('chart-activities-donut');
+                const ctxDonut = document.getElementById('chart-activities-donut')?.getContext('2d');
+                if (ctxDonut && data.activity_distribution && data.activity_distribution.length) {
+                    const labels = data.activity_distribution.map(a => a.activity_type);
+                    const counts = data.activity_distribution.map(a => a.count);
+                    const palette = ['#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#64748b'];
+
+                    chartInstances['chart-activities-donut'] = new Chart(ctxDonut, {
+                        type: 'doughnut',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: counts,
+                                backgroundColor: palette.slice(0, counts.length),
+                                borderWidth: 2,
+                                borderColor: '#0f172a'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '65%',
+                            plugins: {
+                                legend: { position: 'bottom', labels: { boxWidth: 10, padding: 8, font: { size: 10 } } }
+                            }
+                        }
+                    });
+                }
+
+                // 2. Chart: Monthly Trends (Combo Bar + Line)
+                destroyChart('chart-monthly-trends');
+                const ctxMonthly = document.getElementById('chart-monthly-trends')?.getContext('2d');
+                if (ctxMonthly && data.monthly_trends && data.monthly_trends.length) {
+                    chartInstances['chart-monthly-trends'] = new Chart(ctxMonthly, {
+                        data: {
+                            labels: data.monthly_trends.map(t => t.label),
+                            datasets: [
+                                {
+                                    type: 'bar',
+                                    label: 'Livrabile & Piese',
+                                    data: data.monthly_trends.map(t => t.total_deliverables),
+                                    backgroundColor: 'rgba(59, 130, 246, 0.75)',
+                                    borderRadius: 6
+                                },
+                                {
+                                    type: 'line',
+                                    label: 'Zile Active',
+                                    data: data.monthly_trends.map(t => t.active_days),
+                                    borderColor: '#06b6d4',
+                                    backgroundColor: '#06b6d4',
+                                    tension: 0.3,
+                                    borderWidth: 2,
+                                    pointRadius: 4
+                                },
+                                {
+                                    type: 'line',
+                                    label: '⭐ Reușite Mărire',
+                                    data: data.monthly_trends.map(t => t.highlights),
+                                    borderColor: '#f59e0b',
+                                    backgroundColor: '#f59e0b',
+                                    tension: 0.3,
+                                    borderWidth: 2,
+                                    pointRadius: 4
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }
+                            },
+                            scales: {
+                                y: { beginAtZero: true, ticks: { precision: 0 } }
+                            }
+                        }
+                    });
+                }
+
+                // 3. Chart: Project Efforts (Horizontal Bar)
+                destroyChart('chart-projects-bar');
+                const ctxProj = document.getElementById('chart-projects-bar')?.getContext('2d');
+                if (ctxProj && data.project_efforts && data.project_efforts.length) {
+                    chartInstances['chart-projects-bar'] = new Chart(ctxProj, {
+                        type: 'bar',
+                        data: {
+                            labels: data.project_efforts.map(p => `[${p.part_number}] ${p.name.length > 20 ? p.name.substring(0, 18)+'...' : p.name}`),
+                            datasets: [{
+                                label: 'Zile Investite',
+                                data: data.project_efforts.map(p => p.days_spent),
+                                backgroundColor: data.project_efforts.map(p => p.color || '#3b82f6'),
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                x: { beginAtZero: true, ticks: { precision: 0 } }
+                            }
+                        }
+                    });
+                }
+
+                // 4. Chart: Cumulative ROI Savings Area Chart
+                destroyChart('chart-savings-area');
+                const ctxSavings = document.getElementById('chart-savings-area')?.getContext('2d');
+                if (ctxSavings && data.savings_entries && data.savings_entries.length) {
+                    let runningTotal = 0;
+                    const cumLabels = [];
+                    const cumData = [];
+                    data.savings_entries.forEach(e => {
+                        runningTotal += e.money_saved_est;
+                        cumLabels.push(e.date);
+                        cumData.push(runningTotal);
+                    });
+
+                    chartInstances['chart-savings-area'] = new Chart(ctxSavings, {
+                        type: 'line',
+                        data: {
+                            labels: cumLabels,
+                            datasets: [{
+                                label: 'Total Economii Validate (RON)',
+                                data: cumData,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                                fill: true,
+                                tension: 0.35,
+                                borderWidth: 2.5,
+                                pointBackgroundColor: '#10b981',
+                                pointRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (c) => `+${Number(c.raw).toLocaleString()} RON economisiți`
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                }
+
+                // 5. Chart: Blockers Bar
+                destroyChart('chart-blockers-bar');
+                const ctxBlk = document.getElementById('chart-blockers-bar')?.getContext('2d');
+                if (ctxBlk && data.blocker_breakdown && data.blocker_breakdown.length) {
+                    chartInstances['chart-blockers-bar'] = new Chart(ctxBlk, {
+                        type: 'bar',
+                        data: {
+                            labels: data.blocker_breakdown.map(b => b.cause_type),
+                            datasets: [{
+                                label: 'Zile Întârziere Prevenite',
+                                data: data.blocker_breakdown.map(b => b.total_impact_days),
+                                backgroundColor: 'rgba(244, 63, 94, 0.75)',
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                }
+
+            } catch (err) {
+                console.error(err);
+            }
         }
 
         // ================= SCUT & BLOCAJE =================

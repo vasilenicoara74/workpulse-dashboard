@@ -216,6 +216,10 @@ def api_daily_logs():
     '''
     params = []
 
+    activity_type = request.args.get('activity_type')
+    status_tag = request.args.get('status_tag')
+    highlight_only = request.args.get('highlight_only')
+
     if year and year != 'all':
         query += " AND d.year = ?"
         params.append(int(year))
@@ -225,6 +229,14 @@ def api_daily_logs():
     if project_id and project_id != 'all':
         query += " AND d.project_id = ?"
         params.append(int(project_id))
+    if activity_type and activity_type != 'all':
+        query += " AND d.activity_type = ?"
+        params.append(activity_type)
+    if status_tag and status_tag != 'all':
+        query += " AND d.status_tag = ?"
+        params.append(status_tag)
+    if highlight_only in ('1', 'true', True):
+        query += " AND d.is_highlight = 1"
     if search:
         query += " AND (d.description LIKE ? OR d.part_number LIKE ? OR p.name LIKE ?)"
         params.extend([f"%{search}%", f"%{search}%", f"%{search}%"])
@@ -283,6 +295,75 @@ def api_daily_log_delete(log_id):
     conn = get_connection()
     c = conn.cursor()
     c.execute('DELETE FROM daily_logs WHERE id = ?', (log_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+@app.route('/api/daily-logs/<int:log_id>', methods=['GET'])
+@login_required
+def api_daily_log_get(log_id):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('''
+        SELECT d.*, p.name as project_name, p.cad_software, p.client
+        FROM daily_logs d
+        LEFT JOIN projects p ON d.project_id = p.id
+        WHERE d.id = ?
+    ''', (log_id,))
+    row = c.fetchone()
+    conn.close()
+    if not row:
+        return jsonify({'error': 'Înregistrarea nu a fost găsită'}), 404
+    return jsonify(dict(row))
+
+@app.route('/api/daily-logs/<int:log_id>/update', methods=['POST'])
+@login_required
+def api_daily_log_update(log_id):
+    data = request.json or {}
+    conn = get_connection()
+    c = conn.cursor()
+
+    c.execute('SELECT * FROM daily_logs WHERE id = ?', (log_id,))
+    existing = c.fetchone()
+    if not existing:
+        conn.close()
+        return jsonify({'error': 'Înregistrarea nu există'}), 404
+
+    entry_date = data.get('date') or existing['date']
+    try:
+        d_obj = datetime.strptime(entry_date, '%Y-%m-%d').date()
+    except Exception:
+        d_obj = date.today()
+        entry_date = d_obj.isoformat()
+
+    project_id = data.get('project_id')
+    part_number = existing['part_number']
+    revision = existing['revision']
+
+    if project_id in ('', 'null', None):
+        project_id = None
+    else:
+        project_id = int(project_id)
+        c.execute('SELECT part_number, revision FROM projects WHERE id = ?', (project_id,))
+        p = c.fetchone()
+        if p:
+            part_number = p['part_number']
+            revision = p['revision']
+
+    desc = data.get('description', '').strip() or existing['description']
+    activity_type = data.get('activity_type') or existing['activity_type']
+    status_tag = data.get('status_tag') or existing['status_tag']
+    is_highlight = 1 if data.get('is_highlight') else 0
+
+    c.execute('''
+        UPDATE daily_logs
+        SET project_id = ?, part_number = ?, revision = ?, date = ?, year = ?, month = ?,
+            activity_type = ?, description = ?, status_tag = ?, is_highlight = ?
+        WHERE id = ?
+    ''', (
+        project_id, part_number, revision, entry_date, d_obj.year, d_obj.month,
+        activity_type, desc, status_tag, is_highlight, log_id
+    ))
     conn.commit()
     conn.close()
     return jsonify({'success': True})
@@ -514,6 +595,164 @@ def api_salary_calculator():
         'requested_raise_yearly': requested_raise_yearly,
         'new_target_salary': new_target_salary,
         'roi_multiple': roi_multiple
+    })
+
+# ----------------- ANALYTICS & STATISTICI INGINEREȘTI -----------------
+@app.route('/api/analytics')
+@login_required
+def api_analytics():
+    conn = get_connection()
+    c = conn.cursor()
+
+    period = request.args.get('period', 'all')
+    project_id = request.args.get('project_id', 'all')
+
+    today = date.today()
+    start_date = None
+    if period == '1m':
+        start_date = (today - timedelta(days=30)).isoformat()
+    elif period == '3m':
+        start_date = (today - timedelta(days=90)).isoformat()
+    elif period == '6m':
+        start_date = (today - timedelta(days=180)).isoformat()
+    elif period == '1y':
+        start_date = (today - timedelta(days=365)).isoformat()
+
+    where_clauses = []
+    params = []
+    if start_date:
+        where_clauses.append("d.date >= ?")
+        params.append(start_date)
+    if project_id and project_id != 'all':
+        where_clauses.append("d.project_id = ?")
+        params.append(int(project_id))
+    
+    where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+
+    # 1. Activity Type Distribution
+    c.execute(f'''
+        SELECT d.activity_type, COUNT(*) as count
+        FROM daily_logs d
+        {where_sql}
+        GROUP BY d.activity_type
+        ORDER BY count DESC
+    ''', params)
+    activity_distribution = [dict(r) for r in c.fetchall()]
+
+    # 2. Monthly Trend
+    c.execute(f'''
+        SELECT d.year, d.month, 
+               COUNT(*) as total_deliverables,
+               COUNT(DISTINCT d.date) as active_days,
+               SUM(CASE WHEN d.is_highlight = 1 THEN 1 ELSE 0 END) as highlights
+        FROM daily_logs d
+        {where_sql}
+        GROUP BY d.year, d.month
+        ORDER BY d.year ASC, d.month ASC
+    ''', params)
+    monthly_trends = []
+    for r in c.fetchall():
+        m_label = f"{MONTH_NAMES.get(r['month'], r['month'])[:3]} {r['year']}"
+        monthly_trends.append({
+            'year': r['year'],
+            'month': r['month'],
+            'label': m_label,
+            'total_deliverables': r['total_deliverables'],
+            'active_days': r['active_days'],
+            'highlights': r['highlights'] or 0
+        })
+
+    # 3. Project Effort Breakdown
+    c.execute('''
+        SELECT p.id, p.part_number, p.revision, p.name, p.cad_software, p.color, p.status,
+               COUNT(d.id) as log_count,
+               COUNT(DISTINCT d.date) as days_spent,
+               SUM(CASE WHEN d.is_highlight = 1 THEN 1 ELSE 0 END) as highlights_count
+        FROM projects p
+        LEFT JOIN daily_logs d ON p.id = d.project_id
+        GROUP BY p.id
+        ORDER BY days_spent DESC, log_count DESC
+    ''')
+    project_efforts = [dict(r) for r in c.fetchall()]
+
+    # 4. Blocker breakdown
+    c.execute('''
+        SELECT cause_type, COUNT(*) as count, COALESCE(SUM(time_lost_days), 0) as total_impact_days
+        FROM blockers
+        GROUP BY cause_type
+        ORDER BY total_impact_days DESC
+    ''')
+    blocker_breakdown = [dict(r) for r in c.fetchall()]
+
+    # 5. Cumulative Savings & Financial Impact
+    c.execute('''
+        SELECT a.date, a.money_saved_est, a.title, p.part_number
+        FROM achievements a
+        LEFT JOIN projects p ON a.project_id = p.id
+        WHERE a.money_saved_est > 0
+        ORDER BY a.date ASC
+    ''')
+    savings_entries = [dict(r) for r in c.fetchall()]
+
+    # 6. Overall Engineering KPIs
+    c.execute(f'''
+        SELECT COUNT(DISTINCT d.date) as total_active_days,
+               COUNT(*) as total_deliverables,
+               SUM(CASE WHEN d.is_highlight = 1 THEN 1 ELSE 0 END) as total_highlights
+        FROM daily_logs d
+        {where_sql}
+    ''', params)
+    kpi_raw = dict(c.fetchone() or {})
+
+    c.execute('SELECT COUNT(*) as cnt FROM projects')
+    total_projects = c.fetchone()['cnt']
+
+    c.execute('SELECT COUNT(*) as cnt, COALESCE(SUM(time_lost_days), 0) as tot_impact FROM blockers')
+    blk_stats = c.fetchone()
+    total_blockers = blk_stats['cnt']
+    total_blocker_days = blk_stats['tot_impact']
+
+    c.execute('SELECT COALESCE(SUM(money_saved_est), 0) as tot_savings FROM achievements')
+    total_savings = c.fetchone()['tot_savings']
+
+    c.execute('SELECT * FROM salary_settings WHERE id = 1')
+    salary_row = c.fetchone()
+    salary_cfg = dict(salary_row) if salary_row else {'current_net_salary': 6500, 'target_raise_pct': 20, 'currency': 'RON'}
+
+    conn.close()
+
+    total_active_days = kpi_raw.get('total_active_days') or 0
+    total_deliverables = kpi_raw.get('total_deliverables') or 0
+    total_highlights = kpi_raw.get('total_highlights') or 0
+    avg_per_day = round(total_deliverables / (total_active_days or 1), 1)
+
+    score = min(100, int((total_active_days * 3) + (total_highlights * 8) + (total_deliverables * 1.5)))
+    if score == 0 and total_deliverables > 0: score = 50
+
+    requested_yearly_raise = (salary_cfg['current_net_salary'] * (salary_cfg['target_raise_pct'] / 100.0)) * 12
+    roi_multiple = round(total_savings / (requested_yearly_raise or 1), 1)
+
+    return jsonify({
+        'kpis': {
+            'total_active_days': total_active_days,
+            'total_deliverables': total_deliverables,
+            'total_highlights': total_highlights,
+            'total_projects': total_projects,
+            'total_blockers': total_blockers,
+            'total_blocker_days': total_blocker_days,
+            'total_savings': total_savings,
+            'avg_per_day': avg_per_day,
+            'score': score,
+            'roi_multiple': roi_multiple,
+            'current_salary': salary_cfg['current_net_salary'],
+            'target_raise_pct': salary_cfg['target_raise_pct'],
+            'currency': salary_cfg.get('currency', 'RON')
+        },
+        'activity_distribution': activity_distribution,
+        'monthly_trends': monthly_trends,
+        'project_efforts': project_efforts,
+        'blocker_breakdown': blocker_breakdown,
+        'savings_entries': savings_entries
     })
 
 # ----------------- RAPORT DE EVALUARE & EXPORTURI -----------------
