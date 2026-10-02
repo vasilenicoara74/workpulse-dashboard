@@ -2,7 +2,9 @@ import sqlite3
 import os
 from datetime import datetime, date, timedelta
 
-DB_PATH = os.path.join(os.path.dirname(__file__), 'workpulse.db')
+DATA_DIR = os.environ.get('DATA_DIR', os.path.dirname(__file__))
+os.makedirs(DATA_DIR, exist_ok=True)
+DB_PATH = os.path.join(DATA_DIR, 'workpulse.db')
 
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
