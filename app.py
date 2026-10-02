@@ -9,7 +9,7 @@ from database import init_db, get_connection
 
 app = Flask(__name__)
 
-# Initialize database on startup
+# Initialize database on startup (preserves existing data unless forced)
 init_db()
 
 @app.route('/')
@@ -20,7 +20,7 @@ def index():
 def service_worker():
     return send_file(os.path.join(app.static_folder, 'sw.js'), mimetype='application/javascript')
 
-# ----------------- API STATS -----------------
+# ----------------- API STATS (INGINERIE MECANICĂ) -----------------
 @app.route('/api/stats')
 def api_stats():
     conn = get_connection()
@@ -36,22 +36,25 @@ def api_stats():
     c.execute("SELECT COUNT(*) as total, SUM(CASE WHEN status = 'În Lucru' THEN 1 ELSE 0 END) as active, SUM(CASE WHEN status = 'Finalizat' THEN 1 ELSE 0 END) as completed FROM projects")
     proj_row = c.fetchone()
 
-    # Achievements count
+    # Achievements and Blockers count
     c.execute("SELECT COUNT(*) as total, SUM(CASE WHEN is_highlight = 1 THEN 1 ELSE 0 END) as highlights FROM achievements")
     ach_row = c.fetchone()
 
+    c.execute("SELECT COUNT(*) as total, COALESCE(SUM(time_lost_hours), 0) as hours_saved FROM blockers")
+    blockers_row = c.fetchone()
+
     # Hours by project
     c.execute('''
-        SELECT p.name, p.color, ROUND(SUM(t.duration_minutes) / 60.0, 1) as hours
+        SELECT p.name, p.color, p.cad_software, ROUND(SUM(t.duration_minutes) / 60.0, 1) as hours
         FROM projects p
         LEFT JOIN time_entries t ON p.id = t.project_id
         GROUP BY p.id
         HAVING hours > 0
         ORDER BY hours DESC
     ''')
-    project_hours = [{'name': r['name'], 'color': r['color'], 'hours': r['hours']} for r in c.fetchall()]
+    project_hours = [{'name': r['name'], 'color': r['color'], 'cad': r['cad_software'], 'hours': r['hours']} for r in c.fetchall()]
 
-    # Hours by category
+    # Hours by mechanical category
     c.execute('''
         SELECT category, ROUND(SUM(duration_minutes) / 60.0, 1) as hours
         FROM time_entries
@@ -92,6 +95,16 @@ def api_stats():
     ''')
     top_achievements = [dict(r) for r in c.fetchall()]
 
+    # Top blockers resolved (Scut)
+    c.execute('''
+        SELECT b.*, p.name as project_name
+        FROM blockers b
+        LEFT JOIN projects p ON b.project_id = p.id
+        ORDER BY b.date DESC
+        LIMIT 4
+    ''')
+    recent_blockers = [dict(r) for r in c.fetchall()]
+
     conn.close()
 
     return jsonify({
@@ -102,6 +115,8 @@ def api_stats():
         'total_projects': proj_row['total'] or 0,
         'total_achievements': ach_row['total'] or 0,
         'highlight_achievements': ach_row['highlights'] or 0,
+        'total_blockers': blockers_row['total'] or 0,
+        'blocker_hours_managed': round(blockers_row['hours_saved'] or 0, 1),
         'project_hours': project_hours,
         'category_hours': category_hours,
         'timeline': {
@@ -109,10 +124,11 @@ def api_stats():
             'regular': days_regular,
             'overtime': days_overtime
         },
-        'top_achievements': top_achievements
+        'top_achievements': top_achievements,
+        'recent_blockers': recent_blockers
     })
 
-# ----------------- PROJECTS -----------------
+# ----------------- PROIECTE INGINERIE MECANICĂ -----------------
 @app.route('/api/projects', methods=['GET', 'POST'])
 def api_projects():
     conn = get_connection()
@@ -123,15 +139,16 @@ def api_projects():
         name = data.get('name', '').strip()
         if not name:
             conn.close()
-            return jsonify({'error': 'Numele proiectului este obligatoriu'}), 400
+            return jsonify({'error': 'Numele ansamblului / proiectului mecanic este obligatoriu'}), 400
 
         c.execute('''
-            INSERT INTO projects (name, description, client, status, priority, color, target_hours, start_date, deadline)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO projects (name, description, client, cad_software, status, priority, color, target_hours, start_date, deadline)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             name,
             data.get('description', ''),
             data.get('client', ''),
+            data.get('cad_software', 'SolidWorks'),
             data.get('status', 'În Lucru'),
             data.get('priority', 'Medie'),
             data.get('color', '#3b82f6'),
@@ -150,7 +167,8 @@ def api_projects():
                COALESCE(ROUND(SUM(t.duration_minutes) / 60.0, 1), 0) as logged_hours,
                (SELECT COUNT(*) FROM tasks WHERE project_id = p.id) as total_tasks,
                (SELECT COUNT(*) FROM tasks WHERE project_id = p.id AND status = 'done') as done_tasks,
-               (SELECT COUNT(*) FROM achievements WHERE project_id = p.id) as total_achievements
+               (SELECT COUNT(*) FROM achievements WHERE project_id = p.id) as total_achievements,
+               (SELECT COUNT(*) FROM blockers WHERE project_id = p.id) as total_blockers
         FROM projects p
         LEFT JOIN time_entries t ON p.id = t.project_id
         GROUP BY p.id
@@ -168,12 +186,13 @@ def api_project_update(project_id):
 
     c.execute('''
         UPDATE projects
-        SET name = ?, description = ?, client = ?, status = ?, priority = ?, color = ?, target_hours = ?, start_date = ?, deadline = ?
+        SET name = ?, description = ?, client = ?, cad_software = ?, status = ?, priority = ?, color = ?, target_hours = ?, start_date = ?, deadline = ?
         WHERE id = ?
     ''', (
         data.get('name'),
         data.get('description'),
         data.get('client'),
+        data.get('cad_software', 'SolidWorks'),
         data.get('status'),
         data.get('priority'),
         data.get('color'),
@@ -195,7 +214,7 @@ def api_project_delete(project_id):
     conn.close()
     return jsonify({'success': True})
 
-# ----------------- TIME TRACKING -----------------
+# ----------------- PONTAJ ACTIVITĂȚI MECANICE -----------------
 @app.route('/api/time-entries', methods=['GET', 'POST'])
 def api_time_entries():
     conn = get_connection()
@@ -222,7 +241,7 @@ def api_time_entries():
             project_id,
             entry_date,
             duration_minutes,
-            data.get('category', 'Dezvoltare'),
+            data.get('category', 'Modelare CAD 3D'),
             data.get('description', ''),
             1 if data.get('is_overtime') else 0
         ))
@@ -232,14 +251,28 @@ def api_time_entries():
         return jsonify({'success': True, 'id': entry_id})
 
     # GET
-    limit = int(request.args.get('limit', 50))
-    c.execute('''
-        SELECT t.*, p.name as project_name, p.color as project_color
+    limit = int(request.args.get('limit', 60))
+    search = request.args.get('search', '').strip()
+    category = request.args.get('category', '').strip()
+
+    query = '''
+        SELECT t.*, p.name as project_name, p.color as project_color, p.cad_software
         FROM time_entries t
         LEFT JOIN projects p ON t.project_id = p.id
-        ORDER BY t.date DESC, t.id DESC
-        LIMIT ?
-    ''', (limit,))
+        WHERE 1=1
+    '''
+    params = []
+    if search:
+        query += " AND (t.description LIKE ? OR p.name LIKE ?)"
+        params.extend([f"%{search}%", f"%{search}%"])
+    if category:
+        query += " AND t.category = ?"
+        params.append(category)
+
+    query += " ORDER BY t.date DESC, t.id DESC LIMIT ?"
+    params.append(limit)
+
+    c.execute(query, params)
     entries = [dict(r) for r in c.fetchall()]
     conn.close()
     return jsonify(entries)
@@ -253,7 +286,7 @@ def api_time_entry_delete(entry_id):
     conn.close()
     return jsonify({'success': True})
 
-# ----------------- TIMER STATE -----------------
+# ----------------- CRONOMETRU LIVE -----------------
 @app.route('/api/timer')
 def api_timer():
     conn = get_connection()
@@ -292,7 +325,7 @@ def api_timer_start():
         WHERE id = 1
     ''', (
         project_id,
-        data.get('category', 'Dezvoltare'),
+        data.get('category', 'Modelare CAD 3D'),
         data.get('description', ''),
         1 if data.get('is_overtime') else 0,
         time.time()
@@ -315,7 +348,6 @@ def api_timer_stop():
     elapsed_seconds = int(time.time() - t['start_timestamp'])
     duration_minutes = max(1, round(elapsed_seconds / 60))
 
-    # Save to time_entries
     c.execute('''
         INSERT INTO time_entries (project_id, date, duration_minutes, category, description, is_overtime)
         VALUES (?, ?, ?, ?, ?, ?)
@@ -323,12 +355,11 @@ def api_timer_stop():
         t['project_id'],
         date.today().isoformat(),
         duration_minutes,
-        t['category'] or 'Dezvoltare',
-        t['description'] or 'Activitate înregistrată via Live Timer',
+        t['category'] or 'Modelare CAD 3D',
+        t['description'] or 'Sesiune activă înregistrată automat via Live Timer',
         t['is_overtime']
     ))
 
-    # Reset timer
     c.execute('''
         UPDATE active_timer
         SET is_running = 0, start_timestamp = NULL, description = ''
@@ -339,7 +370,7 @@ def api_timer_stop():
     conn.close()
     return jsonify({'success': True, 'duration_minutes': duration_minutes})
 
-# ----------------- ACHIEVEMENTS & BRAG DOCUMENT (FOR APPRAISAL) -----------------
+# ----------------- REALIZĂRI INGINERIE (BRAG SHEET PENTRU MĂRIRE) -----------------
 @app.route('/api/achievements', methods=['GET', 'POST'])
 def api_achievements():
     conn = get_connection()
@@ -351,7 +382,7 @@ def api_achievements():
         impact = data.get('impact_value', '').strip()
         if not title or not impact:
             conn.close()
-            return jsonify({'error': 'Titlul și Valoarea / Impactul sunt obligatorii!'}), 400
+            return jsonify({'error': 'Titlul și Rezultatul / Impactul sunt obligatorii!'}), 400
 
         project_id = data.get('project_id')
         if project_id in ('', 'null', None):
@@ -367,7 +398,7 @@ def api_achievements():
             data.get('date') or date.today().isoformat(),
             title,
             impact,
-            data.get('category', 'Eficiență & Valoare'),
+            data.get('category', 'Optimizare Proiectare & Cost'),
             data.get('feedback_received', ''),
             1 if data.get('is_highlight') else 0
         ))
@@ -376,9 +407,8 @@ def api_achievements():
         conn.close()
         return jsonify({'success': True, 'id': ach_id})
 
-    # GET
     c.execute('''
-        SELECT a.*, p.name as project_name, p.color as project_color
+        SELECT a.*, p.name as project_name, p.color as project_color, p.cad_software
         FROM achievements a
         LEFT JOIN projects p ON a.project_id = p.id
         ORDER BY a.is_highlight DESC, a.date DESC, a.id DESC
@@ -405,7 +435,116 @@ def api_achievement_delete(ach_id):
     conn.close()
     return jsonify({'success': True})
 
-# ----------------- TASKS -----------------
+# ----------------- SCUT & BLOCAJE TEHNICE (ÎN CAZ DE PROBLEME LA EVALUARE) -----------------
+@app.route('/api/blockers', methods=['GET', 'POST'])
+def api_blockers():
+    conn = get_connection()
+    c = conn.cursor()
+
+    if request.method == 'POST':
+        data = request.json or {}
+        title = data.get('title', '').strip()
+        description = data.get('description', '').strip()
+        solution = data.get('solution_applied', '').strip()
+
+        if not title or not description:
+            conn.close()
+            return jsonify({'error': 'Titlul și Descrierea blocajului sunt obligatorii'}), 400
+
+        project_id = data.get('project_id')
+        if project_id in ('', 'null', None):
+            project_id = None
+        else:
+            project_id = int(project_id)
+
+        c.execute('''
+            INSERT INTO blockers (project_id, date, title, cause_type, description, solution_applied, time_lost_hours, prevented_risk)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            project_id,
+            data.get('date') or date.today().isoformat(),
+            title,
+            data.get('cause_type', 'Modificare Cerințe Client'),
+            description,
+            solution,
+            float(data.get('time_lost_hours', 0) or 0),
+            data.get('prevented_risk', '')
+        ))
+        conn.commit()
+        bid = c.lastrowid
+        conn.close()
+        return jsonify({'success': True, 'id': bid})
+
+    c.execute('''
+        SELECT b.*, p.name as project_name, p.color as project_color
+        FROM blockers b
+        LEFT JOIN projects p ON b.project_id = p.id
+        ORDER BY b.date DESC, b.id DESC
+    ''')
+    blockers = [dict(r) for r in c.fetchall()]
+    conn.close()
+    return jsonify(blockers)
+
+@app.route('/api/blockers/<int:blocker_id>/delete', methods=['POST'])
+def api_blocker_delete(blocker_id):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('DELETE FROM blockers WHERE id = ?', (blocker_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+# ----------------- CALCULATOR MĂRIRE & ROI INGINEREASC -----------------
+@app.route('/api/salary-calculator', methods=['GET', 'POST'])
+def api_salary_calculator():
+    conn = get_connection()
+    c = conn.cursor()
+
+    if request.method == 'POST':
+        data = request.json or {}
+        c.execute('''
+            UPDATE salary_settings
+            SET current_net_salary = ?, target_raise_pct = ?, currency = ?
+            WHERE id = 1
+        ''', (
+            float(data.get('current_net_salary', 6500)),
+            float(data.get('target_raise_pct', 20)),
+            data.get('currency', 'RON')
+        ))
+        conn.commit()
+
+    c.execute('SELECT * FROM salary_settings WHERE id = 1')
+    settings = dict(c.fetchone())
+
+    # Get total overtime hours
+    c.execute('SELECT COALESCE(SUM(duration_minutes), 0) / 60.0 as overtime_hours FROM time_entries WHERE is_overtime = 1')
+    overtime_hours = round(c.fetchone()['overtime_hours'], 1)
+
+    # Standard 168 hours/month
+    hourly_net = round(settings['current_net_salary'] / 168.0, 2)
+    # Overtime legally compensated at minimum 175% in engineering/production
+    overtime_hourly_rate = round(hourly_net * 1.75, 2)
+    overtime_total_value = round(overtime_hours * overtime_hourly_rate, 2)
+
+    # Target raise requested
+    requested_raise_amount = round(settings['current_net_salary'] * (settings['target_raise_pct'] / 100.0), 2)
+    new_target_salary = round(settings['current_net_salary'] + requested_raise_amount, 2)
+
+    conn.close()
+
+    return jsonify({
+        'current_net_salary': settings['current_net_salary'],
+        'target_raise_pct': settings['target_raise_pct'],
+        'currency': settings['currency'],
+        'hourly_net': hourly_net,
+        'overtime_hours': overtime_hours,
+        'overtime_hourly_rate': overtime_hourly_rate,
+        'overtime_total_value': overtime_total_value,
+        'requested_raise_amount': requested_raise_amount,
+        'new_target_salary': new_target_salary
+    })
+
+# ----------------- TASKURI & ETAPE PROIECTARE -----------------
 @app.route('/api/tasks', methods=['GET', 'POST'])
 def api_tasks():
     conn = get_connection()
@@ -425,11 +564,12 @@ def api_tasks():
             project_id = int(project_id)
 
         c.execute('''
-            INSERT INTO tasks (project_id, title, status, due_date)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO tasks (project_id, title, stage, status, due_date)
+            VALUES (?, ?, ?, ?, ?)
         ''', (
             project_id,
             title,
+            data.get('stage', 'Concept 3D'),
             data.get('status', 'todo'),
             data.get('due_date', '')
         ))
@@ -439,7 +579,7 @@ def api_tasks():
         return jsonify({'success': True, 'id': task_id})
 
     c.execute('''
-        SELECT t.*, p.name as project_name, p.color as project_color
+        SELECT t.*, p.name as project_name, p.color as project_color, p.cad_software
         FROM tasks t
         LEFT JOIN projects p ON t.project_id = p.id
         ORDER BY CASE t.status WHEN 'todo' THEN 1 WHEN 'in_progress' THEN 2 ELSE 3 END, t.id DESC
@@ -470,7 +610,7 @@ def api_task_delete(task_id):
     conn.close()
     return jsonify({'success': True})
 
-# ----------------- APPRAISAL DOSSIER & EXPORTS -----------------
+# ----------------- RAPORT DE EVALUARE INGINERESC & EXPORTURI -----------------
 @app.route('/api/report')
 def api_report():
     conn = get_connection()
@@ -479,7 +619,6 @@ def api_report():
     start_date = request.args.get('start_date', (date.today() - timedelta(days=90)).isoformat())
     end_date = request.args.get('end_date', date.today().isoformat())
 
-    # Total hours in period
     c.execute('''
         SELECT 
             ROUND(SUM(duration_minutes) / 60.0, 1) as total_hours,
@@ -490,9 +629,8 @@ def api_report():
     ''', (start_date, end_date))
     overview = dict(c.fetchone() or {})
 
-    # Hours by project in period
     c.execute('''
-        SELECT p.name, p.client, p.status, ROUND(SUM(t.duration_minutes) / 60.0, 1) as hours
+        SELECT p.name, p.client, p.cad_software, p.status, ROUND(SUM(t.duration_minutes) / 60.0, 1) as hours
         FROM projects p
         JOIN time_entries t ON p.id = t.project_id
         WHERE t.date BETWEEN ? AND ?
@@ -501,15 +639,23 @@ def api_report():
     ''', (start_date, end_date))
     projects_breakdown = [dict(r) for r in c.fetchall()]
 
-    # Achievements in period
     c.execute('''
-        SELECT a.*, p.name as project_name
+        SELECT a.*, p.name as project_name, p.cad_software
         FROM achievements a
         LEFT JOIN projects p ON a.project_id = p.id
         WHERE a.date BETWEEN ? AND ?
         ORDER BY a.is_highlight DESC, a.date DESC
     ''', (start_date, end_date))
     achievements = [dict(r) for r in c.fetchall()]
+
+    c.execute('''
+        SELECT b.*, p.name as project_name
+        FROM blockers b
+        LEFT JOIN projects p ON b.project_id = p.id
+        WHERE b.date BETWEEN ? AND ?
+        ORDER BY b.date DESC
+    ''', (start_date, end_date))
+    blockers = [dict(r) for r in c.fetchall()]
 
     conn.close()
 
@@ -518,7 +664,8 @@ def api_report():
         'end_date': end_date,
         'overview': overview,
         'projects': projects_breakdown,
-        'achievements': achievements
+        'achievements': achievements,
+        'blockers': blockers
     })
 
 # Export to CSV
@@ -527,8 +674,8 @@ def export_csv():
     conn = get_connection()
     c = conn.cursor()
     c.execute('''
-        SELECT t.date, p.name as proiect, t.duration_minutes, ROUND(t.duration_minutes/60.0, 2) as ore,
-               t.category as categorie, t.description as descriere,
+        SELECT t.date, p.name as proiect, p.cad_software, t.duration_minutes, ROUND(t.duration_minutes/60.0, 2) as ore,
+               t.category as categorie_inginerie, t.description as descriere,
                CASE WHEN t.is_overtime = 1 THEN 'DA' ELSE 'NU' END as ore_suplimentare
         FROM time_entries t
         LEFT JOIN projects p ON t.project_id = p.id
@@ -539,17 +686,17 @@ def export_csv():
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['Data', 'Proiect', 'Minute', 'Ore', 'Categorie', 'Descriere', 'Ore Suplimentare'])
+    writer.writerow(['Data', 'Ansamblu/Proiect', 'Software CAD', 'Minute', 'Ore', 'Etapa Inginerie', 'Descriere', 'Ore Suplimentare'])
     for r in rows:
-        writer.writerow([r['date'], r['proiect'] or 'Nespecificat', r['duration_minutes'], r['ore'], r['categorie'], r['descriere'], r['ore_suplimentare']])
+        writer.writerow([r['date'], r['proiect'] or 'General', r['cad_software'] or '-', r['duration_minutes'], r['ore'], r['categorie_inginerie'], r['descriere'], r['ore_suplimentare']])
 
     return Response(
         output.getvalue(),
         mimetype="text/csv; charset=utf-8",
-        headers={"Content-disposition": f"attachment; filename=WorkPulse_Pontaj_{date.today().isoformat()}.csv"}
+        headers={"Content-disposition": f"attachment; filename=WorkPulse_Inginerie_{date.today().isoformat()}.csv"}
     )
 
-# Export Full Performance Dossier in Markdown
+# Export Full Dossier in Markdown
 @app.route('/export/markdown')
 def export_markdown():
     conn = get_connection()
@@ -560,7 +707,7 @@ def export_markdown():
     stats = c.fetchone()
 
     c.execute('''
-        SELECT p.name, p.status, ROUND(SUM(t.duration_minutes)/60.0, 1) as hours
+        SELECT p.name, p.cad_software, p.status, ROUND(SUM(t.duration_minutes)/60.0, 1) as hours
         FROM projects p
         LEFT JOIN time_entries t ON p.id = t.project_id
         GROUP BY p.id
@@ -575,47 +722,67 @@ def export_markdown():
         ORDER BY a.is_highlight DESC, a.date DESC
     ''')
     achievements = c.fetchall()
+
+    c.execute('''
+        SELECT b.*, p.name as project_name
+        FROM blockers b
+        LEFT JOIN projects p ON b.project_id = p.id
+        ORDER BY b.date DESC
+    ''')
+    blockers = c.fetchall()
     conn.close()
 
     lines = [
-        f"# 📋 Dosar de Performanță & Argumentare Mărire Salarială",
-        f"**Generat automat:** {today_str}",
-        f"**Aplicație:** WorkPulse Career Dashboard\n",
+        f"# 📋 Dosar de Performanță Tehnică & Justificare Mărire Salarială",
+        f"**Rol:** Inginer Proiectant Mecanic",
+        f"**Data Raport:** {today_str}\n",
         f"---",
-        f"## 1. 📊 Indicatori Cheie de Volum & Implicare",
-        f"- **Total Ore Lucrate Înregistrate:** {stats['tot'] or 0} ore",
-        f"- **Ore Suplimentare (Overtime):** {stats['ovt'] or 0} ore",
-        f"- **Proiecte Implicate:** {len(projects)}\n",
-        f"## 2. 🚀 Distribuție Efort pe Proiecte"
+        f"## 1. 📊 Indicatori de Volum & Ore Dedicate",
+        f"- **Total Ore Proiectare & Asistență Tehnică:** {stats['tot'] or 0} ore",
+        f"- **Ore Suplimentare (Overtime Neplanificat):** {stats['ovt'] or 0} ore",
+        f"- **Proiecte / Ansambluri Gestionate:** {len(projects)}\n",
+        f"## 2. 🚀 Repartizare Efort pe Proiecte Mecanice"
     ]
 
     for p in projects:
-        lines.append(f"- **{p['name']}** ({p['status']}): {p['hours'] or 0} ore")
+        lines.append(f"- **{p['name']}** [CAD: {p['cad_software']}] ({p['status']}): {p['hours'] or 0} ore")
 
-    lines.append("\n## 3. 🏆 Realizări de Impact & Valoare Adusă Companiei")
-    lines.append("*Notă: Aceste puncte demonstrează ROI-ul (Return on Investment) și valoarea cuantificabilă adusă echipei.*\n")
+    lines.append("\n## 3. 🛡️ Scut de Apărare: Blocaje & Incidente Tehnologice Depășite")
+    lines.append("*Dovezi clare pentru situații neprevăzute cauzate de clienți, furnizori sau atelier pe care le-am rezolvat rapid:*\n")
+
+    for b in blockers:
+        lines.append(f"### ⚠️ {b['title']} ({b['date']}) - {b['cause_type']}")
+        lines.append(f"- **Proiect:** {b['project_name'] or 'Atelier / General'}")
+        lines.append(f"- **Situație / Cauză:** {b['description']}")
+        lines.append(f"- **Soluția Inginerească Aplicată:** {b['solution_applied']}")
+        if b['prevented_risk']:
+            lines.append(f"- **Risc / Cost Prevenit:** {b['prevented_risk']}")
+        lines.append("")
+
+    lines.append("## 4. 🏆 Realizări Cheie: Economii de Costuri, Materiale & Rebuturi Evitate")
+    lines.append("*Valoare cuantificabilă adusă companiei pentru susținerea măririi salariale:*\n")
 
     for a in achievements:
         star = "⭐ [TOP ARGUMENT MĂRIRE] " if a['is_highlight'] else ""
         lines.append(f"### {star}{a['title']} ({a['date']})")
-        lines.append(f"- **Proiect:** {a['project_name'] or 'General / Echipă'}")
+        lines.append(f"- **Proiect:** {a['project_name'] or 'General'}")
         lines.append(f"- **Categorie:** {a['category']}")
-        lines.append(f"- **Rezultat Cuantificabil & Impact:** {a['impact_value']}")
+        lines.append(f"- **Rezultat Tehnic & Financiar:** {a['impact_value']}")
         if a['feedback_received']:
-            lines.append(f"- **Feedback / Aprecieri:** _{a['feedback_received']}_")
+            lines.append(f"- **Aprecieri / Feedback:** _{a['feedback_received']}_")
         lines.append("")
 
-    lines.append("## 4. 💡 Argumente Cheie pentru Negocierea Măririi Salariale")
-    lines.append("1. **Rezultate Măsurabile:** Toate proiectele au fost livrate cu impact direct asupra vitezei și calității.")
-    lines.append("2. **Disponibilitate și Loialitate:** Orele suplimentare înregistrate demonstrează intervenții rapide în momente critice.")
-    lines.append("3. **Autonomie și Mentorat:** Am redus blocajele din echipă și am accelerat integrarea noilor colegi.")
-    lines.append("\n---\n*Generat de WorkPulse pe Termux.*")
+    lines.append("## 5. 💡 Concluzie pentru Negocierea Salarială")
+    lines.append("1. **Reducerea costurilor de fabricație:** Prin verificări 3D temeinice am prevenit rebutarea reperelor și întârzierile de asamblare.")
+    lines.append("2. **Flexibilitate și Viteză:** Reacție imediată la modificările cerute de clienți sau la limitările tehnologice din atelier.")
+    lines.append("3. **Disponibilitate:** Orele suplimentare atestă implicarea totală pentru respectarea termenelor de livrare.")
+    lines.append("\n---\n*Generat automat cu WorkPulse.*")
 
     md_content = "\n".join(lines)
     return Response(
         md_content,
         mimetype="text/markdown; charset=utf-8",
-        headers={"Content-disposition": f"attachment; filename=Dosar_Evaluare_Marire_{today_str}.md"}
+        headers={"Content-disposition": f"attachment; filename=Dosar_Evaluare_Inginer_Mecanic_{today_str}.md"}
     )
 
 # Save backup directly to Phone Storage
@@ -633,27 +800,29 @@ def save_to_storage():
     c.execute('SELECT * FROM achievements')
     achievements = [dict(r) for r in c.fetchall()]
 
+    c.execute('SELECT * FROM blockers')
+    blockers = [dict(r) for r in c.fetchall()]
+
     c.execute('SELECT * FROM tasks')
     tasks = [dict(r) for r in c.fetchall()]
 
     conn.close()
 
     backup_data = {
-        'version': 1.0,
+        'version': '2.0-mechanical',
         'created_at': datetime.now().isoformat(),
         'projects': projects,
         'time_entries': time_entries,
         'achievements': achievements,
+        'blockers': blockers,
         'tasks': tasks
     }
 
-    # Target directory on phone
     target_dir = os.path.expanduser('~/storage/shared/Download')
     if not os.path.exists(target_dir):
-        # Fallback to local downloads
         target_dir = os.path.dirname(os.path.dirname(__file__))
 
-    filename = f"workpulse_backup_{date.today().isoformat()}.json"
+    filename = f"workpulse_inginerie_backup_{date.today().isoformat()}.json"
     full_path = os.path.join(target_dir, filename)
 
     with open(full_path, 'w', encoding='utf-8') as f:
@@ -667,6 +836,4 @@ def save_to_storage():
     })
 
 if __name__ == '__main__':
-    # Listen on all interfaces so user can open from any browser on phone (localhost:5000)
-    print("Starting WorkPulse Dashboard on http://127.0.0.1:5000 ...")
     app.run(host='0.0.0.0', port=5000, debug=False)

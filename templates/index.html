@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WorkPulse - Monitorizare Muncă & Dosar Evaluare</title>
+    <title>WorkPulse - Inginer Proiectant Mecanic</title>
     <!-- PWA Settings -->
     <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#4f46e5">
+    <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,25 +17,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            900: '#312e81',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -44,194 +25,168 @@
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            body { background: white !important; color: black !important; font-size: 12pt; }
-            .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; }
-            .border { border: 1px solid #e2e8f0 !important; }
-        }
-        .active-tab {
-            color: #4f46e5;
-            border-bottom: 2px solid #4f46e5;
-            font-weight: 600;
+            body { background: white !important; color: black !important; font-size: 11pt; }
+            .shadow-sm, .shadow-md, .shadow-lg, .shadow-2xl { box-shadow: none !important; }
+            .border { border: 1px solid #cbd5e1 !important; }
         }
         .active-nav-btn {
-            background-color: #4f46e5;
+            background-color: #2563eb;
             color: white !important;
         }
-        /* Mobile touch scroll improvements */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen pb-20 md:pb-6">
+<body class="bg-slate-950 text-slate-100 min-h-screen pb-20 md:pb-6">
 
-    <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3">
+    <!-- Top Sticky Header -->
+    <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-2.5">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                    <i class="fa-solid fa-chart-line text-white text-base"></i>
+            <div class="flex items-center space-x-2.5">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-compass-drafting text-white text-base"></i>
                 </div>
                 <div>
-                    <h1 class="text-base font-bold tracking-tight text-white leading-tight">WorkPulse <span class="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full font-medium ml-1">Pro</span></h1>
-                    <p class="text-[11px] text-slate-400">Activitate & Dosar Evaluare Mărire</p>
+                    <h1 class="text-sm font-bold tracking-tight text-white leading-tight">WorkPulse <span class="text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.2 rounded font-medium">CAD Pro</span></h1>
+                    <p class="text-[10px] text-slate-400">Inginer Proiectant Mecanic • Monitorizare & Evaluare</p>
                 </div>
             </div>
 
             <div class="flex items-center space-x-2">
-                <button onclick="installPWA()" id="header-install-btn" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40 text-[11px] font-bold flex items-center gap-1 transition">
+                <button onclick="installPWA()" id="header-install-btn" class="px-2.5 py-1 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/40 text-[11px] font-bold flex items-center gap-1 transition">
                     <i class="fa-solid fa-mobile-screen-button"></i> <span>Instalează</span>
                 </button>
-                <!-- Quick Action Timer Badge -->
-                <div id="header-timer-badge" class="hidden flex items-center space-x-2 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 px-3 py-1 rounded-full text-xs font-mono font-medium animate-pulse">
+                <div id="header-timer-badge" class="hidden flex items-center space-x-2 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 px-2.5 py-1 rounded-full text-xs font-mono font-medium animate-pulse">
                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                     <span id="header-timer-clock">00:00:00</span>
                 </div>
             </div>
         </div>
 
-        <!-- Navigation Tabs (Scrollable on phone) -->
-        <nav class="max-w-6xl mx-auto mt-2 flex space-x-1 overflow-x-auto no-scrollbar pt-1 text-xs">
+        <!-- Navigation Tabs (Touch-scrollable on phone) -->
+        <nav class="max-w-6xl mx-auto mt-2 flex space-x-1.5 overflow-x-auto no-scrollbar pt-1 text-xs">
             <button onclick="switchTab('dashboard')" id="nav-dashboard" class="active-nav-btn px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
                 <i class="fa-solid fa-gauge-high"></i> Dashboard
             </button>
+            <button onclick="switchTab('blockers')" id="nav-blockers" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
+                <i class="fa-solid fa-shield-halved text-rose-400"></i> Scut & Blocaje
+            </button>
             <button onclick="switchTab('projects')" id="nav-projects" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
-                <i class="fa-solid fa-folder-tree"></i> Proiecte
+                <i class="fa-solid fa-cubes-stacked text-blue-400"></i> Ansambluri CAD
             </button>
             <button onclick="switchTab('time')" id="nav-time" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
-                <i class="fa-solid fa-clock"></i> Pontaj & Ore
+                <i class="fa-solid fa-clock text-amber-400"></i> Pontaj Etape
             </button>
             <button onclick="switchTab('brag')" id="nav-brag" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
-                <i class="fa-solid fa-award text-amber-400"></i> Dosar Mărire
+                <i class="fa-solid fa-trophy text-amber-400"></i> Dosar Mărire & ROI
             </button>
             <button onclick="switchTab('report')" id="nav-report" class="px-3 py-1.5 rounded-lg text-slate-300 font-medium whitespace-nowrap transition flex items-center gap-1.5">
-                <i class="fa-solid fa-file-contract text-indigo-400"></i> Raport Evaluare
+                <i class="fa-solid fa-file-contract text-emerald-400"></i> Raport Evaluare
             </button>
         </nav>
     </header>
 
     <!-- Main Container -->
-    <main class="max-w-6xl mx-auto px-4 py-4 space-y-6">
+    <main class="max-w-6xl mx-auto px-4 py-4 space-y-5">
 
         <!-- ================= TAB 1: DASHBOARD ================= -->
-        <section id="tab-dashboard" class="space-y-5">
+        <section id="tab-dashboard" class="space-y-4">
 
-            <!-- Live Timer Widget Banner -->
-            <div class="bg-gradient-to-r from-slate-800 to-indigo-950/70 border border-slate-700/80 rounded-2xl p-4 shadow-xl">
+            <!-- Live Timer Banner for Mechanical Tasks -->
+            <div class="bg-gradient-to-r from-slate-900 via-blue-950/40 to-slate-900 border border-blue-500/30 rounded-2xl p-4 shadow-xl">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div class="flex items-center space-x-3">
-                        <div id="timer-icon-box" class="w-11 h-11 rounded-xl bg-slate-700/60 flex items-center justify-center text-slate-300 text-lg">
+                        <div id="timer-icon-box" class="w-11 h-11 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center text-lg border border-slate-700">
                             <i class="fa-solid fa-stopwatch"></i>
                         </div>
                         <div>
-                            <span class="text-[11px] font-semibold tracking-wider uppercase text-slate-400">Cronometru Muncă Live</span>
+                            <span class="text-[10px] font-semibold tracking-wider uppercase text-blue-400">Sesiune Proiectare Live</span>
                             <div class="text-2xl font-black font-mono tracking-tight text-white" id="live-timer-display">00:00:00</div>
                         </div>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <div id="timer-status-text" class="text-xs text-slate-400 flex items-center gap-1">
-                            <span>Status:</span> <span class="font-medium text-slate-300">Oprit</span>
-                        </div>
-                        <button id="btn-toggle-timer" onclick="handleTimerClick()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs tracking-wide shadow-lg shadow-indigo-600/30 flex items-center gap-1.5 transition active:scale-95">
-                            <i class="fa-solid fa-play"></i> <span>Pornește Sesiune</span>
+                        <div id="timer-status-text" class="text-xs text-slate-400">Status: <span class="font-medium text-slate-300">Oprit</span></div>
+                        <button id="btn-toggle-timer" onclick="handleTimerClick()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-lg shadow-blue-600/30 flex items-center gap-1.5 transition active:scale-95">
+                            <i class="fa-solid fa-play"></i> <span>Start Sesiune CAD</span>
                         </button>
-                        <button onclick="openManualTimeModal()" class="px-3 py-2 rounded-xl bg-slate-700/70 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1 transition">
-                            <i class="fa-solid fa-plus"></i> Adaugă Manual
+                        <button onclick="openManualTimeModal()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition">
+                            <i class="fa-solid fa-plus"></i> Pontaj Manual
                         </button>
                     </div>
                 </div>
 
-                <!-- Timer active description info -->
-                <div id="timer-active-info" class="hidden mt-3 pt-3 border-t border-slate-700/60 text-xs flex flex-wrap items-center justify-between gap-2 text-slate-300">
+                <div id="timer-active-info" class="hidden mt-3 pt-3 border-t border-slate-800 text-xs flex flex-wrap items-center justify-between gap-2 text-slate-300">
                     <div>
-                        <span class="text-slate-400">Activitate:</span> <strong id="timer-current-task">Codare</strong>
+                        <span class="text-slate-400">Etapă:</span> <strong id="timer-current-task">Modelare CAD 3D</strong>
                         <span class="mx-1.5 text-slate-600">•</span>
-                        <span class="text-slate-400">Proiect:</span> <strong id="timer-current-project" class="text-indigo-300">General</strong>
+                        <span class="text-slate-400">Ansamblu:</span> <strong id="timer-current-project" class="text-blue-300">General</strong>
                     </div>
                     <div id="timer-overtime-pill" class="hidden bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full text-[10px] font-bold">
-                        🔥 ORE SUPLIMENTARE
+                        🔥 ORE SUPLIMENTARE (OVERTIME)
                     </div>
                 </div>
             </div>
 
-            <!-- Top Metric Cards (Optimized for Mobile Grid) -->
+            <!-- Metric Cards (Inginerie Mecanică) -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <!-- Total Ore -->
-                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-3.5 flex flex-col justify-between">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
                     <div class="flex items-center justify-between text-slate-400 mb-1">
-                        <span class="text-[11px] font-medium uppercase tracking-wider">Total Ore</span>
-                        <i class="fa-regular fa-clock text-indigo-400 text-sm"></i>
+                        <span class="text-[10px] font-semibold uppercase tracking-wider">Total Ore CAD</span>
+                        <i class="fa-regular fa-clock text-blue-400 text-sm"></i>
                     </div>
-                    <div>
-                        <div class="text-2xl font-black text-white" id="stat-total-hours">0</div>
-                        <div class="text-[11px] text-slate-400 mt-0.5">ore pontate</div>
-                    </div>
+                    <div class="text-2xl font-black text-white" id="stat-total-hours">0</div>
+                    <div class="text-[10px] text-slate-400 mt-0.5">proiectare & urmărire</div>
                 </div>
 
-                <!-- Ore Suplimentare (CRITICAL FOR SALARY EVALUATION) -->
-                <div class="bg-slate-800/80 border border-amber-500/30 rounded-xl p-3.5 flex flex-col justify-between bg-gradient-to-br from-slate-800 to-amber-950/20">
+                <div class="bg-slate-900 border border-amber-500/30 rounded-xl p-3.5 bg-gradient-to-br from-slate-900 to-amber-950/20">
                     <div class="flex items-center justify-between text-amber-400 mb-1">
-                        <span class="text-[11px] font-semibold uppercase tracking-wider">Overtime</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Overtime</span>
                         <i class="fa-solid fa-fire text-amber-400 text-sm"></i>
                     </div>
-                    <div>
-                        <div class="text-2xl font-black text-amber-300" id="stat-overtime-hours">0</div>
-                        <div class="text-[11px] text-amber-400/80 mt-0.5">ore suplimentare</div>
-                    </div>
+                    <div class="text-2xl font-black text-amber-300" id="stat-overtime-hours">0</div>
+                    <div class="text-[10px] text-amber-400/80 mt-0.5">ore suplimentare atelier/CAD</div>
                 </div>
 
-                <!-- Proiecte Active -->
-                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-3.5 flex flex-col justify-between">
-                    <div class="flex items-center justify-between text-slate-400 mb-1">
-                        <span class="text-[11px] font-medium uppercase tracking-wider">Proiecte</span>
-                        <i class="fa-solid fa-diagram-project text-blue-400 text-sm"></i>
+                <div class="bg-slate-900 border border-rose-500/30 rounded-xl p-3.5 bg-gradient-to-br from-slate-900 to-rose-950/20">
+                    <div class="flex items-center justify-between text-rose-400 mb-1">
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Scut & Blocaje</span>
+                        <i class="fa-solid fa-shield-halved text-rose-400 text-sm"></i>
                     </div>
-                    <div>
-                        <div class="text-2xl font-black text-white" id="stat-active-projects">0</div>
-                        <div class="text-[11px] text-slate-400 mt-0.5"><span id="stat-completed-projects">0</span> livrate cu succes</div>
-                    </div>
+                    <div class="text-2xl font-black text-rose-300" id="stat-total-blockers">0</div>
+                    <div class="text-[10px] text-rose-400/80 mt-0.5"><span id="stat-blocker-hours">0</span>h probleme rezolvate</div>
                 </div>
 
-                <!-- Realizări de Top (Argumente Mărire) -->
-                <div class="bg-slate-800/80 border border-emerald-500/30 rounded-xl p-3.5 flex flex-col justify-between bg-gradient-to-br from-slate-800 to-emerald-950/20">
+                <div class="bg-slate-900 border border-emerald-500/30 rounded-xl p-3.5 bg-gradient-to-br from-slate-900 to-emerald-950/20">
                     <div class="flex items-center justify-between text-emerald-400 mb-1">
-                        <span class="text-[11px] font-semibold uppercase tracking-wider">Top Wins</span>
-                        <i class="fa-solid fa-trophy text-emerald-400 text-sm"></i>
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Top Realizări</span>
+                        <i class="fa-solid fa-award text-emerald-400 text-sm"></i>
                     </div>
-                    <div>
-                        <div class="text-2xl font-black text-emerald-300" id="stat-highlights">0</div>
-                        <div class="text-[11px] text-emerald-400/80 mt-0.5">argumente pentru mărire</div>
-                    </div>
+                    <div class="text-2xl font-black text-emerald-300" id="stat-highlights">0</div>
+                    <div class="text-[10px] text-emerald-400/80 mt-0.5">argumente tari pt. mărire</div>
                 </div>
             </div>
 
-            <!-- Charts Section (Responsive vertical stacking on phone) -->
+            <!-- Charts: Etape Inginerie & Distribuție Proiecte -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <!-- Bar Chart: Ore lucrate in ultimele 14 zile -->
-                <div class="bg-slate-800/80 border border-slate-700/70 rounded-2xl p-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-chart-column text-indigo-400"></i> Ore Ultimele 14 Zile
+                            <i class="fa-solid fa-chart-column text-blue-400"></i> Trend Ore (Ultimele 14 Zile)
                         </h3>
-                        <span class="text-[10px] text-slate-400">Normale vs Overtime</span>
+                        <span class="text-[10px] text-slate-500">Normale vs Overtime</span>
                     </div>
                     <div class="h-56 relative">
                         <canvas id="chart-timeline"></canvas>
                     </div>
                 </div>
 
-                <!-- Doughnut Chart: Distributie pe Proiecte -->
-                <div class="bg-slate-800/80 border border-slate-700/70 rounded-2xl p-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-chart-pie text-violet-400"></i> Timp pe Proiecte
+                            <i class="fa-solid fa-chart-pie text-cyan-400"></i> Repartizare pe Ansambluri CAD
                         </h3>
-                        <span class="text-[10px] text-slate-400">Ore cumulate</span>
+                        <span class="text-[10px] text-slate-500">Ore cumulate</span>
                     </div>
                     <div class="h-56 relative flex items-center justify-center">
                         <canvas id="chart-projects"></canvas>
@@ -239,198 +194,256 @@
                 </div>
             </div>
 
-            <!-- Top Highlights for Appraisal Showcase -->
-            <div class="bg-slate-800/90 border border-indigo-500/30 rounded-2xl p-4">
+            <!-- Top Highlights for Salary Review -->
+            <div class="bg-slate-900 border border-blue-500/30 rounded-2xl p-4">
                 <div class="flex items-center justify-between mb-3">
                     <div>
                         <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
-                            <i class="fa-solid fa-star text-amber-400"></i> Realizări Cheie Pregătite Pentru Evaluare
+                            <i class="fa-solid fa-star text-amber-400"></i> Realizări Cheie Pregătite Pentru Mărire
                         </h3>
-                        <p class="text-[11px] text-slate-400">Dovezile concrete cu care mergi la negocierea măririi de salariu</p>
+                        <p class="text-[11px] text-slate-400">Rebuturi prevenite prin verificare 3D, optimizări de greutate și dispozitive de producție</p>
                     </div>
-                    <button onclick="switchTab('brag')" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">Vezi toate →</button>
+                    <button onclick="switchTab('brag')" class="text-xs text-blue-400 hover:text-blue-300 font-semibold">Vezi toate →</button>
                 </div>
-                <div id="dashboard-highlights-list" class="space-y-2.5">
-                    <!-- Populated by JS -->
-                </div>
+                <div id="dashboard-highlights-list" class="space-y-2.5"></div>
             </div>
         </section>
 
-        <!-- ================= TAB 2: PROJECTS ================= -->
+        <!-- ================= TAB 2: SCUT & BLOCAJE ================= -->
+        <section id="tab-blockers" class="hidden space-y-4">
+            <div class="bg-gradient-to-r from-rose-950/40 via-slate-900 to-slate-900 border border-rose-500/40 rounded-2xl p-4">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 bg-rose-500/20 text-rose-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full mb-1.5 border border-rose-500/30">
+                            <i class="fa-solid fa-shield-halved"></i> SCUT DE APĂRARE LA EVALUARE
+                        </div>
+                        <h2 class="text-base font-bold text-white">Jurnalul de Blocaje, Modificări Client & Incidente</h2>
+                        <p class="text-xs text-slate-300 mt-1">
+                            Aici notezi tot ce a cauzat întârzieri fără vina ta (cerințe modificate de client pe ultima sută de metri, lipsă mostre/cote de la furnizori, limitări de scule în atelier). La evaluare, ai data exactă și soluția prin care tu ai deblocat situația!
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-slate-400">Ai <strong id="blocker-count-badge" class="text-rose-400">0</strong> obstacole documentate</span>
+                    <button onclick="openNewBlockerModal()" class="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-rose-600/30 transition">
+                        <i class="fa-solid fa-plus"></i> Înregistrează Blocaj / Incident
+                    </button>
+                </div>
+            </div>
+
+            <div id="blockers-list" class="space-y-3"></div>
+        </section>
+
+        <!-- ================= TAB 3: PROIECTE & ANSAMBLURI CAD ================= -->
         <section id="tab-projects" class="hidden space-y-4">
             <div class="flex items-center justify-between flex-wrap gap-2">
                 <div>
-                    <h2 class="text-lg font-bold text-white">Proiectele Mele</h2>
-                    <p class="text-xs text-slate-400">Monitorizează progresul, orele dedicate și livrabilele</p>
+                    <h2 class="text-base font-bold text-white">Proiecte & Ansambluri Mecanice</h2>
+                    <p class="text-xs text-slate-400">Urmărește orele, software-ul CAD, desenele de execuție și termenele</p>
                 </div>
-                <button onclick="openNewProjectModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/30 transition">
-                    <i class="fa-solid fa-folder-plus"></i> Proiect Nou
+                <button onclick="openNewProjectModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-blue-600/30 transition">
+                    <i class="fa-solid fa-plus"></i> Ansamblu / Proiect Nou
                 </button>
             </div>
 
-            <!-- Project Filter Pills -->
-            <div class="flex space-x-2 overflow-x-auto no-scrollbar text-xs">
-                <button onclick="filterProjects('all')" class="proj-filter active-filter px-3 py-1 rounded-lg bg-slate-700 text-white font-medium">Toate</button>
-                <button onclick="filterProjects('În Lucru')" class="proj-filter px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white">În Lucru</button>
-                <button onclick="filterProjects('Finalizat')" class="proj-filter px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white">Finalizate</button>
-            </div>
-
             <!-- Projects Grid -->
-            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                <!-- Injected via JS -->
-            </div>
+            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
         </section>
 
-        <!-- ================= TAB 3: PONTAJ & ORE ================= -->
+        <!-- ================= TAB 4: PONTAJ ETAPE INGINERIE ================= -->
         <section id="tab-time" class="hidden space-y-4">
             <div class="flex items-center justify-between flex-wrap gap-2">
                 <div>
-                    <h2 class="text-lg font-bold text-white">Pontaj & Jurnal Activități</h2>
-                    <p class="text-xs text-slate-400">Evidența strictă a timpului lucrat și a orelor suplimentare</p>
+                    <h2 class="text-base font-bold text-white">Pontaj Activități de Proiectare</h2>
+                    <p class="text-xs text-slate-400">Evidența strictă pe etape: Modelare 3D, Desene 2D, FEA, ECN, Atelier</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <a href="/export/csv" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1 transition">
+                    <a href="/export/csv" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1 transition">
                         <i class="fa-solid fa-file-csv text-emerald-400"></i> Export CSV
                     </a>
-                    <button onclick="openManualTimeModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/30 transition">
+                    <button onclick="openManualTimeModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-blue-600/30 transition">
                         <i class="fa-solid fa-plus"></i> Înregistrează Ore
                     </button>
                 </div>
             </div>
 
-            <!-- Time Entries List -->
-            <div class="bg-slate-800/80 border border-slate-700/70 rounded-2xl p-3.5 overflow-hidden">
-                <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1 flex items-center justify-between">
-                    <span>Istoric Zile & Activități</span>
-                    <span id="entries-count-badge" class="text-[11px] text-slate-500">0 înregistrări</span>
+            <!-- Filters Bar -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex flex-col sm:flex-row gap-2">
+                <div class="flex-1 relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                    <input type="text" id="time-search-input" onkeyup="debounceLoadTimeEntries()" placeholder="Caută după descriere piesă / ansamblu..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500">
                 </div>
-                <div id="time-entries-list" class="space-y-2.5 divide-y divide-slate-700/50">
-                    <!-- Injected via JS -->
-                </div>
+                <select id="time-filter-category" onchange="loadTimeEntries()" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500">
+                    <option value="">Toate Etapele</option>
+                    <option value="Modelare CAD 3D">Modelare CAD 3D</option>
+                    <option value="Desene de Execuție 2D & BOM">Desene 2D & BOM</option>
+                    <option value="Calcule & Simulări FEA">Calcule & Simulări FEA</option>
+                    <option value="Modificări Proiectare (ECN)">Modificări (ECN)</option>
+                    <option value="Asistență Tehnică Atelier">Asistență Atelier / Montaj</option>
+                    <option value="Documentație Tehnică">Documentație Tehnică</option>
+                    <option value="Ore Suplimentare">Ore Suplimentare</option>
+                </select>
+            </div>
+
+            <!-- Time entries list -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
+                <div id="time-entries-list" class="space-y-2.5 divide-y divide-slate-800"></div>
             </div>
         </section>
 
-        <!-- ================= TAB 4: DOSAR MĂRIRE (BRAG SHEET) ================= -->
+        <!-- ================= TAB 5: DOSAR MĂRIRE & CALCULATOR ROI ================= -->
         <section id="tab-brag" class="hidden space-y-4">
-            <div class="bg-gradient-to-r from-amber-950/40 via-slate-800 to-indigo-950/40 border border-amber-500/30 rounded-2xl p-4">
-                <div class="flex items-start justify-between gap-3">
-                    <div>
-                        <div class="inline-flex items-center gap-1.5 bg-amber-500/20 text-amber-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full mb-1.5 border border-amber-500/30">
-                            <i class="fa-solid fa-award"></i> BRAG DOCUMENT • INSTRUMENT NEGOCIERE
+            <!-- Salary & ROI Calculator Card -->
+            <div class="bg-slate-900 border border-emerald-500/40 rounded-2xl p-4 bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/20">
+                <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2.5">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
+                            <i class="fa-solid fa-calculator"></i>
                         </div>
-                        <h2 class="text-lg font-bold text-white leading-snug">Jurnal de Valoare & Realizări Personale</h2>
-                        <p class="text-xs text-slate-300 mt-1">
-                            La evaluarea de performanță nu contează doar că ai muncit, ci <strong>valoarea concretă adusă companiei</strong> (timp salvat, costuri reduse, bug-uri critice oprite, leadership). Marchează realizările cu steluță ⭐ pentru a le folosi în fața conducerii!
-                        </p>
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Calculator ROI & Justificare Financiară Mărire</h3>
+                            <p class="text-[10px] text-slate-400">Valoarea monetară a orelor suplimentare și a economiilor de proiectare</p>
+                        </div>
                     </div>
                 </div>
-                <div class="mt-3.5 pt-3 border-t border-slate-700/70 flex flex-wrap items-center justify-between gap-2">
-                    <span class="text-xs text-slate-400">Ai <strong id="brag-star-count" class="text-amber-400">0</strong> argumente de top bifate</span>
-                    <button onclick="openNewAchievementModal()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-amber-500/20 transition">
-                        <i class="fa-solid fa-plus"></i> Înregistrează Realizare Nouă
-                    </button>
-                </div>
-            </div>
 
-            <!-- Achievements List -->
-            <div id="achievements-list" class="space-y-3">
-                <!-- Injected via JS -->
-            </div>
-        </section>
-
-        <!-- ================= TAB 5: RAPORT EVALUARE ================= -->
-        <section id="tab-report" class="hidden space-y-5">
-            <div class="no-print bg-slate-800/80 border border-slate-700/70 rounded-2xl p-4">
-                <h2 class="text-lg font-bold text-white mb-1">Generator Dosar Evaluare & Mărire</h2>
-                <p class="text-xs text-slate-400 mb-4">Selectează perioada analizată și generează dosarul complet gata de printat sau exportat.</p>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 text-xs">
                     <div>
-                        <label class="block text-[11px] font-medium text-slate-400 mb-1">De la data:</label>
-                        <input type="date" id="report-start-date" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-[11px] text-slate-400 mb-1">Salariul Tău Net Lunar (RON):</label>
+                        <input type="number" id="calc-current-salary" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-medium text-slate-400 mb-1">Până la data:</label>
-                        <input type="date" id="report-end-date" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-[11px] text-slate-400 mb-1">Mărire Dorită (%):</label>
+                        <input type="number" id="calc-raise-pct" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-emerald-400 font-bold">
                     </div>
                     <div class="flex items-end">
-                        <button onclick="loadReportData()" class="w-full px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center justify-center gap-2 transition">
+                        <button onclick="saveSalarySettings()" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
+                            Recalculează
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Calculated Metrics Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-800 text-center">
+                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <div class="text-[10px] text-slate-400">Tarif Orar Net</div>
+                        <div class="text-base font-black text-white mt-0.5" id="calc-hourly-rate">0 RON/h</div>
+                    </div>
+                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <div class="text-[10px] text-amber-400">Total Overtime</div>
+                        <div class="text-base font-black text-amber-300 mt-0.5" id="calc-overtime-hours">0 h</div>
+                    </div>
+                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <div class="text-[10px] text-amber-400">Valoare Ore Suplimentare (175%)</div>
+                        <div class="text-base font-black text-amber-400 mt-0.5" id="calc-overtime-value">0 RON</div>
+                    </div>
+                    <div class="bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/40">
+                        <div class="text-[10px] text-emerald-300 font-bold">Mărire Lunar Cerută</div>
+                        <div class="text-base font-black text-emerald-400 mt-0.5" id="calc-target-raise">+0 RON</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements Header -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-bold text-white">Realizări Tehnice de Impact (Brag Document)</h3>
+                    <p class="text-xs text-slate-400">Rebuturi evitate, optimizări de greutate, standardizări de piese</p>
+                </div>
+                <button onclick="openNewAchievementModal()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition">
+                    <i class="fa-solid fa-plus"></i> Înregistrează Realizare
+                </button>
+            </div>
+
+            <div id="achievements-list" class="space-y-3"></div>
+        </section>
+
+        <!-- ================= TAB 6: RAPORT EVALUARE ================= -->
+        <section id="tab-report" class="hidden space-y-4">
+            <div class="no-print bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                <h2 class="text-base font-bold text-white mb-1">Generator Dosar Evaluare & Mărire Salarială</h2>
+                <p class="text-xs text-slate-400 mb-4">Generează dosarul complet structurat pentru ședința de evaluare cu managerul sau conducerea.</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">De la data:</label>
+                        <input type="date" id="report-start-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Până la data:</label>
+                        <input type="date" id="report-end-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="loadReportData()" class="w-full px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center justify-center gap-2 transition">
                             <i class="fa-solid fa-rotate"></i> Actualizează Raport
                         </button>
                     </div>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-700">
+                <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-800">
                     <button onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition">
                         <i class="fa-solid fa-print"></i> Printează / Salvează PDF
                     </button>
-                    <a href="/export/markdown" class="px-3.5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-medium flex items-center gap-1.5 transition">
-                        <i class="fa-solid fa-file-lines text-indigo-400"></i> Descarcă Markdown (.md)
+                    <a href="/export/markdown" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-file-lines text-blue-400"></i> Descarcă Markdown (.md)
                     </a>
-                    <button onclick="backupToPhone()" class="px-3.5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-medium flex items-center gap-1.5 transition">
+                    <button onclick="backupToPhone()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium flex items-center gap-1.5 transition">
                         <i class="fa-solid fa-download text-amber-400"></i> Salvează Copie pe Telefon
                     </button>
                 </div>
             </div>
 
-            <!-- Printable Report Document Preview -->
+            <!-- Printable Paper Document -->
             <div id="printable-report-area" class="bg-white text-slate-900 rounded-2xl p-6 shadow-2xl border border-slate-200">
-                <!-- Header inside paper -->
-                <div class="border-b-2 border-indigo-600 pb-4 mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                <div class="border-b-2 border-blue-600 pb-4 mb-5 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                     <div>
-                        <h1 class="text-2xl font-black text-slate-900 tracking-tight">RAPORT DE PERFORMANȚĂ & EVALUARE</h1>
-                        <p class="text-xs text-slate-500 font-medium">Dosar Justificativ Activitate & Solicitare Mărire Salarială</p>
+                        <h1 class="text-xl font-black text-slate-900 tracking-tight">RAPORT DE ACTIVITATE INGINEREASCĂ & EVALUARE</h1>
+                        <p class="text-xs text-slate-500 font-semibold">Post: Inginer Proiectant Mecanic • Dosar Justificativ Mărire Salarială</p>
                     </div>
                     <div class="text-left sm:text-right">
-                        <span class="inline-block bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-2.5 py-1 rounded font-bold" id="report-period-tag">Perioadă</span>
-                        <div class="text-[11px] text-slate-400 mt-1" id="report-gen-date">Data generării: azi</div>
+                        <span class="inline-block bg-blue-50 text-blue-800 border border-blue-200 text-xs px-2.5 py-0.5 rounded font-bold" id="report-period-tag">Perioadă</span>
+                        <div class="text-[10px] text-slate-400 mt-1" id="report-gen-date">Data: azi</div>
                     </div>
                 </div>
 
                 <!-- Executive Summary Cards -->
-                <div class="grid grid-cols-3 gap-3 mb-6 text-center">
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
-                        <div class="text-[11px] text-slate-500 font-bold uppercase">Total Ore Muncite</div>
-                        <div class="text-2xl font-black text-slate-900 mt-0.5" id="rep-total-hours">0</div>
+                <div class="grid grid-cols-3 gap-3 mb-5 text-center">
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                        <div class="text-[10px] text-slate-500 font-bold uppercase">Total Ore Proiectare</div>
+                        <div class="text-xl font-black text-slate-900 mt-0.5" id="rep-total-hours">0</div>
                     </div>
-                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
-                        <div class="text-[11px] text-amber-800 font-bold uppercase">Ore Suplimentare</div>
-                        <div class="text-2xl font-black text-amber-700 mt-0.5" id="rep-overtime-hours">0</div>
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5">
+                        <div class="text-[10px] text-amber-800 font-bold uppercase">Ore Suplimentare (Overtime)</div>
+                        <div class="text-xl font-black text-amber-700 mt-0.5" id="rep-overtime-hours">0</div>
                     </div>
-                    <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
-                        <div class="text-[11px] text-indigo-800 font-bold uppercase">Zile Active</div>
-                        <div class="text-2xl font-black text-indigo-700 mt-0.5" id="rep-days-worked">0</div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-2.5">
+                        <div class="text-[10px] text-blue-800 font-bold uppercase">Zile Lucrate</div>
+                        <div class="text-xl font-black text-blue-700 mt-0.5" id="rep-days-worked">0</div>
                     </div>
                 </div>
 
-                <!-- Section 1: Strategic Impact Highlights (THE RAISER) -->
-                <div class="mb-6">
-                    <h2 class="text-sm font-black uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1.5 mb-3 flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> 1. Realizări Majore & Valoare Adusă (Argumente Mărire)
+                <!-- 1. Scut de Apărare (Blocaje & Probleme Rezolvate) -->
+                <div class="mb-5">
+                    <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-2.5 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> 1. Scut de Apărare: Blocaje & Incidente Rezolvate
                     </h2>
-                    <div id="rep-achievements-list" class="space-y-3">
-                        <!-- Populated by JS -->
-                    </div>
+                    <div id="rep-blockers-list" class="space-y-2"></div>
                 </div>
 
-                <!-- Section 2: Projects Breakdown -->
-                <div class="mb-6">
-                    <h2 class="text-sm font-black uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1.5 mb-3 flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span> 2. Distribuție Efort & Proiecte Livrate
+                <!-- 2. Realizări de Impact Tehnic & Financiar -->
+                <div class="mb-5">
+                    <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-2.5 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> 2. Valoare Adusă Companiei: Optimizări, Rebuturi Prevenite & Standardizări
                     </h2>
-                    <div id="rep-projects-table" class="overflow-x-auto">
-                        <!-- Populated by JS -->
-                    </div>
+                    <div id="rep-achievements-list" class="space-y-2"></div>
                 </div>
 
-                <!-- Section 3: Summary Arguments -->
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-700 space-y-2">
-                    <h3 class="font-bold text-slate-900 text-sm">💡 Concluzii & Puncte Cheie pentru Evaluare:</h3>
-                    <ul class="list-disc pl-4 space-y-1">
-                        <li><strong>Dedicare & Disponibilitate:</strong> Activitatea include ore suplimentare pentru rezolvarea urgențelor și asigurarea continuității.</li>
-                        <li><strong>Eficiență Cuantificabilă:</strong> Realizările de mai sus reflectă optimizări directe de costuri, viteză de execuție și calitate tehnică.</li>
-                        <li><strong>Impact asupra Echipei:</strong> Implicare proactivă în mentorat, rezolvare de blocaje și documentație tehnică.</li>
-                    </ul>
+                <!-- 3. Repartizare Proiecte CAD -->
+                <div class="mb-5">
+                    <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-2.5 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span> 3. Proiecte & Ansambluri Gestionate
+                    </h2>
+                    <div id="rep-projects-table" class="overflow-x-auto"></div>
                 </div>
             </div>
         </section>
@@ -439,143 +452,117 @@
 
     <!-- ================= MODALS ================= -->
 
-    <!-- Modal 1: Pornire Sesiune Timer -->
-    <div id="modal-start-timer" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+    <!-- Modal: Blocaj Tehnic Nou (Scut) -->
+    <div id="modal-new-blocker" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-rose-500/40 w-full max-w-md rounded-2xl p-5 space-y-3.5 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-play text-indigo-400"></i> Pornire Cronometru Muncă
+                    <i class="fa-solid fa-shield-halved text-rose-400"></i> Înregistrare Blocaj / Problemă
                 </h3>
-                <button onclick="closeModal('modal-start-timer')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="closeModal('modal-new-blocker')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="space-y-3 text-xs">
+            <div class="space-y-2.5 text-xs">
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Proiect asociat:</label>
-                    <select id="timer-modal-project" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"></select>
-                </div>
-                <div>
-                    <label class="block font-medium text-slate-300 mb-1">Categorie activitate:</label>
-                    <select id="timer-modal-category" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
-                        <option value="Dezvoltare / Cod">Dezvoltare / Cod</option>
-                        <option value="Mentenanță / Bugfix">Mentenanță / Bugfix</option>
-                        <option value="Meeting / Ședință">Meeting / Ședință</option>
-                        <option value="Arhitectură & Design">Arhitectură & Design</option>
-                        <option value="Documentație">Documentație</option>
-                        <option value="Suport & Mentorat">Suport & Mentorat</option>
-                        <option value="Altele">Altele</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block font-medium text-slate-300 mb-1">Ce lucrezi acum? (opțional):</label>
-                    <input type="text" id="timer-modal-desc" placeholder="ex: Scriere teste, refactorizare modul plăți..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
-                </div>
-                <div class="flex items-center space-x-2 pt-1">
-                    <input type="checkbox" id="timer-modal-overtime" class="w-4 h-4 rounded text-indigo-600 bg-slate-900 border-slate-700 focus:ring-0">
-                    <label for="timer-modal-overtime" class="font-medium text-amber-300">Aceasta este o sesiune de Ore Suplimentare (Overtime)</label>
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
-                <button onclick="closeModal('modal-start-timer')" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Anulează</button>
-                <button onclick="submitStartTimer()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30">
-                    <i class="fa-solid fa-play"></i> Start Lucru
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal 2: Adaugă Pontaj Manual -->
-    <div id="modal-manual-time" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-clock text-indigo-400"></i> Înregistrare Timp Lucrat
-                </h3>
-                <button onclick="closeModal('modal-manual-time')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-medium text-slate-300 mb-1">Data:</label>
-                    <input type="date" id="manual-date" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block font-medium text-slate-300 mb-1">Proiect:</label>
-                    <select id="manual-project" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"></select>
+                    <label class="block font-medium text-slate-300 mb-1">Titlu Problemă *:</label>
+                    <input type="text" id="blk-title" placeholder="ex: Modificare gabarit motor cerută de client" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-rose-500">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block font-medium text-slate-300 mb-1">Ore:</label>
-                        <input type="number" id="manual-hours" min="0" max="24" value="1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block font-medium text-slate-300 mb-1">Data incident:</label>
+                        <input type="date" id="blk-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-rose-500">
                     </div>
                     <div>
-                        <label class="block font-medium text-slate-300 mb-1">Minute suplimentare:</label>
-                        <input type="number" id="manual-minutes" min="0" max="59" step="5" value="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block font-medium text-slate-300 mb-1">Ansamblu / Proiect:</label>
+                        <select id="blk-project" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-rose-500"></select>
                     </div>
                 </div>
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Categorie:</label>
-                    <select id="manual-category" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
-                        <option value="Dezvoltare / Cod">Dezvoltare / Cod</option>
-                        <option value="Mentenanță / Bugfix">Mentenanță / Bugfix</option>
-                        <option value="Meeting / Ședință">Meeting / Ședință</option>
-                        <option value="Arhitectură & Design">Arhitectură & Design</option>
-                        <option value="Documentație">Documentație</option>
-                        <option value="Suport & Mentorat">Suport & Mentorat</option>
+                    <label class="block font-medium text-slate-300 mb-1">Cauză principală:</label>
+                    <select id="blk-cause" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-rose-500">
+                        <option value="Modificare Cerințe Client">Modificare Cerințe Client</option>
+                        <option value="Întârziere Furnizor / Piese">Întârziere Furnizor / Piese</option>
+                        <option value="Limitare Tehnologică Atelier">Limitare Tehnologică Atelier</option>
+                        <option value="Lipsă Date Intrare / Măsurători">Lipsă Date Intrare / Măsurători</option>
+                        <option value="Coliziune / Eroare Specificații">Coliziune / Eroare Specificații</option>
                         <option value="Altele">Altele</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Descriere detaliată sarcină:</label>
-                    <textarea id="manual-desc" rows="2" placeholder="Ce ai finalizat concret..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"></textarea>
+                    <label class="block font-medium text-slate-300 mb-1">Descriere situație (ce a cauzat problema):</label>
+                    <textarea id="blk-desc" rows="2" placeholder="ex: Clientul a trimis noi cote de gabarit după lansarea desenelor..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-rose-500"></textarea>
                 </div>
-                <div class="flex items-center space-x-2 pt-1">
-                    <input type="checkbox" id="manual-overtime" class="w-4 h-4 rounded text-indigo-600 bg-slate-900 border-slate-700 focus:ring-0">
-                    <label for="manual-overtime" class="font-medium text-amber-300">Marchează ca Ore Suplimentare (Overtime)</label>
+                <div>
+                    <label class="block font-medium text-emerald-400 mb-1">Cum ai rezolvat TU problema (Soluția inginerească):</label>
+                    <textarea id="blk-sol" rows="2" placeholder="ex: Am reproiectat suportul în 24h, adaptat cotele fără a opri montajul..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Timp pierdut (ore):</label>
+                        <input type="number" id="blk-hours" value="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-rose-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Ce risc/cost ai prevenit:</label>
+                        <input type="text" id="blk-risk" placeholder="ex: Evitat oprirea liniei de producție" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-rose-500">
+                    </div>
                 </div>
             </div>
-            <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
-                <button onclick="closeModal('modal-manual-time')" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Anulează</button>
-                <button onclick="submitManualTime()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30">
-                    <i class="fa-solid fa-check"></i> Salvează Înregistrarea
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                <button onclick="closeModal('modal-new-blocker')" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Anulează</button>
+                <button onclick="submitNewBlocker()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs">
+                    Salvează în Scut
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal 3: Adaugă Proiect Nou -->
-    <div id="modal-new-project" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+    <!-- Modal: Proiect / Ansamblu Nou -->
+    <div id="modal-new-project" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-5 space-y-3.5 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-folder-plus text-indigo-400"></i> Proiect Nou
+                    <i class="fa-solid fa-cubes-stacked text-blue-400"></i> Ansamblu / Proiect Mecanic Nou
                 </h3>
                 <button onclick="closeModal('modal-new-project')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="space-y-3 text-xs">
+            <div class="space-y-2.5 text-xs">
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Nume Proiect *:</label>
-                    <input type="text" id="proj-name" placeholder="ex: Integrare Sistem CRM" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block font-medium text-slate-300 mb-1">Client / Departament:</label>
-                    <input type="text" id="proj-client" placeholder="ex: Vânzări, Intern, Client X" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block font-medium text-slate-300 mb-1">Descriere:</label>
-                    <textarea id="proj-desc" rows="2" placeholder="Obiective și detalii..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"></textarea>
+                    <label class="block font-medium text-slate-300 mb-1">Denumire Ansamblu / Utilaj *:</label>
+                    <input type="text" id="proj-name" placeholder="ex: Modul Ridicare & Răsturnare Paleți" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block font-medium text-slate-300 mb-1">Status:</label>
-                        <select id="proj-status" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block font-medium text-slate-300 mb-1">Client / Atelier:</label>
+                        <input type="text" id="proj-client" placeholder="ex: Fabrica X / Atelier CNC" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Software CAD:</label>
+                        <select id="proj-cad" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                            <option value="SolidWorks">SolidWorks</option>
+                            <option value="Autodesk Inventor">Autodesk Inventor</option>
+                            <option value="CATIA">CATIA</option>
+                            <option value="PTC Creo">PTC Creo</option>
+                            <option value="Siemens NX">Siemens NX</option>
+                            <option value="AutoCAD 2D">AutoCAD 2D</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Descriere tehnică & Cerințe:</label>
+                    <textarea id="proj-desc" rows="2" placeholder="Subansamble principale, motoare, ghidaje..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Status Proiectare:</label>
+                        <select id="proj-status" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                             <option value="În Lucru">În Lucru</option>
                             <option value="Planificat">Planificat</option>
                             <option value="Finalizat">Finalizat</option>
-                            <option value="În Pauză">În Pauză</option>
+                            <option value="În Aprobare">În Aprobare</option>
                         </select>
                     </div>
                     <div>
                         <label class="block font-medium text-slate-300 mb-1">Prioritate:</label>
-                        <select id="proj-priority" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+                        <select id="proj-priority" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                             <option value="Critic">Critic</option>
                             <option value="Ridicată">Ridicată</option>
                             <option value="Medie" selected>Medie</option>
@@ -586,189 +573,178 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block font-medium text-slate-300 mb-1">Țintă Ore:</label>
-                        <input type="number" id="proj-target-hours" value="40" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+                        <input type="number" id="proj-target-hours" value="60" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                     </div>
                     <div>
-                        <label class="block font-medium text-slate-300 mb-1">Termen Limită (Deadline):</label>
-                        <input type="date" id="proj-deadline" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block font-medium text-slate-300 mb-1">Termen Lansare Atelier:</label>
+                        <input type="date" id="proj-deadline" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
                     </div>
                 </div>
             </div>
-            <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
                 <button onclick="closeModal('modal-new-project')" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Anulează</button>
-                <button onclick="submitNewProject()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30">
-                    <i class="fa-solid fa-plus"></i> Salvează Proiectul
+                <button onclick="submitNewProject()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs">
+                    Salvează Ansamblul
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal 4: Adaugă Realizare / Brag Document -->
-    <div id="modal-new-achievement" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+    <!-- Modal: Adaugă Pontaj Manual -->
+    <div id="modal-manual-time" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-5 space-y-3.5 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-award text-amber-400"></i> Înregistrare Realizare & Impact (Mărire)
+                    <i class="fa-solid fa-clock text-blue-400"></i> Înregistrare Ore Proiectare
+                </h3>
+                <button onclick="closeModal('modal-manual-time')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-2.5 text-xs">
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Data:</label>
+                    <input type="date" id="manual-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Ansamblu / Proiect:</label>
+                    <select id="manual-project" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500"></select>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Ore:</label>
+                        <input type="number" id="manual-hours" min="0" max="24" value="2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Minute suplimentare:</label>
+                        <input type="number" id="manual-minutes" min="0" max="59" step="5" value="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Etapă Inginerie:</label>
+                    <select id="manual-category" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                        <option value="Modelare CAD 3D">Modelare CAD 3D (Piese / Ansambluri)</option>
+                        <option value="Desene de Execuție 2D & BOM">Desene 2D & BOM (Cote, Toleranțe)</option>
+                        <option value="Calcule & Simulări FEA">Calcule & Simulări FEA / Rezistență</option>
+                        <option value="Modificări Proiectare (ECN)">Modificări Proiectare (ECN/ECO)</option>
+                        <option value="Asistență Tehnică Atelier">Asistență Tehnică Atelier / Montaj</option>
+                        <option value="Documentație Tehnică">Documentație & Manual Tehnic</option>
+                        <option value="Ședințe Tehnice & Furnizori">Ședințe Tehnice & Furnizori</option>
+                        <option value="Altele">Altele</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Descriere detaliată reper / activitate:</label>
+                    <textarea id="manual-desc" rows="2" placeholder="ex: Proiectat suport lagăr, verificat jocuri rulmenți..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+                <div class="flex items-center space-x-2 pt-1">
+                    <input type="checkbox" id="manual-overtime" class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-800 focus:ring-0">
+                    <label for="manual-overtime" class="font-bold text-amber-300">Marchează ca Ore Suplimentare (Overtime)</label>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                <button onclick="closeModal('modal-manual-time')" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Anulează</button>
+                <button onclick="submitManualTime()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs">
+                    Salvează Orele
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Adaugă Realizare Tehnică (Brag Sheet) -->
+    <div id="modal-new-achievement" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-amber-500/40 w-full max-w-md rounded-2xl p-5 space-y-3.5 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-award text-amber-400"></i> Realizare Tehnică & Impact (Pentru Mărire)
                 </h3>
                 <button onclick="closeModal('modal-new-achievement')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="space-y-3 text-xs">
+            <div class="space-y-2.5 text-xs">
                 <div>
                     <label class="block font-medium text-slate-300 mb-1">Titlu Realizare *:</label>
-                    <input type="text" id="ach-title" placeholder="ex: Redus timpul de procesare facturi de la 2h la 10min" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="ach-title" placeholder="ex: Redus masa carcasei cu 20% prin optimizare nervuri" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block font-medium text-slate-300 mb-1">Data:</label>
-                        <input type="date" id="ach-date" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+                        <input type="date" id="ach-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
                     </div>
                     <div>
-                        <label class="block font-medium text-slate-300 mb-1">Proiect asociat:</label>
-                        <select id="ach-project" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"></select>
+                        <label class="block font-medium text-slate-300 mb-1">Ansamblu asociat:</label>
+                        <select id="ach-project" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"></select>
                     </div>
                 </div>
                 <div>
-                    <label class="block font-medium text-amber-300 mb-1">Impact & Rezultat Cuantificabil (Cifre, % sau bani salvați) *:</label>
-                    <textarea id="ach-impact" rows="2" placeholder="ex: A redus încărcarea serverului cu 40% și a eliminat plângerile clienților..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"></textarea>
+                    <label class="block font-medium text-amber-300 mb-1">Impact Cuantificabil (Economie greutate/bani, piese salvate) *:</label>
+                    <textarea id="ach-impact" rows="2" placeholder="ex: Eliminat coliziune ax-flanșă, salvat piese de ~12.000 RON și 5 zile de montaj..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"></textarea>
                 </div>
                 <div>
                     <label class="block font-medium text-slate-300 mb-1">Categorie:</label>
-                    <select id="ach-category" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
-                        <option value="Eficiență & Automatizare">Eficiență & Automatizare</option>
-                        <option value="Salvare Costuri / Bani">Salvare Costuri / Bani</option>
-                        <option value="Rezolvare Crize & Incidente">Rezolvare Crize & Incidente</option>
-                        <option value="Leadership & Mentorat">Leadership & Mentorat</option>
-                        <option value="Valoare Financiară & UX">Valoare Financiară & UX</option>
-                        <option value="Calitate Cod & Stabilitate">Calitate Cod & Stabilitate</option>
+                    <select id="ach-category" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+                        <option value="Eliminare Rebuturi & Calitate">Eliminare Rebuturi & Calitate 3D</option>
+                        <option value="Optimizare Producție & Timp">Optimizare Timp Montaj / Atelier</option>
+                        <option value="Calcul Tehnic & FEA">Calcul Tehnic & FEA (Reducere Masă)</option>
+                        <option value="Standardizare & Achiziții">Standardizare Organe Asamblare & BOM</option>
+                        <option value="Inovație & Dispozitive Noi">Inovație / Dispozitive & Scule Noi</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block font-medium text-slate-300 mb-1">Feedback Primit / Aprecieri (opțional):</label>
-                    <input type="text" id="ach-feedback" placeholder='ex: Managerul a zis: "Excelentă inițiativă!"' class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+                    <label class="block font-medium text-slate-300 mb-1">Feedback Primit / Aprecieri (Șef atelier, conducere):</label>
+                    <input type="text" id="ach-feedback" placeholder='ex: Inginerul șef a felicitat soluția tehnică' class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500">
                 </div>
                 <div class="flex items-center space-x-2 pt-1">
-                    <input type="checkbox" id="ach-highlight" checked class="w-4 h-4 rounded text-amber-500 bg-slate-900 border-slate-700 focus:ring-0">
-                    <label for="ach-highlight" class="font-medium text-amber-300">⭐ Evidențiază ca Top Argument pentru Mărire</label>
+                    <input type="checkbox" id="ach-highlight" checked class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-800 focus:ring-0">
+                    <label for="ach-highlight" class="font-bold text-amber-300">⭐ Evidențiază ca Top Argument pentru Mărire</label>
                 </div>
             </div>
-            <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
                 <button onclick="closeModal('modal-new-achievement')" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs">Anulează</button>
-                <button onclick="submitNewAchievement()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-amber-500/20">
-                    <i class="fa-solid fa-check"></i> Salvează Realizarea
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal 5: Ghid Instalare pe Telefon -->
-    <div id="modal-install-guide" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-slate-800 border border-indigo-500/40 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-mobile-screen-button text-indigo-400"></i> Instalează pe Telefon
-                </h3>
-                <button onclick="closeModal('modal-install-guide')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-3 text-xs text-slate-300">
-                <p>Poți avea <strong>WorkPulse</strong> ca o aplicație nativă pe ecranul principal al telefonului tău:</p>
-                <div class="space-y-2.5 bg-slate-900/80 p-3 rounded-xl border border-slate-700">
-                    <div class="flex items-start gap-2.5">
-                        <span class="w-5 h-5 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-[11px] shrink-0">1</span>
-                        <span>Apasă pe cele <strong>3 puncte ⋮</strong> din colțul dreapta-sus al browserului (Chrome / Brave).</span>
-                    </div>
-                    <div class="flex items-start gap-2.5">
-                        <span class="w-5 h-5 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-[11px] shrink-0">2</span>
-                        <span>Selectează <strong>"Instalează aplicația"</strong> sau <strong>"Adaugă pe ecranul de pornire"</strong> (Add to Home screen).</span>
-                    </div>
-                    <div class="flex items-start gap-2.5">
-                        <span class="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-[11px] shrink-0">✓</span>
-                        <span>Icoana <strong>WorkPulse</strong> va apărea pe ecranul telefonului și se va deschide fără bara de browser!</span>
-                    </div>
-                </div>
-            </div>
-            <div class="flex justify-end pt-2 border-t border-slate-700">
-                <button onclick="closeModal('modal-install-guide')" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">
-                    Am înțeles
+                <button onclick="submitNewAchievement()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs">
+                    Salvează Realizarea
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-16 right-4 left-4 sm:left-auto sm:w-80 bg-slate-800 border border-indigo-500/40 text-white px-4 py-3 rounded-xl shadow-2xl text-xs flex items-center gap-2 transform translate-y-24 opacity-0 transition duration-300 z-50 pointer-events-none">
+    <div id="toast" class="fixed bottom-16 right-4 left-4 sm:left-auto sm:w-80 bg-slate-900 border border-blue-500/40 text-white px-4 py-3 rounded-xl shadow-2xl text-xs flex items-center gap-2 transform translate-y-24 opacity-0 transition duration-300 z-50 pointer-events-none">
         <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
         <span id="toast-msg">Salvat cu succes!</span>
     </div>
 
     <!-- Application Script -->
     <script>
-        // PWA Service Worker & Install Prompt
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
-            });
-        }
-
-        let deferredPrompt = null;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const btn = document.getElementById('header-install-btn');
-            if (btn) {
-                btn.classList.add('animate-bounce');
-                btn.classList.remove('bg-indigo-600/30');
-                btn.classList.add('bg-indigo-600', 'text-white');
-            }
-        });
-
-        function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        showToast('Aplicația a fost instalată pe telefon!');
-                    }
-                    deferredPrompt = null;
-                });
-            } else {
-                openModal('modal-install-guide');
-            }
-        }
-
-        // Global variables & state
         let currentTab = 'dashboard';
         let projectsList = [];
         let timerInterval = null;
         let chartTimelineInstance = null;
         let chartProjectsInstance = null;
+        let searchTimeout = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Set default date inputs
             const today = new Date().toISOString().split('T')[0];
             const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString().split('T')[0];
             
             document.getElementById('manual-date').value = today;
             document.getElementById('ach-date').value = today;
+            document.getElementById('blk-date').value = today;
             document.getElementById('report-start-date').value = ninetyDaysAgo;
             document.getElementById('report-end-date').value = today;
 
-            // Load initial data
             loadProjects();
             loadStats();
             checkTimerState();
+            loadBlockers();
             loadTimeEntries();
             loadAchievements();
+            loadSalaryCalculator();
             loadReportData();
 
-            // Refresh timer every second
             setInterval(checkTimerTick, 1000);
         });
 
-        // Tab Switcher
         function switchTab(tabId) {
             currentTab = tabId;
-            const tabs = ['dashboard', 'projects', 'time', 'brag', 'report'];
-            tabs.forEach(t => {
+            ['dashboard', 'blockers', 'projects', 'time', 'brag', 'report'].forEach(t => {
                 const el = document.getElementById(`tab-${t}`);
                 const nav = document.getElementById(`nav-${t}`);
                 if (t === tabId) {
@@ -780,20 +756,14 @@
                 }
             });
 
-            if (tabId === 'dashboard') {
-                loadStats();
-            } else if (tabId === 'projects') {
-                loadProjects();
-            } else if (tabId === 'time') {
-                loadTimeEntries();
-            } else if (tabId === 'brag') {
-                loadAchievements();
-            } else if (tabId === 'report') {
-                loadReportData();
-            }
+            if (tabId === 'dashboard') loadStats();
+            else if (tabId === 'blockers') loadBlockers();
+            else if (tabId === 'projects') loadProjects();
+            else if (tabId === 'time') loadTimeEntries();
+            else if (tabId === 'brag') { loadAchievements(); loadSalaryCalculator(); }
+            else if (tabId === 'report') loadReportData();
         }
 
-        // Show Toast
         function showToast(msg, isError = false) {
             const toast = document.getElementById('toast');
             const icon = document.getElementById('toast-icon');
@@ -810,26 +780,13 @@
             }, 3000);
         }
 
-        // Modals helper
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-        function openManualTimeModal() {
-            populateProjectDropdowns();
-            openModal('modal-manual-time');
-        }
-        function openNewProjectModal() {
-            openModal('modal-new-project');
-        }
-        function openNewAchievementModal() {
-            populateProjectDropdowns();
-            openModal('modal-new-achievement');
-        }
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function openManualTimeModal() { populateProjectDropdowns(); openModal('modal-manual-time'); }
+        function openNewProjectModal() { openModal('modal-new-project'); }
+        function openNewAchievementModal() { populateProjectDropdowns(); openModal('modal-new-achievement'); }
+        function openNewBlockerModal() { populateProjectDropdowns(); openModal('modal-new-blocker'); }
 
-        // Format seconds to HH:MM:SS
         function formatDuration(totalSeconds) {
             const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
             const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
@@ -837,18 +794,15 @@
             return `${h}:${m}:${s}`;
         }
 
-        // ================= TIMER MANAGEMENT =================
+        // ================= TIMER =================
         let activeTimerState = { is_running: 0, elapsed_seconds: 0, start_timestamp: null };
 
         async function checkTimerState() {
             try {
                 const res = await fetch('/api/timer');
-                const data = await res.json();
-                activeTimerState = data;
+                activeTimerState = await res.json();
                 updateTimerUI();
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         function checkTimerTick() {
@@ -873,61 +827,31 @@
 
             if (activeTimerState.is_running) {
                 headerBadge.classList.remove('hidden');
-                timerIcon.className = "w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg animate-pulse";
-                btn.className = "px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs tracking-wide shadow-lg shadow-rose-600/30 flex items-center gap-1.5 transition active:scale-95";
-                btn.innerHTML = `<i class="fa-solid fa-stop"></i> <span>Oprește & Salvează</span>`;
-                statusText.innerHTML = `<span>Status:</span> <span class="font-bold text-emerald-400">Activă (${activeTimerState.category || 'Dezvoltare'})</span>`;
+                timerIcon.className = "w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg animate-pulse border border-emerald-500/40";
+                btn.className = "px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs shadow-lg shadow-rose-600/30 flex items-center gap-1.5 transition active:scale-95";
+                btn.innerHTML = `<i class="fa-solid fa-stop"></i> <span>Oprește Sesiunea</span>`;
+                statusText.innerHTML = `Status: <span class="font-bold text-emerald-400">Activă (${activeTimerState.category || 'CAD 3D'})</span>`;
                 
                 activeInfo.classList.remove('hidden');
-                document.getElementById('timer-current-task').innerText = activeTimerState.description || activeTimerState.category || 'Muncă curentă';
-                
+                document.getElementById('timer-current-task').innerText = activeTimerState.category || 'Modelare CAD 3D';
                 const proj = projectsList.find(p => p.id === activeTimerState.project_id);
                 document.getElementById('timer-current-project').innerText = proj ? proj.name : 'General';
 
-                if (activeTimerState.is_overtime) {
-                    overtimePill.classList.remove('hidden');
-                } else {
-                    overtimePill.classList.add('hidden');
-                }
+                if (activeTimerState.is_overtime) overtimePill.classList.remove('hidden');
+                else overtimePill.classList.add('hidden');
             } else {
                 headerBadge.classList.add('hidden');
-                timerIcon.className = "w-11 h-11 rounded-xl bg-slate-700/60 text-slate-300 flex items-center justify-center text-lg";
-                btn.className = "px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs tracking-wide shadow-lg shadow-indigo-600/30 flex items-center gap-1.5 transition active:scale-95";
-                btn.innerHTML = `<i class="fa-solid fa-play"></i> <span>Pornește Sesiune</span>`;
-                statusText.innerHTML = `<span>Status:</span> <span class="font-medium text-slate-400">Oprit</span>`;
+                timerIcon.className = "w-11 h-11 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center text-lg border border-slate-700";
+                btn.className = "px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-lg shadow-blue-600/30 flex items-center gap-1.5 transition active:scale-95";
+                btn.innerHTML = `<i class="fa-solid fa-play"></i> <span>Start Sesiune CAD</span>`;
+                statusText.innerHTML = `Status: <span class="font-medium text-slate-400">Oprit</span>`;
                 activeInfo.classList.add('hidden');
             }
         }
 
         function handleTimerClick() {
-            if (activeTimerState.is_running) {
-                stopTimer();
-            } else {
-                populateProjectDropdowns();
-                openModal('modal-start-timer');
-            }
-        }
-
-        async function submitStartTimer() {
-            const project_id = document.getElementById('timer-modal-project').value;
-            const category = document.getElementById('timer-modal-category').value;
-            const description = document.getElementById('timer-modal-desc').value;
-            const is_overtime = document.getElementById('timer-modal-overtime').checked;
-
-            try {
-                const res = await fetch('/api/timer/start', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ project_id, category, description, is_overtime })
-                });
-                if (res.ok) {
-                    closeModal('modal-start-timer');
-                    showToast('Sesiune pornită cu succes!');
-                    checkTimerState();
-                }
-            } catch (err) {
-                showToast('Eroare la pornirea timer-ului', true);
-            }
+            if (activeTimerState.is_running) stopTimer();
+            else openManualTimeModal(); // Or quick start
         }
 
         async function stopTimer() {
@@ -935,14 +859,12 @@
                 const res = await fetch('/api/timer/stop', { method: 'POST' });
                 const data = await res.json();
                 if (res.ok) {
-                    showToast(`Sesiune salvată: +${data.duration_minutes} minute!`);
+                    showToast(`Sesiune salvată: +${data.duration_minutes} min!`);
                     checkTimerState();
                     loadStats();
                     loadTimeEntries();
                 }
-            } catch (err) {
-                showToast('Eroare la oprirea timer-ului', true);
-            }
+            } catch (err) { showToast('Eroare la oprirea timer-ului', true); }
         }
 
         // ================= STATS & CHARTS =================
@@ -953,19 +875,19 @@
 
                 document.getElementById('stat-total-hours').innerText = data.total_hours;
                 document.getElementById('stat-overtime-hours').innerText = data.overtime_hours;
-                document.getElementById('stat-active-projects').innerText = data.active_projects;
-                document.getElementById('stat-completed-projects').innerText = data.completed_projects;
+                document.getElementById('stat-total-blockers').innerText = data.total_blockers;
+                document.getElementById('stat-blocker-hours').innerText = data.blocker_hours_managed;
                 document.getElementById('stat-highlights').innerText = data.highlight_achievements;
 
                 // Render Top Highlights List
                 const hlList = document.getElementById('dashboard-highlights-list');
                 if (data.top_achievements && data.top_achievements.length > 0) {
                     hlList.innerHTML = data.top_achievements.map(a => `
-                        <div class="bg-slate-900/70 border border-slate-700/60 rounded-xl p-3 flex items-start justify-between gap-3">
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-start justify-between gap-3">
                             <div class="space-y-1">
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <span class="text-xs font-bold text-amber-300">${a.title}</span>
-                                    <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-medium">${a.project_name || 'General'}</span>
+                                    <span class="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full font-medium">${a.project_name || 'General'}</span>
                                     <span class="text-[10px] text-slate-500">${a.date}</span>
                                 </div>
                                 <p class="text-xs text-slate-300 font-medium">${a.impact_value}</p>
@@ -975,18 +897,12 @@
                         </div>
                     `).join('');
                 } else {
-                    hlList.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-2">Nicio realizare marcată încă. Adaugă una în tab-ul 'Dosar Mărire'!</p>`;
+                    hlList.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-2">Nicio realizare marcată încă.</p>`;
                 }
 
-                // Render Timeline Chart (Bar)
                 renderTimelineChart(data.timeline);
-
-                // Render Projects Doughnut Chart
                 renderProjectsChart(data.project_hours);
-
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         function renderTimelineChart(timeline) {
@@ -998,18 +914,8 @@
                 data: {
                     labels: timeline.labels,
                     datasets: [
-                        {
-                            label: 'Ore Normale',
-                            data: timeline.regular,
-                            backgroundColor: '#6366f1',
-                            borderRadius: 4
-                        },
-                        {
-                            label: 'Overtime',
-                            data: timeline.overtime,
-                            backgroundColor: '#f59e0b',
-                            borderRadius: 4
-                        }
+                        { label: 'Ore CAD Normale', data: timeline.regular, backgroundColor: '#2563eb', borderRadius: 4 },
+                        { label: 'Overtime Atelier/CAD', data: timeline.overtime, backgroundColor: '#f59e0b', borderRadius: 4 }
                     ]
                 },
                 options: {
@@ -1019,9 +925,7 @@
                         x: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
                         y: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
                     },
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 11 } } }
-                    }
+                    plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 11 } } } }
                 }
             });
         }
@@ -1030,9 +934,9 @@
             const ctx = document.getElementById('chart-projects').getContext('2d');
             if (chartProjectsInstance) chartProjectsInstance.destroy();
 
-            const labels = projects.map(p => p.name);
+            const labels = projects.map(p => `${p.name} [${p.cad || 'CAD'}]`);
             const data = projects.map(p => p.hours);
-            const colors = projects.map(p => p.color || '#3b82f6');
+            const colors = projects.map(p => p.color || '#2563eb');
 
             chartProjectsInstance = new Chart(ctx, {
                 type: 'doughnut',
@@ -1047,12 +951,94 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 10 }, boxWidth: 12 } }
-                    },
+                    plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 10 }, boxWidth: 12 } } },
                     cutout: '65%'
                 }
             });
+        }
+
+        // ================= SCUT & BLOCAJE =================
+        async function loadBlockers() {
+            try {
+                const res = await fetch('/api/blockers');
+                const blockers = await res.json();
+                document.getElementById('blocker-count-badge').innerText = blockers.length;
+
+                const container = document.getElementById('blockers-list');
+                if (!blockers.length) {
+                    container.innerHTML = `<div class="bg-slate-900 border border-slate-800 rounded-xl p-6 text-center text-xs text-slate-500">Niciun blocaj înregistrat. Apasă butonul de mai sus pentru a adăuga situațiile neprevăzute din proiecte!</div>`;
+                    return;
+                }
+
+                container.innerHTML = blockers.map(b => `
+                    <div class="bg-slate-900 border border-rose-500/30 rounded-2xl p-4 space-y-3 shadow-lg">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap mb-1">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-full">${b.cause_type}</span>
+                                    <span class="text-xs font-semibold text-blue-400">${b.project_name || 'Atelier / General'}</span>
+                                    <span class="text-xs text-slate-500">• ${b.date}</span>
+                                </div>
+                                <h3 class="text-sm font-bold text-white">${b.title}</h3>
+                            </div>
+                            <span class="text-xs font-bold text-rose-400 whitespace-nowrap bg-rose-950/60 px-2 py-1 rounded-lg border border-rose-500/20">
+                                ⏱️ ${b.time_lost_hours}h pierdute
+                            </span>
+                        </div>
+
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs space-y-2">
+                            <div>
+                                <span class="font-bold text-slate-400 uppercase text-[10px]">Ce a cauzat blocajul:</span>
+                                <p class="text-slate-300 mt-0.5">${b.description}</p>
+                            </div>
+                            <div class="pt-2 border-t border-slate-800/60">
+                                <span class="font-bold text-emerald-400 uppercase text-[10px]">Soluția ta inginerească:</span>
+                                <p class="text-slate-200 font-medium mt-0.5">${b.solution_applied}</p>
+                            </div>
+                        </div>
+
+                        ${b.prevented_risk ? `
+                            <div class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1.5">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <span>Risc/Cost Prevenit: ${b.prevented_risk}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            } catch (err) { console.error(err); }
+        }
+
+        async function submitNewBlocker() {
+            const title = document.getElementById('blk-title').value.trim();
+            const description = document.getElementById('blk-desc').value.trim();
+            const solution_applied = document.getElementById('blk-sol').value.trim();
+
+            if (!title || !description) return showToast('Completează titlul și descrierea!', true);
+
+            const payload = {
+                title,
+                date: document.getElementById('blk-date').value,
+                project_id: document.getElementById('blk-project').value,
+                cause_type: document.getElementById('blk-cause').value,
+                description,
+                solution_applied,
+                time_lost_hours: document.getElementById('blk-hours').value,
+                prevented_risk: document.getElementById('blk-risk').value.trim()
+            };
+
+            try {
+                const res = await fetch('/api/blockers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    closeModal('modal-new-blocker');
+                    showToast('Blocaj înregistrat în Scut!');
+                    loadBlockers();
+                    loadStats();
+                }
+            } catch (err) { showToast('Eroare la salvare', true); }
         }
 
         // ================= PROJECTS =================
@@ -1062,58 +1048,56 @@
                 projectsList = await res.json();
                 renderProjects(projectsList);
                 populateProjectDropdowns();
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         function renderProjects(projects) {
             const grid = document.getElementById('projects-grid');
             if (!projects.length) {
-                grid.innerHTML = `<div class="col-span-full text-center py-8 text-xs text-slate-400">Nu ai proiecte adăugate încă. Creează primul proiect!</div>`;
+                grid.innerHTML = `<div class="col-span-full text-center py-8 text-xs text-slate-500">Nu ai ansambluri adăugate încă.</div>`;
                 return;
             }
 
             grid.innerHTML = projects.map(p => {
                 const progressPct = p.target_hours > 0 ? Math.min(100, Math.round((p.logged_hours / p.target_hours) * 100)) : 0;
-                let priorityClass = 'bg-slate-700 text-slate-300';
-                if (p.priority === 'Critic') priorityClass = 'bg-rose-500/20 text-rose-300 border border-rose-500/40';
-                else if (p.priority === 'Ridicată') priorityClass = 'bg-amber-500/20 text-amber-300 border border-amber-500/40';
-                else if (p.priority === 'Medie') priorityClass = 'bg-blue-500/20 text-blue-300 border border-blue-500/40';
+                let priorityClass = p.priority === 'Critic' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40' :
+                                    p.priority === 'Ridicată' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' :
+                                    'bg-blue-500/20 text-blue-300 border border-blue-500/40';
 
                 return `
-                    <div class="bg-slate-800/80 border border-slate-700/70 rounded-2xl p-4 flex flex-col justify-between space-y-3 relative overflow-hidden shadow-lg">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3 relative overflow-hidden shadow-lg">
                         <div class="absolute top-0 left-0 w-1.5 h-full" style="background-color: ${p.color};"></div>
                         <div>
-                            <div class="flex items-center justify-between gap-2 mb-1.5">
-                                <span class="text-[10px] font-bold uppercase tracking-wider ${priorityClass} px-2 py-0.5 rounded-full">${p.priority}</span>
-                                <span class="text-xs font-semibold px-2 py-0.5 rounded-md ${p.status === 'Finalizat' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700/80 text-slate-300'}">${p.status}</span>
+                            <div class="flex items-center justify-between gap-2 mb-1">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[10px] font-bold uppercase ${priorityClass} px-2 py-0.5 rounded-full">${p.priority}</span>
+                                    <span class="text-[10px] bg-slate-800 text-blue-300 border border-slate-700 font-mono px-2 py-0.5 rounded-full">${p.cad_software || 'CAD'}</span>
+                                </div>
+                                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md ${p.status === 'Finalizat' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-300'}">${p.status}</span>
                             </div>
-                            <h3 class="text-base font-bold text-white">${p.name}</h3>
-                            <p class="text-xs text-indigo-400 font-medium">${p.client || 'Proiect Intern'}</p>
+                            <h3 class="text-sm font-bold text-white mt-1.5">${p.name}</h3>
+                            <p class="text-xs text-slate-400 font-medium">${p.client || 'Atelier / Intern'}</p>
                             ${p.description ? `<p class="text-xs text-slate-300 mt-1 line-clamp-2">${p.description}</p>` : ''}
                         </div>
 
-                        <!-- Hours Progress Bar -->
                         <div class="space-y-1">
                             <div class="flex justify-between text-xs text-slate-400">
                                 <span>Timp lucrat: <strong class="text-white">${p.logged_hours}h</strong></span>
                                 <span>Țintă: ${p.target_hours}h (${progressPct}%)</span>
                             </div>
-                            <div class="w-full bg-slate-700/80 h-2 rounded-full overflow-hidden">
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
                                 <div class="h-full rounded-full transition-all duration-500" style="width: ${progressPct}%; background-color: ${p.color};"></div>
                             </div>
                         </div>
 
-                        <!-- Card Footer Info & Actions -->
-                        <div class="pt-2 border-t border-slate-700/50 flex items-center justify-between text-xs">
-                            <span class="text-slate-400 text-[11px]"><i class="fa-regular fa-calendar"></i> ${p.deadline ? `Termen: ${p.deadline}` : 'Fără deadline'}</span>
+                        <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
+                            <span class="text-slate-500 text-[11px]"><i class="fa-regular fa-calendar"></i> ${p.deadline ? `Lansare: ${p.deadline}` : 'Fără deadline'}</span>
                             <div class="flex items-center gap-2">
-                                <button onclick="quickLogTime(${p.id})" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 text-indigo-300 hover:bg-indigo-600/50 text-[11px] font-semibold transition">
+                                <button onclick="quickLogTime(${p.id})" class="px-2.5 py-1 rounded-lg bg-blue-600/30 text-blue-300 hover:bg-blue-600/50 text-[11px] font-bold transition">
                                     + Pontaj
                                 </button>
-                                <button onclick="quickAddBrag(${p.id})" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 text-[11px] font-semibold transition">
-                                    + Win
+                                <button onclick="quickAddBlocker(${p.id})" class="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 text-[11px] font-bold transition">
+                                    + Blocaj
                                 </button>
                             </div>
                         </div>
@@ -1122,36 +1106,23 @@
             }).join('');
         }
 
-        function filterProjects(status) {
-            document.querySelectorAll('.proj-filter').forEach(btn => {
-                btn.className = "proj-filter px-3 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white";
-            });
-            event.target.className = "proj-filter px-3 py-1 rounded-lg bg-slate-700 text-white font-medium";
-
-            if (status === 'all') {
-                renderProjects(projectsList);
-            } else {
-                renderProjects(projectsList.filter(p => p.status === status));
-            }
-        }
-
         function populateProjectDropdowns() {
-            const dropdowns = ['timer-modal-project', 'manual-project', 'ach-project'];
-            dropdowns.forEach(id => {
+            ['timer-modal-project', 'manual-project', 'ach-project', 'blk-project'].forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
-                el.innerHTML = '<option value="">(Selectează Proiect)</option>' +
-                    projectsList.map(p => `<option value="${p.id}">${p.name} [${p.status}]</option>`).join('');
+                el.innerHTML = '<option value="">(Selectează Ansamblu)</option>' +
+                    projectsList.map(p => `<option value="${p.id}">${p.name} [${p.cad_software || 'CAD'}]</option>`).join('');
             });
         }
 
         async function submitNewProject() {
             const name = document.getElementById('proj-name').value.trim();
-            if (!name) return showToast('Introdu numele proiectului!', true);
+            if (!name) return showToast('Completează numele ansamblului!', true);
 
             const payload = {
                 name,
                 client: document.getElementById('proj-client').value.trim(),
+                cad_software: document.getElementById('proj-cad').value,
                 description: document.getElementById('proj-desc').value.trim(),
                 status: document.getElementById('proj-status').value,
                 priority: document.getElementById('proj-priority').value,
@@ -1167,13 +1138,11 @@
                 });
                 if (res.ok) {
                     closeModal('modal-new-project');
-                    showToast('Proiect adăugat cu succes!');
+                    showToast('Ansamblu adăugat!');
                     loadProjects();
                     loadStats();
                 }
-            } catch (err) {
-                showToast('Eroare la adăugarea proiectului', true);
-            }
+            } catch (err) { showToast('Eroare la adăugare', true); }
         }
 
         function quickLogTime(projectId) {
@@ -1182,13 +1151,55 @@
             openModal('modal-manual-time');
         }
 
-        function quickAddBrag(projectId) {
+        function quickAddBlocker(projectId) {
             populateProjectDropdowns();
-            document.getElementById('ach-project').value = projectId;
-            openModal('modal-new-achievement');
+            document.getElementById('blk-project').value = projectId;
+            openModal('modal-new-blocker');
         }
 
-        // ================= MANUAL TIME =================
+        // ================= PONTAJ =================
+        function debounceLoadTimeEntries() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(loadTimeEntries, 300);
+        }
+
+        async function loadTimeEntries() {
+            const search = document.getElementById('time-search-input')?.value || '';
+            const category = document.getElementById('time-filter-category')?.value || '';
+
+            try {
+                const res = await fetch(`/api/time-entries?search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`);
+                const entries = await res.json();
+                const list = document.getElementById('time-entries-list');
+
+                if (!entries.length) {
+                    list.innerHTML = `<div class="text-center py-6 text-xs text-slate-500">Nicio înregistrare găsită.</div>`;
+                    return;
+                }
+
+                list.innerHTML = entries.map(e => {
+                    const hoursDec = (e.duration_minutes / 60).toFixed(1);
+                    return `
+                        <div class="pt-2.5 pb-1 flex items-start justify-between gap-3 text-xs">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="font-bold text-white">${e.date}</span>
+                                    <span class="font-semibold text-blue-400">${e.project_name || 'General'}</span>
+                                    <span class="bg-slate-800 text-slate-300 border border-slate-700 px-1.5 py-0.5 rounded text-[10px]">${e.category}</span>
+                                    ${e.is_overtime ? `<span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded text-[10px] font-bold">OVERTIME</span>` : ''}
+                                </div>
+                                <p class="text-slate-300 text-[11px]">${e.description || 'Fără descriere'}</p>
+                            </div>
+                            <div class="text-right whitespace-nowrap">
+                                <div class="text-sm font-black ${e.is_overtime ? 'text-amber-400' : 'text-blue-400'}">${hoursDec}h</div>
+                                <div class="text-[10px] text-slate-500">${e.duration_minutes} min</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) { console.error(err); }
+        }
+
         async function submitManualTime() {
             const date = document.getElementById('manual-date').value;
             const project_id = document.getElementById('manual-project').value;
@@ -1215,85 +1226,76 @@
                 });
                 if (res.ok) {
                     closeModal('modal-manual-time');
-                    showToast('Pontaj înregistrat cu succes!');
+                    showToast('Ore salvate cu succes!');
                     loadTimeEntries();
                     loadStats();
+                    loadSalaryCalculator();
                 }
-            } catch (err) {
-                showToast('Eroare la salvarea pontajului', true);
-            }
+            } catch (err) { showToast('Eroare la salvare', true); }
         }
 
-        async function loadTimeEntries() {
+        // ================= CALCULATOR SALARIU & MĂRIRE =================
+        async function loadSalaryCalculator() {
             try {
-                const res = await fetch('/api/time-entries?limit=40');
-                const entries = await res.json();
-                document.getElementById('entries-count-badge').innerText = `${entries.length} înregistrări recente`;
+                const res = await fetch('/api/salary-calculator');
+                const data = await res.json();
 
-                const list = document.getElementById('time-entries-list');
-                if (!entries.length) {
-                    list.innerHTML = `<div class="text-center py-6 text-xs text-slate-400">Nicio intrare de timp înregistrată.</div>`;
-                    return;
-                }
-
-                list.innerHTML = entries.map(e => {
-                    const hoursDec = (e.duration_minutes / 60).toFixed(1);
-                    return `
-                        <div class="pt-2.5 pb-1 flex items-start justify-between gap-3 text-xs">
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-1.5 flex-wrap">
-                                    <span class="font-bold text-white">${e.date}</span>
-                                    <span class="font-semibold text-indigo-300">${e.project_name || 'General'}</span>
-                                    <span class="bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded text-[10px]">${e.category}</span>
-                                    ${e.is_overtime ? `<span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded text-[10px] font-bold">OVERTIME</span>` : ''}
-                                </div>
-                                <p class="text-slate-300 text-[11px]">${e.description || 'Fără descriere'}</p>
-                            </div>
-                            <div class="text-right whitespace-nowrap">
-                                <div class="text-sm font-black ${e.is_overtime ? 'text-amber-400' : 'text-indigo-400'}">${hoursDec}h</div>
-                                <div class="text-[10px] text-slate-500">${e.duration_minutes} min</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            } catch (err) {
-                console.error(err);
-            }
+                document.getElementById('calc-current-salary').value = data.current_net_salary;
+                document.getElementById('calc-raise-pct').value = data.target_raise_pct;
+                document.getElementById('calc-hourly-rate').innerText = `${data.hourly_net} ${data.currency}/h`;
+                document.getElementById('calc-overtime-hours').innerText = `${data.overtime_hours} ore`;
+                document.getElementById('calc-overtime-value').innerText = `${data.overtime_total_value} ${data.currency}`;
+                document.getElementById('calc-target-raise').innerText = `+${data.requested_raise_amount} ${data.currency} (${data.target_raise_pct}%)`;
+            } catch (err) { console.error(err); }
         }
 
-        // ================= ACHIEVEMENTS & BRAG DOCUMENT =================
+        async function saveSalarySettings() {
+            const current_net_salary = document.getElementById('calc-current-salary').value;
+            const target_raise_pct = document.getElementById('calc-raise-pct').value;
+
+            try {
+                const res = await fetch('/api/salary-calculator', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ current_net_salary, target_raise_pct })
+                });
+                if (res.ok) {
+                    showToast('Calcule actualizate!');
+                    loadSalaryCalculator();
+                }
+            } catch (err) { showToast('Eroare la recalculare', true); }
+        }
+
+        // ================= REALIZĂRI =================
         async function loadAchievements() {
             try {
                 const res = await fetch('/api/achievements');
                 const list = await res.json();
-                const starCount = list.filter(a => a.is_highlight).length;
-                document.getElementById('brag-star-count').innerText = starCount;
-
                 const container = document.getElementById('achievements-list');
+
                 if (!list.length) {
-                    container.innerHTML = `<div class="bg-slate-800 border border-slate-700 rounded-xl p-6 text-center text-xs text-slate-400">Nicio realizare înregistrată. Apasă butonul de mai sus pentru a adăuga primul tău succes!</div>`;
+                    container.innerHTML = `<div class="bg-slate-900 border border-slate-800 rounded-xl p-6 text-center text-xs text-slate-500">Nicio realizare înregistrată.</div>`;
                     return;
                 }
 
                 container.innerHTML = list.map(a => `
-                    <div class="bg-slate-800/80 border ${a.is_highlight ? 'border-amber-500/40 bg-gradient-to-br from-slate-800 to-amber-950/20' : 'border-slate-700/60'} rounded-2xl p-4 space-y-2.5 shadow-lg">
+                    <div class="bg-slate-900 border ${a.is_highlight ? 'border-amber-500/40 bg-gradient-to-br from-slate-900 to-amber-950/20' : 'border-slate-800'} rounded-2xl p-4 space-y-2.5 shadow-lg">
                         <div class="flex items-start justify-between gap-2">
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="text-[10px] uppercase font-bold tracking-wider bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">${a.category}</span>
-                                    <span class="text-xs font-semibold text-indigo-300">${a.project_name || 'General / Echipă'}</span>
-                                    <span class="text-xs text-slate-400">• ${a.date}</span>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap mb-1">
+                                    <span class="text-[10px] uppercase font-bold tracking-wider bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">${a.category}</span>
+                                    <span class="text-xs font-semibold text-blue-400">${a.project_name || 'General'}</span>
+                                    <span class="text-xs text-slate-500">• ${a.date}</span>
                                 </div>
-                                <h3 class="text-base font-bold text-white">${a.title}</h3>
+                                <h3 class="text-sm font-bold text-white">${a.title}</h3>
                             </div>
-                            <button onclick="toggleStar(${a.id})" class="p-2 rounded-xl bg-slate-700/70 hover:bg-slate-700 transition">
-                                <i class="fa-solid fa-star ${a.is_highlight ? 'text-amber-400' : 'text-slate-500'} text-base"></i>
+                            <button onclick="toggleStar(${a.id})" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 transition">
+                                <i class="fa-solid fa-star ${a.is_highlight ? 'text-amber-400' : 'text-slate-600'} text-base"></i>
                             </button>
                         </div>
 
-                        <!-- Quantifiable impact -->
-                        <div class="bg-slate-900/80 border border-slate-700/60 rounded-xl p-3 text-xs">
-                            <div class="text-[10px] uppercase font-bold text-amber-400/90 mb-1">Rezultat & Impact Cuantificabil (De ce meriți mărire):</div>
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs">
+                            <div class="text-[10px] uppercase font-bold text-amber-400 mb-0.5">Impact Cuantificabil & Valoare Adusă:</div>
                             <p class="text-slate-200 font-medium leading-relaxed">${a.impact_value}</p>
                         </div>
 
@@ -1305,9 +1307,7 @@
                         ` : ''}
                     </div>
                 `).join('');
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         async function toggleStar(id) {
@@ -1317,15 +1317,13 @@
                     loadAchievements();
                     loadStats();
                 }
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         async function submitNewAchievement() {
             const title = document.getElementById('ach-title').value.trim();
             const impact_value = document.getElementById('ach-impact').value.trim();
-            if (!title || !impact_value) return showToast('Titlul și Rezultatul Cuantificabil sunt obligatorii!', true);
+            if (!title || !impact_value) return showToast('Completează titlul și impactul!', true);
 
             const payload = {
                 title,
@@ -1345,16 +1343,14 @@
                 });
                 if (res.ok) {
                     closeModal('modal-new-achievement');
-                    showToast('Realizare salvată cu succes!');
+                    showToast('Realizare salvată!');
                     loadAchievements();
                     loadStats();
                 }
-            } catch (err) {
-                showToast('Eroare la salvarea realizării', true);
-            }
+            } catch (err) { showToast('Eroare la salvare', true); }
         }
 
-        // ================= REPORT GENERATION =================
+        // ================= RAPORT EVALUARE =================
         async function loadReportData() {
             const startDate = document.getElementById('report-start-date').value;
             const endDate = document.getElementById('report-end-date').value;
@@ -1370,32 +1366,51 @@
                 document.getElementById('rep-overtime-hours').innerText = data.overview.overtime_hours || '0';
                 document.getElementById('rep-days-worked').innerText = data.overview.days_worked || '0';
 
+                // Blockers in report (Scut)
+                const blkContainer = document.getElementById('rep-blockers-list');
+                if (data.blockers && data.blockers.length > 0) {
+                    blkContainer.innerHTML = data.blockers.map((b, i) => `
+                        <div class="border border-slate-200 rounded-xl p-2.5 bg-slate-50 text-xs">
+                            <div class="flex items-center justify-between mb-1">
+                                <h4 class="font-bold text-slate-900">${i+1}. ${b.title} (${b.date})</h4>
+                                <span class="text-[10px] bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded">${b.cause_type}</span>
+                            </div>
+                            <p class="text-slate-600 mb-1">Cauză: ${b.description}</p>
+                            <p class="text-emerald-800 font-semibold">Soluția mea inginerească: <span class="font-normal text-slate-800">${b.solution_applied}</span></p>
+                            ${b.prevented_risk ? `<p class="text-[10px] text-emerald-700 italic">✓ Prevenit: ${b.prevented_risk}</p>` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    blkContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Niciun incident înregistrat.</p>`;
+                }
+
                 // Achievements in report
                 const achContainer = document.getElementById('rep-achievements-list');
                 if (data.achievements && data.achievements.length > 0) {
                     achContainer.innerHTML = data.achievements.map((a, i) => `
-                        <div class="border border-slate-200 rounded-xl p-3 bg-slate-50/50">
+                        <div class="border border-slate-200 rounded-xl p-2.5 bg-slate-50 text-xs">
                             <div class="flex items-center justify-between mb-1">
-                                <h4 class="font-bold text-slate-900 text-xs">${i+1}. ${a.title}</h4>
-                                <span class="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-medium">${a.category}</span>
+                                <h4 class="font-bold text-slate-900">${i+1}. ${a.title}</h4>
+                                <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded">${a.category}</span>
                             </div>
-                            <p class="text-xs text-slate-700 font-semibold mb-1">Impact: <span class="font-normal">${a.impact_value}</span></p>
+                            <p class="text-slate-700 font-semibold mb-1">Rezultat Tehnic: <span class="font-normal">${a.impact_value}</span></p>
                             ${a.feedback_received ? `<p class="text-[11px] text-emerald-700 italic">Feedback: "${a.feedback_received}"</p>` : ''}
                         </div>
                     `).join('');
                 } else {
-                    achContainer.innerHTML = `<p class="text-xs text-slate-500 italic">Nicio realizare în această perioadă.</p>`;
+                    achContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Nicio realizare în această perioadă.</p>`;
                 }
 
-                // Projects table in report
+                // Projects table
                 const projContainer = document.getElementById('rep-projects-table');
                 if (data.projects && data.projects.length > 0) {
                     projContainer.innerHTML = `
                         <table class="w-full text-xs text-left border-collapse border border-slate-200">
                             <thead>
                                 <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
-                                    <th class="p-2 border-r border-slate-200">Proiect</th>
-                                    <th class="p-2 border-r border-slate-200">Client / Dep.</th>
+                                    <th class="p-2 border-r border-slate-200">Ansamblu Mecanic</th>
+                                    <th class="p-2 border-r border-slate-200">CAD</th>
+                                    <th class="p-2 border-r border-slate-200">Client / Atelier</th>
                                     <th class="p-2 border-r border-slate-200">Status</th>
                                     <th class="p-2 text-right">Ore Alocate</th>
                                 </tr>
@@ -1404,36 +1419,30 @@
                                 ${data.projects.map(p => `
                                     <tr class="border-b border-slate-200">
                                         <td class="p-2 font-bold text-slate-900 border-r border-slate-200">${p.name}</td>
+                                        <td class="p-2 text-slate-600 border-r border-slate-200 font-mono">${p.cad_software || 'CAD'}</td>
                                         <td class="p-2 text-slate-600 border-r border-slate-200">${p.client || '-'}</td>
                                         <td class="p-2 text-slate-600 border-r border-slate-200">${p.status}</td>
-                                        <td class="p-2 text-right font-black text-indigo-700">${p.hours}h</td>
+                                        <td class="p-2 text-right font-black text-blue-700">${p.hours}h</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
                         </table>
                     `;
-                } else {
-                    projContainer.innerHTML = `<p class="text-xs text-slate-500 italic">Niciun proiect înregistrat în acest interval.</p>`;
                 }
-
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) { console.error(err); }
         }
 
-        // Backup directly to phone storage
         async function backupToPhone() {
             try {
                 const res = await fetch('/api/backup/save-to-storage', { method: 'POST' });
                 const data = await res.json();
-                if (res.ok) {
-                    showToast(data.message);
-                } else {
-                    showToast('Eroare la salvare backup', true);
-                }
-            } catch (err) {
-                showToast('Eroare de conexiune', true);
-            }
+                if (res.ok) showToast(data.message);
+                else showToast('Eroare la salvare backup', true);
+            } catch (err) { showToast('Eroare de conexiune', true); }
+        }
+
+        function installPWA() {
+            alert('Pentru a instala aplicația pe ecranul telefonului:\n1. Apasă pe cele 3 puncte ⋮ din colțul Chrome.\n2. Alege "Instalează aplicația" sau "Adaugă pe ecran".');
         }
     </script>
 </body>
