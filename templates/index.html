@@ -204,33 +204,78 @@
             <!-- ================= TAB 1: FLUX LIVRABILE CAD (5 CONCEPTE LAYOUT) ================= -->
             <section id="tab-table" class="space-y-3">
 
-                <!-- Live Layout Switcher (Cele 5 Concepte din War Room) -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-2.5 shadow-md space-y-2">
+                <!-- Live Layout Switcher (Toate cele 6 Concepte Vizibile 100% pe Mobil) -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-3 shadow-xl space-y-2.5">
                     <div class="flex items-center justify-between px-1">
-                        <span class="text-[11px] font-bold text-white flex items-center gap-1.5">
-                            <i class="fa-solid fa-layer-group text-cyan-400"></i> Stiluri de Interfață (Alege Preferatul):
+                        <span class="text-xs font-bold text-white flex items-center gap-1.5">
+                            <i class="fa-solid fa-layer-group text-cyan-400"></i> Alege Stilul de Interfață (6 Opțiuni):
                         </span>
-                        <span class="text-[10px] text-cyan-400/90 font-medium">1-tap pentru testare</span>
+                        <button type="button" onclick="openLayoutsGuideModal()" class="text-[10px] bg-cyan-950/90 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 transition">
+                            <i class="fa-solid fa-circle-question"></i> Ghid Stiluri
+                        </button>
                     </div>
-                    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 text-xs">
-                        <button type="button" onclick="switchLayoutView('mission', this)" id="layout-btn-mission" class="layout-btn active-layout-btn px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition flex items-center gap-1.5">
-                            <span>🚀</span> Speed-Log HUD
+
+                    <!-- 2-Column Responsive Grid: Toate cele 6 concepte sunt vizibile direct pe ecran fără scroll ascuns! -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                        <!-- Option 1: Speed-Log HUD -->
+                        <button type="button" onclick="switchLayoutView('mission', this)" id="layout-btn-mission" class="layout-btn active-layout-btn p-2.5 rounded-2xl border text-left transition flex items-center gap-2">
+                            <span class="text-xl">🚀</span>
+                            <div class="truncate">
+                                <div class="font-bold text-white text-xs truncate">1. Speed-Log</div>
+                                <div class="text-[9px] text-cyan-300/90 truncate font-mono">Blueprint & 1-Tap</div>
+                            </div>
                         </button>
-                        <button type="button" onclick="switchLayoutView('linear', this)" id="layout-btn-linear" class="layout-btn px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white font-semibold whitespace-nowrap transition flex items-center gap-1">
-                            <span>1.</span> ⚡ Linear Feed
+
+                        <!-- Option 2: Linear Stream -->
+                        <button type="button" onclick="switchLayoutView('linear', this)" id="layout-btn-linear" class="layout-btn bg-slate-950 border border-slate-800 text-slate-300 p-2.5 rounded-2xl text-left transition flex items-center gap-2 hover:border-slate-700">
+                            <span class="text-xl">⚡</span>
+                            <div class="truncate">
+                                <div class="font-bold text-white text-xs truncate">2. Linear</div>
+                                <div class="text-[9px] text-slate-400 truncate font-mono">Feed & Filtre</div>
+                            </div>
                         </button>
-                        <button type="button" onclick="switchLayoutView('bento', this)" id="layout-btn-bento" class="layout-btn px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white font-semibold whitespace-nowrap transition flex items-center gap-1">
-                            <span>2.</span> 🍏 Apple Bento
+
+                        <!-- Option 3: Apple Bento -->
+                        <button type="button" onclick="switchLayoutView('bento', this)" id="layout-btn-bento" class="layout-btn bg-slate-950 border border-slate-800 text-slate-300 p-2.5 rounded-2xl text-left transition flex items-center gap-2 hover:border-slate-700">
+                            <span class="text-xl">🍏</span>
+                            <div class="truncate">
+                                <div class="font-bold text-white text-xs truncate">3. Apple Bento</div>
+                                <div class="text-[9px] text-slate-400 truncate font-mono">Widget Center</div>
+                            </div>
                         </button>
-                        <button type="button" onclick="switchLayoutView('pipeline', this)" id="layout-btn-pipeline" class="layout-btn px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white font-semibold whitespace-nowrap transition flex items-center gap-1">
-                            <span>3.</span> 🚀 PDM Pipeline
+
+                        <!-- Option 4: PDM Pipeline -->
+                        <button type="button" onclick="switchLayoutView('pipeline', this)" id="layout-btn-pipeline" class="layout-btn bg-slate-950 border border-slate-800 text-slate-300 p-2.5 rounded-2xl text-left transition flex items-center gap-2 hover:border-slate-700">
+                            <span class="text-xl">📋</span>
+                            <div class="truncate">
+                                <div class="font-bold text-white text-xs truncate">4. Pipeline</div>
+                                <div class="text-[9px] text-slate-400 truncate font-mono">Kanban Atelier</div>
+                            </div>
                         </button>
-                        <button type="button" onclick="switchLayoutView('notion', this)" id="layout-btn-notion" class="layout-btn px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white font-semibold whitespace-nowrap transition flex items-center gap-1">
-                            <span>4.</span> 📓 Notion Journal
+
+                        <!-- Option 5: Notion Journal -->
+                        <button type="button" onclick="switchLayoutView('notion', this)" id="layout-btn-notion" class="layout-btn bg-slate-950 border border-slate-800 text-slate-300 p-2.5 rounded-2xl text-left transition flex items-center gap-2 hover:border-slate-700">
+                            <span class="text-xl">📓</span>
+                            <div class="truncate">
+                                <div class="font-bold text-white text-xs truncate">5. Notion</div>
+                                <div class="text-[9px] text-slate-400 truncate font-mono">Inline Fără Pop-up</div>
+                            </div>
                         </button>
-                        <button type="button" onclick="switchLayoutView('industrial', this)" id="layout-btn-industrial" class="layout-btn px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white font-semibold whitespace-nowrap transition flex items-center gap-1">
-                            <span>5.</span> 🛠️ 3-Tap Industrial
+
+                        <!-- Option 6: 3-Tap Industrial -->
+                        <button type="button" onclick="switchLayoutView('industrial', this)" id="layout-btn-industrial" class="layout-btn bg-slate-950 border border-slate-800 text-slate-300 p-2.5 rounded-2xl text-left transition flex items-center gap-2 hover:border-slate-700">
+                            <span class="text-xl">🛠️</span>
+                            <div class="truncate">
+                                <div class="font-bold text-white text-xs truncate">6. Industrial</div>
+                                <div class="text-[9px] text-slate-400 truncate font-mono">Consolă CNC</div>
+                            </div>
                         </button>
+                    </div>
+
+                    <!-- Active Mode Status Readout -->
+                    <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800/80 px-3 py-1.5 rounded-xl text-[11px]">
+                        <span class="text-slate-400">Interfață Activă Afișată:</span>
+                        <span id="active-layout-indicator-text" class="font-bold text-cyan-400 font-mono">1. 🚀 Speed-Log HUD (Zero-typing & Blueprint CAD)</span>
                     </div>
                 </div>
 
@@ -906,6 +951,111 @@
         </div>
     </div>
 
+    <!-- ================= MODAL: GHID COMPARATIV CELE 6 CONCEPTE & CONFIGURATOARE ================= -->
+    <div id="modal-layouts-guide" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto">
+        <div class="bg-slate-900 border-t sm:border border-cyan-500/40 w-full max-w-xl rounded-t-3xl sm:rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-2xl max-h-[90vh] overflow-y-auto bottom-sheet-anim">
+            <!-- Mobile Drag Handle -->
+            <div class="w-12 h-1.5 bg-slate-700 hover:bg-slate-600 rounded-full mx-auto mb-1 cursor-pointer sm:hidden" onclick="closeModal('modal-layouts-guide')"></div>
+
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📐</span>
+                    <div>
+                        <h3 class="text-sm font-bold text-white">Ghidul Celor 6 Concepte & Configuratoare</h3>
+                        <p class="text-[10px] text-slate-400">Apasă pe oricare pentru a-l activa instant pe ecran</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModal('modal-layouts-guide')" class="text-slate-400 hover:text-white p-1 text-base"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <!-- Concept 1 -->
+                <div class="bg-slate-950 p-3 rounded-2xl border border-cyan-500/30 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-white flex items-center gap-1.5 text-xs">
+                            <span class="text-base">🚀</span> 1. Speed-Log HUD (Flagship)
+                        </span>
+                        <button onclick="closeModal('modal-layouts-guide'); switchLayoutView('mission');" class="px-2.5 py-1 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[10px]">Activează</button>
+                    </div>
+                    <p class="text-slate-300 text-[11px] leading-snug">
+                        <strong>Cum adaugi sarcini:</strong> Direct din panoul de sus (zero tastare). Atingi piesa (Flanșă, Batiu etc.), disciplina (3D/2D/Layout), iar schema CAD SVG și descrierea tehnică se generează automat. Apoi apeși butonul mare luminos.
+                    </p>
+                </div>
+
+                <!-- Concept 2 -->
+                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-white flex items-center gap-1.5 text-xs">
+                            <span class="text-base">⚡</span> 2. Linear Hardware Stream
+                        </span>
+                        <button onclick="closeModal('modal-layouts-guide'); switchLayoutView('linear');" class="px-2.5 py-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px]">Activează</button>
+                    </div>
+                    <p class="text-slate-300 text-[11px] leading-snug">
+                        <strong>Cum adaugi sarcini:</strong> Butonul <code>+ Notează Livrabil</code> deschide configuratorul de jos (bottom-sheet) cu tag-uri rapide, cod P/N și selecție de atelier DFM.
+                    </p>
+                </div>
+
+                <!-- Concept 3 -->
+                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-white flex items-center gap-1.5 text-xs">
+                            <span class="text-base">🍏</span> 3. Apple Bento CAD Deck
+                        </span>
+                        <button onclick="closeModal('modal-layouts-guide'); switchLayoutView('bento');" class="px-2.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px]">Activează</button>
+                    </div>
+                    <p class="text-slate-300 text-[11px] leading-snug">
+                        <strong>Cum adaugi sarcini:</strong> Plăci tactile widget. Ai card Hero pentru Ansamblul principal activ, stepper interactiv de planșe 2D <code>[-] [+]</code> și butoane <code>+ Model 3D</code> / <code>+ Planșă Nouă</code>.
+                    </p>
+                </div>
+
+                <!-- Concept 4 -->
+                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-white flex items-center gap-1.5 text-xs">
+                            <span class="text-base">📋</span> 4. PDM Release Pipeline
+                        </span>
+                        <button onclick="closeModal('modal-layouts-guide'); switchLayoutView('pipeline');" class="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px]">Activează</button>
+                    </div>
+                    <p class="text-slate-300 text-[11px] leading-snug">
+                        <strong>Cum adaugi sarcini:</strong> Tablou Kanban mecanic organizat pe cele 4 etape (3D ➔ 2D ➔ Layout ➔ Atelier). Fiecare coloană are butonul ei dedicat (<code>+ Piesă 3D</code>, <code>+ Planșă 2D</code> etc.) și buton de avansare direct pe card.
+                    </p>
+                </div>
+
+                <!-- Concept 5 -->
+                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-white flex items-center gap-1.5 text-xs">
+                            <span class="text-base">📓</span> 5. Notion Micro-Journal
+                        </span>
+                        <button onclick="closeModal('modal-layouts-guide'); switchLayoutView('notion');" class="px-2.5 py-1 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-[10px]">Activează</button>
+                    </div>
+                    <p class="text-slate-300 text-[11px] leading-snug">
+                        <strong>Cum adaugi sarcini:</strong> FĂRĂ FERESTRE POP-UP! Câmpul de notare este direct integrat în document (inline). Tastezi o notă scurtă, alegi tipul și apeși <code>Salvează în Jurnal</code>. Zilele sunt pliabile în stil acordion.
+                    </p>
+                </div>
+
+                <!-- Concept 6 -->
+                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-white flex items-center gap-1.5 text-xs">
+                            <span class="text-base">🛠️</span> 6. 3-Tap Industrial Console
+                        </span>
+                        <button onclick="closeModal('modal-layouts-guide'); switchLayoutView('industrial');" class="px-2.5 py-1 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-[10px]">Activează</button>
+                    </div>
+                    <p class="text-slate-300 text-[11px] leading-snug">
+                        <strong>Cum adaugi sarcini:</strong> Consolă de atelier CNC în culori negru-portocaliu. Conține 3 butoane fizice masive (<code>3D CAD</code>, <code>2D EXEC</code>, <code>LAYOUT</code>) și emite bonuri de lucru numerotate tip atelier (#001, #002).
+                    </p>
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800 text-center">
+                <button type="button" onclick="closeModal('modal-layouts-guide')" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">
+                    Am Înțeles, Închide Ghidul
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: Schimbare Parolă Admin (Cybersecurity) -->
     <div id="modal-change-password" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-5 space-y-3.5 shadow-2xl">
@@ -1292,6 +1442,10 @@
             openModal('modal-change-password');
         }
 
+        function openLayoutsGuideModal() {
+            openModal('modal-layouts-guide');
+        }
+
         async function submitChangePassword(e) {
             e.preventDefault();
             const old_password = document.getElementById('pwd-old').value;
@@ -1481,20 +1635,32 @@
             currentLayoutMode = mode;
             localStorage.setItem('workpulse_layout', mode);
 
+            // Switch to main tab
+            switchTab('table');
+
             // Update button styles
             document.querySelectorAll('.layout-btn').forEach(b => {
                 b.classList.remove('active-layout-btn');
                 b.classList.add('bg-slate-950', 'text-slate-300', 'border-slate-800');
             });
-            if (btn) {
-                btn.classList.remove('bg-slate-950', 'text-slate-300', 'border-slate-800');
-                btn.classList.add('active-layout-btn');
-            } else {
-                const b = document.getElementById(`layout-btn-${mode}`);
-                if (b) {
-                    b.classList.remove('bg-slate-950', 'text-slate-300', 'border-slate-800');
-                    b.classList.add('active-layout-btn');
-                }
+            const b = btn || document.getElementById(`layout-btn-${mode}`);
+            if (b) {
+                b.classList.remove('bg-slate-950', 'text-slate-300', 'border-slate-800');
+                b.classList.add('active-layout-btn');
+            }
+
+            // Update active readout label
+            const labelEl = document.getElementById('active-layout-indicator-text');
+            if (labelEl) {
+                const names = {
+                    'mission': '1. 🚀 Speed-Log HUD (Zero-typing & Blueprint CAD)',
+                    'linear': '2. ⚡ Linear Stream (Micro-carduri & Filtre)',
+                    'bento': '3. 🍏 Apple Bento (Widget Center & Stepper 2D)',
+                    'pipeline': '4. 📋 PDM Pipeline (Kanban Etape Producție)',
+                    'notion': '5. 📓 Notion Journal (Inline Notes Fără Pop-up)',
+                    'industrial': '6. 🛠️ 3-Tap Console (Consolă CNC & Bonuri Lucru)'
+                };
+                labelEl.innerText = names[mode] || mode;
             }
 
             renderCurrentLayout();
