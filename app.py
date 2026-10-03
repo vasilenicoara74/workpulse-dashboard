@@ -370,13 +370,14 @@ def api_daily_log_update(log_id):
         d_obj = date.today()
         entry_date = d_obj.isoformat()
 
+    project_id = data.get('project_id') or existing['project_id']
     part_number = data.get('part_number', '').strip() or existing['part_number']
     revision = data.get('revision', '').strip() or existing['revision']
 
     desc = data.get('description', '').strip() or existing['description']
     activity_type = data.get('activity_type') or existing['activity_type']
     status_tag = data.get('status_tag') or existing['status_tag']
-    is_highlight = 1 if data.get('is_highlight') else 0
+    is_highlight = existing['is_highlight'] if 'is_highlight' not in data else (1 if data['is_highlight'] else 0)
     drawings_count = int(data.get('drawings_count', existing['drawings_count'] if 'drawings_count' in existing.keys() else 1) or 1)
     manufacturing_process = data.get('manufacturing_process') or (existing['manufacturing_process'] if 'manufacturing_process' in existing.keys() else 'Tablă Sheet Metal')
     material = data.get('material') or (existing['material'] if 'material' in existing.keys() else 'Oțel')

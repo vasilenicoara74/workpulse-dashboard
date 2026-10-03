@@ -231,69 +231,7 @@
                     </div>
                 </div>
 
-                <!-- Control Bar & FILTRU UNIC ORIZONTAL CU CHIPS -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-3 shadow-lg">
-                    <!-- Action Buttons & Quick KPIs -->
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                        <div class="flex items-center gap-2">
-                            <button onclick="openNewDailyLogModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-cyan-600/20 active:scale-95 transition">
-                                <i class="fa-solid fa-plus-circle text-cyan-200"></i> + Notează Livrabil
-                            </button>
-                            <button onclick="openNewProjectModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-cubes text-blue-400"></i> + Ansamblu
-                            </button>
-                            <a href="/export/csv" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1 transition">
-                                <i class="fa-solid fa-file-csv text-emerald-400"></i> CSV
-                            </a>
-                        </div>
 
-                        <!-- Compact Scorecards -->
-                        <div class="flex items-center gap-3 text-xs bg-slate-950/80 border border-slate-800 px-3 py-1.5 rounded-xl self-start sm:self-auto">
-                            <div>
-                                <span class="text-[10px] text-slate-400 uppercase font-semibold">Zile: </span>
-                                <strong class="text-white font-bold" id="sum-active-days">0</strong>
-                            </div>
-                            <span class="text-slate-700">|</span>
-                            <div>
-                                <span class="text-[10px] text-slate-400 uppercase font-semibold">Ansambluri: </span>
-                                <strong class="text-cyan-400 font-bold" id="sum-active-projects">0</strong>
-                            </div>
-                            <span class="text-slate-700">|</span>
-                            <div>
-                                <span class="text-[10px] text-slate-400 uppercase font-semibold">Reușite: </span>
-                                <strong class="text-amber-400 font-bold" id="sum-highlights">0 ⭐</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- CĂUTARE INSTANTĂ & FILTRU UNIC ORIZONTAL CU CHIPS -->
-                    <div class="space-y-2 pt-2 border-t border-slate-800/80">
-                        <div class="relative">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-                            <input type="text" id="daily-search" oninput="debounceLoadDailyLogs()" placeholder="Caută proiect, reper sau notă tehnică..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
-                        </div>
-
-                        <!-- FILTRU UNIC ORIZONTAL RAPID (CHIPS TACTILE) -->
-                        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 text-xs">
-                            <button type="button" onclick="setFilterChip('all', this)" class="filter-chip active-filter-chip px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition flex items-center gap-1.5">
-                                <span>•</span> Toate
-                            </button>
-                            <button type="button" onclick="setFilterChip('Proiectare 3D', this)" class="filter-chip px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-cyan-400 hover:border-cyan-500/40 font-semibold whitespace-nowrap transition flex items-center gap-1.5">
-                                <span class="text-cyan-400">📐</span> Proiectare 3D
-                            </button>
-                            <button type="button" onclick="setFilterChip('Desene 2D', this)" class="filter-chip px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-blue-400 hover:border-blue-500/40 font-semibold whitespace-nowrap transition flex items-center gap-1.5">
-                                <span class="text-blue-400">📋</span> Desene 2D
-                            </button>
-                            <button type="button" onclick="setFilterChip('Layout', this)" class="filter-chip px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-purple-400 hover:border-purple-500/40 font-semibold whitespace-nowrap transition flex items-center gap-1.5">
-                                <span class="text-purple-400">📐</span> Layout
-                            </button>
-                            <button type="button" onclick="setFilterChip('highlight', this)" class="filter-chip px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-amber-300/90 hover:text-amber-300 hover:border-amber-500/40 font-semibold whitespace-nowrap transition flex items-center gap-1.5">
-                                <span>⭐</span> Reușite Cheie
-                            </button>
-                            <span id="table-entries-count" class="text-[11px] text-slate-400 font-semibold px-2 shrink-0 ml-auto">0 livrabile</span>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- LINEAR HARDWARE FEED: MICRO-CARDURI LIVRABILE INGINEREȘTI -->
                 <div id="daily-feed-container" class="space-y-3">
@@ -1531,6 +1469,7 @@
 
         let currentLayoutMode = localStorage.getItem('workpulse_layout') || 'linear';
         let currentCachedLogs = [];
+        let currentCachedSummary = { unique_days: 0, unique_projects: 0, highlights: 0 };
 
         function switchLayoutView(mode, btn) {
             currentLayoutMode = mode;
@@ -1572,20 +1511,7 @@
                 const data = await res.json();
 
                 currentCachedLogs = data.logs || [];
-
-                // Update summary scorecards
-                if (document.getElementById('sum-active-days')) {
-                    document.getElementById('sum-active-days').innerText = `${data.summary.unique_days || 0} zile`;
-                }
-                if (document.getElementById('sum-active-projects')) {
-                    document.getElementById('sum-active-projects').innerText = `${data.summary.unique_projects || 0}`;
-                }
-                if (document.getElementById('sum-highlights')) {
-                    document.getElementById('sum-highlights').innerText = `${data.summary.highlights || 0} ⭐`;
-                }
-                if (document.getElementById('table-entries-count')) {
-                    document.getElementById('table-entries-count').innerText = `${currentCachedLogs.length} livrabile`;
-                }
+                currentCachedSummary = data.summary || { unique_days: 0, unique_projects: 0, highlights: 0 };
 
                 // Initialize button state
                 const activeBtn = document.getElementById(`layout-btn-${currentLayoutMode}`);
@@ -1823,7 +1749,7 @@
         }
 
         // =========================================================================
-        // 1. CONCEPT 1: LINEAR HARDWARE (MICRO-CARDS FEED)
+        // 1. CONCEPT 1: LINEAR HARDWARE STREAM (FEED APP INTERFACE)
         // =========================================================================
         function renderLinearFeed(logs, container, isDemo) {
             const isSelected = currentLayoutMode === 'linear';
@@ -1836,10 +1762,10 @@
                         </div>
                         <div>
                             <div class="text-xs font-bold text-white flex items-center gap-1.5 flex-wrap">
-                                <span>Layout 1: Linear Hardware Stream</span>
+                                <span>Interfață 1: Linear Hardware Stream</span>
                                 <span class="text-[9px] bg-cyan-950 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-full font-mono">Stream Modern</span>
                             </div>
-                            <p class="text-[11px] text-slate-300 mt-0.5">Flux rapid de micro-carduri cu coduri PDM, procese DFM și acțiuni instantanee.</p>
+                            <p class="text-[11px] text-slate-300 mt-0.5">Flux fluid cu bară de căutare integrată, filtre chips și micro-carduri compacte.</p>
                         </div>
                     </div>
                     <button onclick="lockSelectedLayout('linear', 'Linear Hardware Stream')" class="px-3.5 py-1.5 rounded-xl ${isSelected ? 'bg-cyan-500 text-slate-950 font-black shadow-cyan-500/30' : 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-400/40 font-bold'} text-xs whitespace-nowrap transition active:scale-95 flex items-center justify-center gap-1.5 shadow-md">
@@ -1856,6 +1782,68 @@
                     </div>
                 `;
             }
+
+            // Linear Dedicated Control Bar & Chips
+            html += `
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-3 shadow-lg">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div class="flex items-center gap-2">
+                            <button onclick="openNewDailyLogModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-cyan-600/20 active:scale-95 transition">
+                                <i class="fa-solid fa-plus-circle text-cyan-200"></i> + Notează Livrabil
+                            </button>
+                            <button onclick="openNewProjectModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-cubes text-blue-400"></i> + Ansamblu
+                            </button>
+                            <a href="/export/csv" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1 transition">
+                                <i class="fa-solid fa-file-csv text-emerald-400"></i> CSV
+                            </a>
+                        </div>
+
+                        <div class="flex items-center gap-3 text-xs bg-slate-950/80 border border-slate-800 px-3 py-1.5 rounded-xl self-start sm:self-auto">
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase font-semibold">Zile: </span>
+                                <strong class="text-white font-bold" id="sum-active-days">${currentCachedSummary.unique_days || 0}</strong>
+                            </div>
+                            <span class="text-slate-700">|</span>
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase font-semibold">Ansambluri: </span>
+                                <strong class="text-cyan-400 font-bold" id="sum-active-projects">${currentCachedSummary.unique_projects || 0}</strong>
+                            </div>
+                            <span class="text-slate-700">|</span>
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase font-semibold">Reușite: </span>
+                                <strong class="text-amber-400 font-bold" id="sum-highlights">${currentCachedSummary.highlights || 0} ⭐</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 pt-2 border-t border-slate-800/80">
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                            <input type="text" id="daily-search" oninput="debounceLoadDailyLogs()" placeholder="Caută proiect, reper sau notă tehnică..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
+                        </div>
+
+                        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 text-xs">
+                            <button type="button" onclick="setFilterChip('all', this)" class="filter-chip ${currentActivityFilter === 'all' && !onlyHighlightsFilter ? 'active-filter-chip' : 'bg-slate-950 border border-slate-800 text-slate-300'} px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition flex items-center gap-1.5">
+                                <span>•</span> Toate
+                            </button>
+                            <button type="button" onclick="setFilterChip('Proiectare 3D', this)" class="filter-chip ${currentActivityFilter === 'Proiectare 3D' ? 'active-filter-chip' : 'bg-slate-950 border border-slate-800 text-slate-300'} px-3 py-1.5 rounded-xl hover:text-cyan-400 font-semibold whitespace-nowrap transition flex items-center gap-1.5">
+                                <span class="text-cyan-400">📐</span> Proiectare 3D
+                            </button>
+                            <button type="button" onclick="setFilterChip('Desene 2D', this)" class="filter-chip ${currentActivityFilter === 'Desene 2D' ? 'active-filter-chip' : 'bg-slate-950 border border-slate-800 text-slate-300'} px-3 py-1.5 rounded-xl hover:text-blue-400 font-semibold whitespace-nowrap transition flex items-center gap-1.5">
+                                <span class="text-blue-400">📋</span> Desene 2D
+                            </button>
+                            <button type="button" onclick="setFilterChip('Layout', this)" class="filter-chip ${currentActivityFilter === 'Layout' ? 'active-filter-chip' : 'bg-slate-950 border border-slate-800 text-slate-300'} px-3 py-1.5 rounded-xl hover:text-purple-400 font-semibold whitespace-nowrap transition flex items-center gap-1.5">
+                                <span class="text-purple-400">📐</span> Layout
+                            </button>
+                            <button type="button" onclick="setFilterChip('highlight', this)" class="filter-chip ${onlyHighlightsFilter ? 'active-filter-chip' : 'bg-slate-950 border border-slate-800 text-slate-300'} px-3 py-1.5 rounded-xl text-amber-300/90 font-semibold whitespace-nowrap transition flex items-center gap-1.5">
+                                <span>⭐</span> Reușite Cheie
+                            </button>
+                            <span id="table-entries-count" class="text-[11px] text-slate-400 font-semibold px-2 shrink-0 ml-auto">${logs.length} livrabile</span>
+                        </div>
+                    </div>
+                </div>
+            `;
 
             html += `<div class="space-y-3">`;
             html += logs.map(log => {
@@ -1934,7 +1922,7 @@
         }
 
         // =========================================================================
-        // 2. CONCEPT 2: APPLE BENTO CAD DECK (MODULAR GLASS TILES)
+        // 2. CONCEPT 2: APPLE BENTO CAD DECK (IOS WIDGET CENTER INTERFACE)
         // =========================================================================
         function renderBentoDeck(logs, container, isDemo) {
             const isSelected = currentLayoutMode === 'bento';
@@ -1951,10 +1939,10 @@
                         </div>
                         <div>
                             <div class="text-xs font-bold text-white flex items-center gap-1.5 flex-wrap">
-                                <span>Layout 2: Apple Bento CAD Deck</span>
+                                <span>Interfață 2: Apple Bento CAD Deck</span>
                                 <span class="text-[9px] bg-indigo-950 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-mono">Modular Glass</span>
                             </div>
-                            <p class="text-[11px] text-slate-300 mt-0.5">Carduri modulare tactile, Hero Card pentru ansamblu și stepper rapid pentru planșe 2D.</p>
+                            <p class="text-[11px] text-slate-300 mt-0.5">Widget Center tactil: card Hero ansamblu, stepper planșe 2D și plăci rotunjite.</p>
                         </div>
                     </div>
                     <button onclick="lockSelectedLayout('bento', 'Apple Bento CAD Deck')" class="px-3.5 py-1.5 rounded-xl ${isSelected ? 'bg-indigo-500 text-white font-black shadow-indigo-500/30' : 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-400/40 font-bold'} text-xs whitespace-nowrap transition active:scale-95 flex items-center justify-center gap-1.5 shadow-md">
@@ -1972,9 +1960,21 @@
                 `;
             }
 
+            // Apple iOS Greeting & Date Pill
             html += `
+                <div class="flex items-center justify-between px-1 pt-1">
+                    <div>
+                        <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">CAD Dashboard</span>
+                        <h2 class="text-base font-black text-white">Salut, Inginer Proiectant 📐</h2>
+                    </div>
+                    <div class="text-right bg-slate-900 border border-slate-800 px-3 py-1 rounded-2xl">
+                        <span class="text-[10px] text-slate-400 block">Astăzi</span>
+                        <span class="text-xs font-bold text-indigo-400 font-mono">${new Date().toISOString().split('T')[0]}</span>
+                    </div>
+                </div>
+
                 <!-- Bento Hero Tile: Ansamblu Principal Activ -->
-                <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 border border-indigo-500/40 rounded-3xl p-4 sm:p-5 space-y-3 shadow-xl">
+                <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/50 border border-indigo-500/40 rounded-3xl p-4 sm:p-5 space-y-3 shadow-xl">
                     <div class="flex items-center justify-between">
                         <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
                             <i class="fa-solid fa-cubes"></i> Ansamblu Principal Activ
@@ -2001,7 +2001,7 @@
                     </div>
                 </div>
 
-                <!-- 2 Split Bento Tiles: Metrici Tactile Rapide -->
+                <!-- 2x2 Bento Interactive Tiles -->
                 <div class="grid grid-cols-2 gap-3">
                     <!-- Tile 1: 3D Status -->
                     <div class="bg-slate-900 border border-slate-800 rounded-3xl p-3.5 space-y-2 shadow-md flex flex-col justify-between">
@@ -2013,7 +2013,7 @@
                             <div class="text-[10px] text-slate-400">Cinematică & Coliziuni OK</div>
                         </div>
                         <button onclick="openNewDailyLogModal('3d')" class="w-full py-1.5 rounded-xl bg-cyan-950/70 hover:bg-cyan-900/60 text-cyan-300 font-bold text-[10px] text-center border border-cyan-500/30 transition active:scale-95">
-                            + Adaugă 3D
+                            + Model 3D
                         </button>
                     </div>
 
@@ -2032,6 +2032,29 @@
                         </div>
                         <button onclick="openNewDailyLogModal('2d')" class="w-full py-1.5 rounded-xl bg-blue-950/70 hover:bg-blue-900/60 text-blue-300 font-bold text-[10px] text-center border border-blue-500/30 transition active:scale-95">
                             + Planșă Nouă
+                        </button>
+                    </div>
+
+                    <!-- Tile 3: DFM Processes -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-3.5 space-y-1.5 shadow-md">
+                        <div class="text-[10px] font-bold text-purple-400 uppercase flex items-center gap-1">
+                            <span>⚙️</span> DFM Fabricație
+                        </div>
+                        <div class="flex flex-wrap gap-1 pt-1">
+                            <span class="text-[9px] bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800 text-slate-300">Tablă Laser</span>
+                            <span class="text-[9px] bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800 text-slate-300">CNC 3-Axe</span>
+                            <span class="text-[9px] bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800 text-slate-300">Sudură MIG</span>
+                        </div>
+                    </div>
+
+                    <!-- Tile 4: Achievements -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-3.5 space-y-1.5 shadow-md flex flex-col justify-between">
+                        <div class="text-[10px] font-bold text-amber-400 uppercase flex items-center gap-1">
+                            <span>⭐</span> Dosar Mărire
+                        </div>
+                        <div class="text-lg font-black text-amber-400">${highlightsCount} Reușite</div>
+                        <button onclick="switchTab('brag')" class="w-full py-1 rounded-xl bg-amber-950/60 text-amber-300 font-bold text-[10px] border border-amber-500/30">
+                            Vezi Dosar
                         </button>
                     </div>
                 </div>
@@ -2079,7 +2102,7 @@
         }
 
         // =========================================================================
-        // 3. CONCEPT 3: PDM RELEASE PIPELINE (KANBAN COLUMNS)
+        // 3. CONCEPT 3: PDM RELEASE PIPELINE (KANBAN BOARD INTERFACE)
         // =========================================================================
         function renderPipelineColumns(logs, container, isDemo) {
             const isSelected = currentLayoutMode === 'pipeline';
@@ -2097,10 +2120,10 @@
                         </div>
                         <div>
                             <div class="text-xs font-bold text-white flex items-center gap-1.5 flex-wrap">
-                                <span>Layout 3: PDM Release Pipeline</span>
+                                <span>Interfață 3: PDM Release Pipeline</span>
                                 <span class="text-[9px] bg-emerald-950 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">Kanban Etape</span>
                             </div>
-                            <p class="text-[11px] text-slate-300 mt-0.5">Urmărește piesele mecanic prin cele 4 etape de la model 3D până la lansare în atelier.</p>
+                            <p class="text-[11px] text-slate-300 mt-0.5">Tablou Kanban mecanic pe cele 4 etape de la model 3D până la lansare atelier.</p>
                         </div>
                     </div>
                     <button onclick="lockSelectedLayout('pipeline', 'PDM Release Pipeline')" class="px-3.5 py-1.5 rounded-xl ${isSelected ? 'bg-emerald-500 text-slate-950 font-black shadow-emerald-500/30' : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-400/40 font-bold'} text-xs whitespace-nowrap transition active:scale-95 flex items-center justify-center gap-1.5 shadow-md">
@@ -2121,19 +2144,19 @@
             html += `
                 <!-- Mobile Column Switcher Tabs -->
                 <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 text-xs">
-                    <button onclick="setPipelineStageFilter('all')" class="px-2.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${activePipelineStage === 'all' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-800'}">
+                    <button onclick="setPipelineStageFilter('all')" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${activePipelineStage === 'all' ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-900 text-slate-400 border border-slate-800'}">
                         Toate (${logs.length})
                     </button>
-                    <button onclick="setPipelineStageFilter('3d')" class="px-2.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${activePipelineStage === '3d' ? 'bg-cyan-600 text-white' : 'bg-slate-900 text-cyan-400 border border-slate-800'}">
+                    <button onclick="setPipelineStageFilter('3d')" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${activePipelineStage === '3d' ? 'bg-cyan-600 text-white shadow-md' : 'bg-slate-900 text-cyan-400 border border-slate-800'}">
                         📐 1. 3D CAD (${group3D.length})
                     </button>
-                    <button onclick="setPipelineStageFilter('2d')" class="px-2.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${activePipelineStage === '2d' ? 'bg-blue-600 text-white' : 'bg-slate-900 text-blue-400 border border-slate-800'}">
+                    <button onclick="setPipelineStageFilter('2d')" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${activePipelineStage === '2d' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-900 text-blue-400 border border-slate-800'}">
                         📋 2. 2D Planșe (${group2D.length})
                     </button>
-                    <button onclick="setPipelineStageFilter('layout')" class="px-2.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${activePipelineStage === 'layout' ? 'bg-purple-600 text-white' : 'bg-slate-900 text-purple-400 border border-slate-800'}">
+                    <button onclick="setPipelineStageFilter('layout')" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${activePipelineStage === 'layout' ? 'bg-purple-600 text-white shadow-md' : 'bg-slate-900 text-purple-400 border border-slate-800'}">
                         📐 3. Layout (${groupLayout.length})
                     </button>
-                    <button onclick="setPipelineStageFilter('released')" class="px-2.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${activePipelineStage === 'released' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-emerald-400 border border-slate-800'}">
+                    <button onclick="setPipelineStageFilter('released')" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${activePipelineStage === 'released' ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-900 text-emerald-400 border border-slate-800'}">
                         🚀 4. Atelier (${groupReleased.length})
                     </button>
                 </div>
@@ -2150,7 +2173,7 @@
                             <span class="flex items-center gap-1.5"><span>📐</span> 1. Proiectare 3D CAD (Modelare)</span>
                             <div class="flex items-center gap-1.5">
                                 <span class="bg-cyan-950 px-2 py-0.5 rounded-full text-[10px] border border-cyan-500/30 font-mono">${group3D.length}</span>
-                                <button onclick="openNewDailyLogModal('3d')" class="text-[10px] bg-cyan-900/60 hover:bg-cyan-800 text-cyan-200 px-2 py-0.5 rounded-lg">+ Piesă</button>
+                                <button onclick="openNewDailyLogModal('3d')" class="text-[10px] bg-cyan-900/60 hover:bg-cyan-800 text-cyan-200 px-2 py-0.5 rounded-lg">+ Piesă 3D</button>
                             </div>
                         </div>
                         <div class="space-y-2">
@@ -2168,7 +2191,7 @@
                             <span class="flex items-center gap-1.5"><span>📋</span> 2. Desene 2D & BOM Execuție</span>
                             <div class="flex items-center gap-1.5">
                                 <span class="bg-blue-950 px-2 py-0.5 rounded-full text-[10px] border border-blue-500/30 font-mono">${group2D.length}</span>
-                                <button onclick="openNewDailyLogModal('2d')" class="text-[10px] bg-blue-900/60 hover:bg-blue-800 text-blue-200 px-2 py-0.5 rounded-lg">+ Planșă</button>
+                                <button onclick="openNewDailyLogModal('2d')" class="text-[10px] bg-blue-900/60 hover:bg-blue-800 text-blue-200 px-2 py-0.5 rounded-lg">+ Planșă 2D</button>
                             </div>
                         </div>
                         <div class="space-y-2">
@@ -2236,7 +2259,7 @@
         }
 
         // =========================================================================
-        // 4. CONCEPT 4: NOTION MICRO-JOURNAL (ZERO-MODAL & INLINE ENTRY)
+        // 4. CONCEPT 4: NOTION MICRO-JOURNAL (DOCUMENT & INLINE ENTRY INTERFACE)
         // =========================================================================
         function renderNotionJournal(logs, container, isDemo) {
             const isSelected = currentLayoutMode === 'notion';
@@ -2257,7 +2280,7 @@
                         </div>
                         <div>
                             <div class="text-xs font-bold text-white flex items-center gap-1.5 flex-wrap">
-                                <span>Layout 4: Notion Micro-Journal</span>
+                                <span>Interfață 4: Notion Micro-Journal</span>
                                 <span class="text-[9px] bg-amber-950 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-mono">Fără Ferestre Modale</span>
                             </div>
                             <p class="text-[11px] text-slate-300 mt-0.5">Jurnal minimalist cu introducere direct în pagină (inline) și grupuri cronologice pliabile.</p>
@@ -2285,7 +2308,7 @@
                         <span class="flex items-center gap-1.5">
                             <i class="fa-solid fa-pen-to-square"></i> + Adaugă Notă Rapidă Direct în Pagină
                         </span>
-                        <span class="text-[10px] text-slate-400 font-normal">Nu necesită ferestre modale</span>
+                        <span class="text-[10px] text-slate-400 font-normal">Tastează și apasă Salvează</span>
                     </div>
                     <div class="space-y-2">
                         <input type="text" id="notion-inline-desc" placeholder="Ce ai lucrat azi? (ex: Modelat flanșă ghidaj, verificat cote de prindere...)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
@@ -2372,7 +2395,7 @@
         }
 
         // =========================================================================
-        // 5. CONCEPT 5: 3-TAP INDUSTRIAL CONSOLE (CNC MACHINING TERMINAL)
+        // 5. CONCEPT 5: 3-TAP INDUSTRIAL CONSOLE (CNC OPERATOR CONSOLE INTERFACE)
         // =========================================================================
         function renderIndustrialLogger(logs, container, isDemo) {
             const isSelected = currentLayoutMode === 'industrial';
@@ -2385,10 +2408,10 @@
                         </div>
                         <div>
                             <div class="text-xs font-mono font-black text-orange-400 flex items-center gap-1.5 tracking-wider flex-wrap">
-                                <span>WP-CNC // INDUSTRIAL CONSOLE</span>
+                                <span>Interfață 5: 3-Tap Industrial Console</span>
                                 <span class="text-[9px] bg-orange-950 text-orange-300 border border-orange-500/40 px-2 py-0.5 rounded font-mono">HARDWARE TACTIL</span>
                             </div>
-                            <p class="text-[11px] text-slate-300 mt-0.5 font-mono">Consolă de atelier cu 3 butoane masive (3-Tap) și registru prelucrări.</p>
+                            <p class="text-[11px] text-slate-300 mt-0.5 font-mono">Panou de atelier CNC cu 3 butoane gigantice și registru bonuri de lucru.</p>
                         </div>
                     </div>
                     <button onclick="lockSelectedLayout('industrial', '3-Tap Industrial Console')" class="px-3.5 py-1.5 rounded-xl ${isSelected ? 'bg-orange-500 text-black font-black shadow-orange-500/40' : 'bg-orange-600 hover:bg-orange-500 text-white font-mono font-bold'} text-xs whitespace-nowrap transition active:scale-95 flex items-center justify-center gap-1.5 shadow-lg shadow-orange-600/30">
@@ -2418,21 +2441,21 @@
                     </div>
 
                     <!-- 3 Butoane Tactile Masive (3-Tap Quick Punch) -->
-                    <div class="grid grid-cols-3 gap-2 pt-1">
-                        <button onclick="openNewDailyLogModal('3d')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-900 border border-amber-500/40 hover:border-amber-400 active:scale-95 transition text-center shadow-md">
-                            <span class="text-xl mb-1">📐</span>
-                            <span class="font-mono text-xs font-bold text-white">3D CAD</span>
-                            <span class="text-[9px] text-amber-400/80 uppercase font-mono mt-0.5">Modelare</span>
+                    <div class="grid grid-cols-3 gap-2.5 pt-1">
+                        <button onclick="openNewDailyLogModal('3d')" class="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-amber-500/60 hover:border-amber-400 active:scale-95 transition text-center shadow-lg shadow-amber-500/10">
+                            <span class="text-2xl mb-1">📐</span>
+                            <span class="font-mono text-xs font-black text-amber-400">3D CAD</span>
+                            <span class="text-[9px] text-slate-400 uppercase font-mono mt-0.5">Modelare</span>
                         </button>
-                        <button onclick="openNewDailyLogModal('2d')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-900 border border-blue-500/40 hover:border-blue-400 active:scale-95 transition text-center shadow-md">
-                            <span class="text-xl mb-1">📋</span>
-                            <span class="font-mono text-xs font-bold text-white">2D EXEC</span>
-                            <span class="text-[9px] text-blue-400/80 uppercase font-mono mt-0.5">Planșe</span>
+                        <button onclick="openNewDailyLogModal('2d')" class="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-blue-500/60 hover:border-blue-400 active:scale-95 transition text-center shadow-lg shadow-blue-500/10">
+                            <span class="text-2xl mb-1">📋</span>
+                            <span class="font-mono text-xs font-black text-blue-400">2D EXEC</span>
+                            <span class="text-[9px] text-slate-400 uppercase font-mono mt-0.5">Planșe</span>
                         </button>
-                        <button onclick="openNewDailyLogModal('layout')" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-900 border border-purple-500/40 hover:border-purple-400 active:scale-95 transition text-center shadow-md">
-                            <span class="text-xl mb-1">📐</span>
-                            <span class="font-mono text-xs font-bold text-white">LAYOUT</span>
-                            <span class="text-[9px] text-purple-400/80 uppercase font-mono mt-0.5">Gabarit</span>
+                        <button onclick="openNewDailyLogModal('layout')" class="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-purple-500/60 hover:border-purple-400 active:scale-95 transition text-center shadow-lg shadow-purple-500/10">
+                            <span class="text-2xl mb-1">📐</span>
+                            <span class="font-mono text-xs font-black text-purple-400">LAYOUT</span>
+                            <span class="text-[9px] text-slate-400 uppercase font-mono mt-0.5">Gabarit</span>
                         </button>
                     </div>
                 </div>
