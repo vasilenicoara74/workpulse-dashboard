@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 *.log
 .DS_Store
+*.db
+.secret_key
+
