@@ -208,12 +208,15 @@
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-2.5 shadow-md space-y-2">
                     <div class="flex items-center justify-between px-1">
                         <span class="text-[11px] font-bold text-white flex items-center gap-1.5">
-                            <i class="fa-solid fa-layer-group text-cyan-400"></i> Comută cele 5 Concepte de Layout:
+                            <i class="fa-solid fa-layer-group text-cyan-400"></i> Stiluri de Interfață (Alege Preferatul):
                         </span>
                         <span class="text-[10px] text-cyan-400/90 font-medium">1-tap pentru testare</span>
                     </div>
                     <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 text-xs">
-                        <button type="button" onclick="switchLayoutView('linear', this)" id="layout-btn-linear" class="layout-btn active-layout-btn px-2.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition flex items-center gap-1">
+                        <button type="button" onclick="switchLayoutView('mission', this)" id="layout-btn-mission" class="layout-btn active-layout-btn px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition flex items-center gap-1.5">
+                            <span>🚀</span> Speed-Log HUD
+                        </button>
+                        <button type="button" onclick="switchLayoutView('linear', this)" id="layout-btn-linear" class="layout-btn px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white font-semibold whitespace-nowrap transition flex items-center gap-1">
                             <span>1.</span> ⚡ Linear Feed
                         </button>
                         <button type="button" onclick="switchLayoutView('bento', this)" id="layout-btn-bento" class="layout-btn px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white font-semibold whitespace-nowrap transition flex items-center gap-1">
@@ -1467,7 +1470,10 @@
             return badges.join(' ');
         }
 
-        let currentLayoutMode = localStorage.getItem('workpulse_layout') || 'linear';
+        let currentLayoutMode = localStorage.getItem('workpulse_layout');
+        if (!currentLayoutMode || currentLayoutMode === 'linear') {
+            currentLayoutMode = 'mission';
+        }
         let currentCachedLogs = [];
         let currentCachedSummary = { unique_days: 0, unique_projects: 0, highlights: 0 };
 
@@ -1735,7 +1741,9 @@
             const isDemo = (!currentCachedLogs || currentCachedLogs.length === 0);
             const logsToRender = isDemo ? sampleMechanicalLogs : currentCachedLogs;
 
-            if (currentLayoutMode === 'linear') {
+            if (currentLayoutMode === 'mission') {
+                renderMissionControl(logsToRender, feedContainer, isDemo);
+            } else if (currentLayoutMode === 'linear') {
                 renderLinearFeed(logsToRender, feedContainer, isDemo);
             } else if (currentLayoutMode === 'bento') {
                 renderBentoDeck(logsToRender, feedContainer, isDemo);
@@ -1746,6 +1754,767 @@
             } else if (currentLayoutMode === 'industrial') {
                 renderIndustrialLogger(logsToRender, feedContainer, isDemo);
             }
+        }
+
+        // =========================================================================
+        // 🚀 FLAGSHIP INTERFACE: CAD MISSION CONTROL (SPEED-LOG HUD & GESTURES)
+        // =========================================================================
+        let missionState = {
+            partFamily: 'flansa',
+            activityType: 'Proiectare 3D',
+            mfgProcess: 'Prelucrare CNC 3-Axe',
+            material: 'Aluminiu 6082-T6',
+            drawingsCount: 2,
+            activeFilter: 'all',
+            partNumberAuto: 'PRT-204',
+            revisionAuto: 'Rev A',
+            isHighlight: 0
+        };
+
+        function getBlueprintSvg(partKey) {
+            if (partKey === 'flansa') {
+                return `
+                <svg viewBox="0 0 280 130" class="w-full h-28 mx-auto" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="bp-grid-flansa" width="10" height="10" patternUnits="userSpaceOnUse">
+                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(6, 182, 212, 0.12)" stroke-width="0.5"/>
+                        </pattern>
+                    </defs>
+                    <rect width="280" height="130" fill="#080e1a" rx="12"/>
+                    <rect width="280" height="130" fill="url(#bp-grid-flansa)" rx="12"/>
+                    <circle cx="95" cy="65" r="48" fill="rgba(6, 182, 212, 0.06)" stroke="#06b6d4" stroke-width="2"/>
+                    <circle cx="95" cy="65" r="36" fill="none" stroke="#38bdf8" stroke-width="1" stroke-dasharray="4 2"/>
+                    <circle cx="95" cy="65" r="18" fill="#030712" stroke="#06b6d4" stroke-width="1.8"/>
+                    <circle cx="95" cy="29" r="4" fill="#030712" stroke="#38bdf8" stroke-width="1.5"/>
+                    <circle cx="95" cy="101" r="4" fill="#030712" stroke="#38bdf8" stroke-width="1.5"/>
+                    <circle cx="59" cy="65" r="4" fill="#030712" stroke="#38bdf8" stroke-width="1.5"/>
+                    <circle cx="131" cy="65" r="4" fill="#030712" stroke="#38bdf8" stroke-width="1.5"/>
+                    <line x1="38" y1="65" x2="152" y2="65" stroke="#f59e0b" stroke-width="0.8" stroke-dasharray="6 3 1 3"/>
+                    <line x1="95" y1="10" x2="95" y2="120" stroke="#f59e0b" stroke-width="0.8" stroke-dasharray="6 3 1 3"/>
+                    <g font-family="monospace" font-size="9" fill="#38bdf8" font-weight="bold">
+                        <text x="175" y="32">Ø 120 h7 (Ext)</text>
+                        <line x1="143" y1="30" x2="170" y2="30" stroke="#38bdf8" stroke-width="0.8"/>
+                        <text x="175" y="55">Ø 40 H7 (Alezaj)</text>
+                        <line x1="113" y1="52" x2="170" y2="52" stroke="#38bdf8" stroke-width="0.8"/>
+                        <text x="175" y="78">PCD 95 // 4x M10</text>
+                        <line x1="131" y1="75" x2="170" y2="75" stroke="#38bdf8" stroke-width="0.8"/>
+                        <text x="175" y="102" fill="#f59e0b">Ra 1.6 // CNC 3-Axe</text>
+                        <rect x="173" y="110" width="80" height="13" rx="3" fill="rgba(245, 158, 11, 0.15)" stroke="rgba(245, 158, 11, 0.4)" stroke-width="0.5"/>
+                        <text x="178" y="120" fill="#f59e0b" font-size="8">ISO 2768-mK</text>
+                    </g>
+                </svg>`;
+            } else if (partKey === 'batiu') {
+                return `
+                <svg viewBox="0 0 280 130" class="w-full h-28 mx-auto" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="bp-grid-batiu" width="10" height="10" patternUnits="userSpaceOnUse">
+                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(6, 182, 212, 0.12)" stroke-width="0.5"/>
+                        </pattern>
+                    </defs>
+                    <rect width="280" height="130" fill="#080e1a" rx="12"/>
+                    <rect width="280" height="130" fill="url(#bp-grid-batiu)" rx="12"/>
+                    <polygon points="40,45 105,25 155,48 90,70" fill="none" stroke="#06b6d4" stroke-width="2"/>
+                    <polygon points="40,85 105,65 155,88 90,110" fill="none" stroke="#06b6d4" stroke-width="2"/>
+                    <line x1="40" y1="45" x2="40" y2="85" stroke="#06b6d4" stroke-width="2"/>
+                    <line x1="105" y1="25" x2="105" y2="65" stroke="#06b6d4" stroke-width="2"/>
+                    <line x1="155" y1="48" x2="155" y2="88" stroke="#06b6d4" stroke-width="2"/>
+                    <line x1="90" y1="70" x2="90" y2="110" stroke="#06b6d4" stroke-width="2"/>
+                    <line x1="40" y1="85" x2="90" y2="70" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3 2"/>
+                    <line x1="105" y1="65" x2="155" y2="48" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3 2"/>
+                    <path d="M 90 70 L 105 55 L 125 55" fill="none" stroke="#38bdf8" stroke-width="1"/>
+                    <polygon points="105,55 111,50 111,55" fill="#38bdf8"/>
+                    <text x="113" y="52" font-family="monospace" font-size="7" fill="#38bdf8">a4 MIG</text>
+                    <g font-family="monospace" font-size="9" fill="#38bdf8" font-weight="bold">
+                        <text x="175" y="32">1200 x 800 x 750</text>
+                        <text x="175" y="54" fill="#94a3b8">Profil 80x80x4 mm</text>
+                        <text x="175" y="76">Sudură S355JR</text>
+                        <text x="175" y="100" fill="#f59e0b">Planeitate 0.5 mm</text>
+                        <rect x="173" y="108" width="85" height="13" rx="3" fill="rgba(6, 182, 212, 0.15)" stroke="rgba(6, 182, 212, 0.4)" stroke-width="0.5"/>
+                        <text x="178" y="118" fill="#38bdf8" font-size="8">BOM: 12 REPERE</text>
+                    </g>
+                </svg>`;
+            } else if (partKey === 'arbore') {
+                return `
+                <svg viewBox="0 0 280 130" class="w-full h-28 mx-auto" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="bp-grid-arbore" width="10" height="10" patternUnits="userSpaceOnUse">
+                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(6, 182, 212, 0.12)" stroke-width="0.5"/>
+                        </pattern>
+                    </defs>
+                    <rect width="280" height="130" fill="#080e1a" rx="12"/>
+                    <rect width="280" height="130" fill="url(#bp-grid-arbore)" rx="12"/>
+                    <rect x="25" y="52" width="35" height="26" fill="rgba(6, 182, 212, 0.08)" stroke="#06b6d4" stroke-width="1.8"/>
+                    <rect x="60" y="44" width="45" height="42" fill="rgba(6, 182, 212, 0.08)" stroke="#06b6d4" stroke-width="1.8"/>
+                    <rect x="105" y="50" width="45" height="30" fill="rgba(6, 182, 212, 0.08)" stroke="#06b6d4" stroke-width="1.8"/>
+                    <rect x="70" y="44" width="22" height="6" fill="#030712" stroke="#f59e0b" stroke-width="1.2"/>
+                    <line x1="15" y1="65" x2="160" y2="65" stroke="#f59e0b" stroke-width="0.8" stroke-dasharray="6 3 1 3"/>
+                    <g font-family="monospace" font-size="9" fill="#38bdf8" font-weight="bold">
+                        <text x="175" y="32">Ø 35 k6 (Rulment)</text>
+                        <text x="175" y="54">Pană 8x7 DIN 6885</text>
+                        <text x="175" y="76" fill="#f59e0b">Bătaie rad. 0.02</text>
+                        <text x="175" y="98">Oțel 42CrMo4</text>
+                        <rect x="173" y="108" width="80" height="13" rx="3" fill="rgba(245, 158, 11, 0.15)" stroke="rgba(245, 158, 11, 0.4)" stroke-width="0.5"/>
+                        <text x="178" y="118" fill="#f59e0b" font-size="8">Tratament Călire</text>
+                    </g>
+                </svg>`;
+            } else if (partKey === 'suport') {
+                return `
+                <svg viewBox="0 0 280 130" class="w-full h-28 mx-auto" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="bp-grid-suport" width="10" height="10" patternUnits="userSpaceOnUse">
+                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(6, 182, 212, 0.12)" stroke-width="0.5"/>
+                        </pattern>
+                    </defs>
+                    <rect width="280" height="130" fill="#080e1a" rx="12"/>
+                    <rect width="280" height="130" fill="url(#bp-grid-suport)" rx="12"/>
+                    <path d="M 35 25 L 55 25 L 55 85 L 135 85 L 135 105 L 35 105 Z" fill="rgba(6, 182, 212, 0.08)" stroke="#06b6d4" stroke-width="2"/>
+                    <polygon points="55,40 120,85 55,85" fill="none" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="3 2"/>
+                    <rect x="80" y="92" width="28" height="6" rx="3" fill="#030712" stroke="#38bdf8" stroke-width="1.2"/>
+                    <circle cx="45" cy="45" r="5" fill="#030712" stroke="#38bdf8" stroke-width="1.2"/>
+                    <g font-family="monospace" font-size="9" fill="#38bdf8" font-weight="bold">
+                        <text x="175" y="32">L 120 x 80 x 15 mm</text>
+                        <text x="175" y="54">Canal reglaj 14x30</text>
+                        <text x="175" y="76" fill="#f59e0b">Frezare CNC 3-Axe</text>
+                        <text x="175" y="98">Aluminiu 6082-T6</text>
+                        <rect x="173" y="108" width="85" height="13" rx="3" fill="rgba(6, 182, 212, 0.15)" stroke="rgba(6, 182, 212, 0.4)" stroke-width="0.5"/>
+                        <text x="178" y="118" fill="#38bdf8" font-size="8">ELOXAT NATURAL</text>
+                    </g>
+                </svg>`;
+            } else if (partKey === 'carcasa') {
+                return `
+                <svg viewBox="0 0 280 130" class="w-full h-28 mx-auto" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="bp-grid-carcasa" width="10" height="10" patternUnits="userSpaceOnUse">
+                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(6, 182, 212, 0.12)" stroke-width="0.5"/>
+                        </pattern>
+                    </defs>
+                    <rect width="280" height="130" fill="#080e1a" rx="12"/>
+                    <rect width="280" height="130" fill="url(#bp-grid-carcasa)" rx="12"/>
+                    <path d="M 35 30 L 135 30 L 145 42 L 145 95 L 135 105 L 35 105 L 25 95 L 25 42 Z" fill="rgba(6, 182, 212, 0.08)" stroke="#06b6d4" stroke-width="2"/>
+                    <line x1="50" y1="30" x2="50" y2="105" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4 2"/>
+                    <line x1="120" y1="30" x2="120" y2="105" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4 2"/>
+                    <line x1="70" y1="50" x2="100" y2="50" stroke="#38bdf8" stroke-width="1.8"/>
+                    <line x1="70" y1="60" x2="100" y2="60" stroke="#38bdf8" stroke-width="1.8"/>
+                    <line x1="70" y1="70" x2="100" y2="70" stroke="#38bdf8" stroke-width="1.8"/>
+                    <line x1="70" y1="80" x2="100" y2="80" stroke="#38bdf8" stroke-width="1.8"/>
+                    <g font-family="monospace" font-size="9" fill="#38bdf8" font-weight="bold">
+                        <text x="175" y="32">Tablă 2.0 mm DC01</text>
+                        <text x="175" y="54">Laser Fiber & Îndoire</text>
+                        <text x="175" y="76" fill="#f59e0b">Factor K = 0.33</text>
+                        <text x="175" y="98">Raza R=2 mm</text>
+                        <rect x="173" y="108" width="85" height="13" rx="3" fill="rgba(245, 158, 11, 0.15)" stroke="rgba(245, 158, 11, 0.4)" stroke-width="0.5"/>
+                        <text x="178" y="118" fill="#f59e0b" font-size="8">VOPSIT POWDER</text>
+                    </g>
+                </svg>`;
+            } else {
+                return `
+                <svg viewBox="0 0 280 130" class="w-full h-28 mx-auto" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="bp-grid-asm" width="10" height="10" patternUnits="userSpaceOnUse">
+                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(6, 182, 212, 0.12)" stroke-width="0.5"/>
+                        </pattern>
+                    </defs>
+                    <rect width="280" height="130" fill="#080e1a" rx="12"/>
+                    <rect width="280" height="130" fill="url(#bp-grid-asm)" rx="12"/>
+                    <rect x="30" y="45" width="25" height="40" rx="3" fill="rgba(6, 182, 212, 0.08)" stroke="#06b6d4" stroke-width="1.8"/>
+                    <circle cx="80" cy="65" r="16" fill="rgba(6, 182, 212, 0.08)" stroke="#38bdf8" stroke-width="1.8"/>
+                    <rect x="115" y="40" width="35" height="50" rx="4" fill="rgba(6, 182, 212, 0.08)" stroke="#06b6d4" stroke-width="2"/>
+                    <line x1="15" y1="65" x2="160" y2="65" stroke="#f59e0b" stroke-width="0.9" stroke-dasharray="5 2 1 2"/>
+                    <circle cx="42" cy="28" r="7" fill="#030712" stroke="#38bdf8" stroke-width="1"/>
+                    <text x="39" y="32" font-family="monospace" font-size="8" fill="#38bdf8" font-weight="bold">1</text>
+                    <circle cx="80" cy="28" r="7" fill="#030712" stroke="#38bdf8" stroke-width="1"/>
+                    <text x="77" y="32" font-family="monospace" font-size="8" fill="#38bdf8" font-weight="bold">2</text>
+                    <circle cx="132" cy="24" r="7" fill="#030712" stroke="#38bdf8" stroke-width="1"/>
+                    <text x="129" y="28" font-family="monospace" font-size="8" fill="#38bdf8" font-weight="bold">3</text>
+                    <g font-family="monospace" font-size="9" fill="#38bdf8" font-weight="bold">
+                        <text x="175" y="32">Subansamblu Motor</text>
+                        <text x="175" y="54">Cinematică Verificată</text>
+                        <text x="175" y="76" fill="#f59e0b">Zero Intersecții 3D</text>
+                        <text x="175" y="98">BOM: 28 Poziții</text>
+                        <rect x="173" y="108" width="80" height="13" rx="3" fill="rgba(6, 182, 212, 0.15)" stroke="rgba(6, 182, 212, 0.4)" stroke-width="0.5"/>
+                        <text x="178" y="118" fill="#38bdf8" font-size="8">SOLIDWORKS PDM</text>
+                    </g>
+                </svg>`;
+            }
+        }
+
+        function getMissionSynthesizedText() {
+            const partTitles = {
+                'flansa': 'flanșă de centrare cu rulmenți',
+                'batiu': 'cadru batiu sudat cu ranforsări nodale',
+                'arbore': 'arbore principal de transmisie cu pană',
+                'suport': 'consolă suport ghidaje liniare',
+                'carcasa': 'carcasă tablă îndoită cu decupaje laser',
+                'ansamblu': 'subansamblu mecanic de acționare'
+            };
+            const partTitle = partTitles[missionState.partFamily] || 'componentă mecanică';
+
+            if (missionState.activityType === 'Desene 2D') {
+                return `Generat ${missionState.drawingsCount} planșe de execuție 2D pentru ${partTitle}: definite toleranțe ISO (H7/h6), rugozități Ra 1.6 și cote de prindere pentru ${missionState.mfgProcess} (${missionState.material}).`;
+            } else if (missionState.activityType === 'Proiectare 3D') {
+                return `Modelat structură 3D CAD parametrică pentru ${partTitle}; verificat cinematică, asamblat componente și optimizat DFM pentru ${missionState.mfgProcess} (${missionState.material}).`;
+            } else {
+                return `Verificat și integrat layout gabarit de montaj pentru ${partTitle}; validate distanțe minime de acces, anvelopă de lucru și trasee de conectare (${missionState.mfgProcess}).`;
+            }
+        }
+
+        function setMissionPartFamily(key) {
+            if (navigator.vibrate) navigator.vibrate([10]);
+            missionState.partFamily = key;
+            const svgBox = document.getElementById('mission-blueprint-svg-box');
+            if (svgBox) svgBox.innerHTML = getBlueprintSvg(key);
+
+            const descArea = document.getElementById('mission-live-desc');
+            if (descArea) descArea.value = getMissionSynthesizedText();
+
+            document.querySelectorAll('.mission-part-chip').forEach(btn => {
+                if (btn.getAttribute('data-part') === key) {
+                    btn.classList.add('bg-cyan-500', 'text-slate-950', 'font-black', 'shadow-md', 'shadow-cyan-500/30', 'border-cyan-400');
+                    btn.classList.remove('bg-slate-950', 'text-slate-300', 'border-slate-800');
+                } else {
+                    btn.classList.remove('bg-cyan-500', 'text-slate-950', 'font-black', 'shadow-md', 'shadow-cyan-500/30', 'border-cyan-400');
+                    btn.classList.add('bg-slate-950', 'text-slate-300', 'border-slate-800');
+                }
+            });
+        }
+
+        function setMissionActivity(act) {
+            if (navigator.vibrate) navigator.vibrate([10]);
+            missionState.activityType = act;
+            const stepperBox = document.getElementById('mission-stepper-box');
+            if (stepperBox) {
+                stepperBox.style.display = (act === 'Desene 2D') ? 'flex' : 'none';
+            }
+            const descArea = document.getElementById('mission-live-desc');
+            if (descArea) descArea.value = getMissionSynthesizedText();
+
+            document.querySelectorAll('.mission-act-chip').forEach(btn => {
+                if (btn.getAttribute('data-act') === act) {
+                    btn.classList.add('bg-blue-600', 'text-white', 'font-bold', 'shadow-md', 'shadow-blue-500/30', 'border-blue-400');
+                    btn.classList.remove('bg-slate-950', 'text-slate-400', 'border-slate-800');
+                } else {
+                    btn.classList.remove('bg-blue-600', 'text-white', 'font-bold', 'shadow-md', 'shadow-blue-500/30', 'border-blue-400');
+                    btn.classList.add('bg-slate-950', 'text-slate-400', 'border-slate-800');
+                }
+            });
+        }
+
+        function setMissionMfg(mfg) {
+            if (navigator.vibrate) navigator.vibrate([10]);
+            missionState.mfgProcess = mfg;
+            const descArea = document.getElementById('mission-live-desc');
+            if (descArea) descArea.value = getMissionSynthesizedText();
+
+            document.querySelectorAll('.mission-mfg-chip').forEach(btn => {
+                if (btn.getAttribute('data-mfg') === mfg) {
+                    btn.classList.add('bg-purple-600', 'text-white', 'font-bold');
+                    btn.classList.remove('bg-slate-950', 'text-slate-400', 'border-slate-800');
+                } else {
+                    btn.classList.remove('bg-purple-600', 'text-white', 'font-bold');
+                    btn.classList.add('bg-slate-950', 'text-slate-400', 'border-slate-800');
+                }
+            });
+        }
+
+        function setMissionMaterial(mat) {
+            if (navigator.vibrate) navigator.vibrate([10]);
+            missionState.material = mat;
+            const descArea = document.getElementById('mission-live-desc');
+            if (descArea) descArea.value = getMissionSynthesizedText();
+
+            document.querySelectorAll('.mission-mat-chip').forEach(btn => {
+                if (btn.getAttribute('data-mat') === mat) {
+                    btn.classList.add('bg-amber-600', 'text-white', 'font-bold');
+                    btn.classList.remove('bg-slate-950', 'text-slate-400', 'border-slate-800');
+                } else {
+                    btn.classList.remove('bg-amber-600', 'text-white', 'font-bold');
+                    btn.classList.add('bg-slate-950', 'text-slate-400', 'border-slate-800');
+                }
+            });
+        }
+
+        function stepMissionDrawings(delta) {
+            if (navigator.vibrate) navigator.vibrate([10]);
+            missionState.drawingsCount = Math.max(1, missionState.drawingsCount + delta);
+            const el = document.getElementById('mission-drawings-val');
+            if (el) el.innerText = missionState.drawingsCount;
+            const descArea = document.getElementById('mission-live-desc');
+            if (descArea) descArea.value = getMissionSynthesizedText();
+        }
+
+        async function executeMissionSpeedLog() {
+            if (navigator.vibrate) navigator.vibrate([30]);
+
+            const descInput = document.getElementById('mission-live-desc');
+            const pnInput = document.getElementById('mission-live-pn');
+            const revInput = document.getElementById('mission-live-rev');
+
+            const desc = descInput?.value.trim() || getMissionSynthesizedText();
+            const pn = pnInput?.value.trim() || missionState.partNumberAuto;
+            const rev = revInput?.value.trim() || missionState.revisionAuto;
+            const today = new Date().toISOString().split('T')[0];
+
+            let projectId = (cachedProjects && cachedProjects.length > 0) ? cachedProjects[0].id : null;
+
+            try {
+                const res = await fetch('/api/daily-logs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        project_id: projectId,
+                        date: today,
+                        description: desc,
+                        activity_type: missionState.activityType,
+                        drawings_count: missionState.activityType === 'Desene 2D' ? missionState.drawingsCount : 0,
+                        status_tag: missionState.activityType === 'Desene 2D' ? 'Lansat Atelier' : 'În Lucru',
+                        is_highlight: missionState.isHighlight,
+                        part_number: pn,
+                        revision: rev,
+                        manufacturing_process: missionState.mfgProcess,
+                        material: missionState.material,
+                        ecn_source: ''
+                    })
+                });
+
+                if (res.ok) {
+                    showToast(`⚡ Livrabil ${pn} salvat în 1 secundă!`, 'success');
+                    const match = pn.match(/\d+/);
+                    if (match) {
+                        const nextNum = parseInt(match[0], 10) + 1;
+                        missionState.partNumberAuto = pn.replace(/\d+/, nextNum);
+                        if (pnInput) pnInput.value = missionState.partNumberAuto;
+                    }
+                    await loadDailyLogs();
+                } else {
+                    const err = await res.json();
+                    showToast(err.error || 'Eroare la salvare', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Eroare de conexiune', 'error');
+            }
+        }
+
+        function setMissionFilter(filterKey) {
+            if (navigator.vibrate) navigator.vibrate([10]);
+            missionState.activeFilter = filterKey;
+            renderCurrentLayout();
+        }
+
+        async function quickAdvanceMissionCard(logId, currentStage, currentType) {
+            if (navigator.vibrate) navigator.vibrate([15]);
+            if (String(logId).startsWith('demo')) {
+                showToast('Acesta este un reper demonstrativ. Adaugă primul tău livrabil pentru fluxul complet.', 'info');
+                return;
+            }
+
+            let nextType = currentType || 'Desene 2D';
+            let nextStatus = 'Lansat Atelier';
+
+            if (currentStage === 'În Lucru') {
+                if (currentType === 'Proiectare 3D') {
+                    nextType = 'Desene 2D';
+                    nextStatus = 'În Lucru';
+                } else {
+                    nextStatus = 'Lansat Atelier';
+                }
+            } else if (currentStage === 'Lansat Atelier') {
+                nextStatus = 'Finalizat';
+            } else {
+                nextStatus = 'Finalizat';
+            }
+
+            try {
+                const res = await fetch(`/api/daily-logs/${logId}/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        activity_type: nextType,
+                        status_tag: nextStatus
+                    })
+                });
+                if (res.ok) {
+                    showToast(`Stadiu avansat: ${nextStatus}!`, 'success');
+                    await loadDailyLogs();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function quickCopyMissionCard(pn, desc) {
+            if (navigator.vibrate) navigator.vibrate([10]);
+            const text = `${pn}: ${desc}`;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text);
+                showToast('📋 Copiat în clipboard!', 'info');
+            } else {
+                showToast(text, 'info');
+            }
+        }
+
+        async function quickDeleteMissionCard(logId) {
+            if (String(logId).startsWith('demo')) {
+                showToast('Reperul demonstrativ nu poate fi șters.', 'info');
+                return;
+            }
+            if (!confirm('Ești sigur că vrei să ștergi acest livrabil?')) return;
+            try {
+                const res = await fetch(`/api/daily-logs/${logId}/delete`, { method: 'POST' });
+                if (res.ok) {
+                    showToast('Livrabil șters.', 'info');
+                    await loadDailyLogs();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function attachMissionSwipeGestures() {
+            document.querySelectorAll('.mission-swipe-card').forEach(card => {
+                let startX = 0, startY = 0;
+                card.addEventListener('touchstart', e => {
+                    startX = e.changedTouches[0].screenX;
+                    startY = e.changedTouches[0].screenY;
+                }, { passive: true });
+
+                card.addEventListener('touchend', e => {
+                    const diffX = e.changedTouches[0].screenX - startX;
+                    const diffY = e.changedTouches[0].screenY - startY;
+                    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 60) {
+                        const logId = card.getAttribute('data-id');
+                        const stage = card.getAttribute('data-stage');
+                        const type = card.getAttribute('data-type');
+                        if (diffX > 0) {
+                            quickAdvanceMissionCard(logId, stage, type);
+                        } else {
+                            toggleDailyStar(logId);
+                        }
+                    }
+                }, { passive: true });
+            });
+        }
+
+        function renderMissionControl(logs, container, isDemo) {
+            const isSelected = currentLayoutMode === 'mission';
+            const totalDrawings = logs.reduce((sum, l) => sum + (parseInt(l.drawings_count, 10) || 0), 0);
+            const highlightsCount = logs.filter(l => l.is_highlight).length;
+
+            const group3D = logs.filter(l => (l.activity_type || '').includes('3D') || (l.activity_type || '').includes('Modelare'));
+            const group2D = logs.filter(l => (l.activity_type || '').includes('2D') || (l.activity_type || '').includes('Desene'));
+            const groupLayout = logs.filter(l => (l.activity_type || '').includes('Layout'));
+            const groupReleased = logs.filter(l => l.status_tag === 'Lansat Atelier' || l.status_tag === 'Finalizat');
+
+            let filteredLogs = logs;
+            if (missionState.activeFilter === '3d') filteredLogs = group3D;
+            else if (missionState.activeFilter === '2d') filteredLogs = group2D;
+            else if (missionState.activeFilter === 'layout') filteredLogs = groupLayout;
+            else if (missionState.activeFilter === 'workshop') filteredLogs = groupReleased;
+            else if (missionState.activeFilter === 'highlights') filteredLogs = logs.filter(l => l.is_highlight);
+
+            let html = `
+                <!-- Mission Control Header Banner -->
+                <div class="bg-gradient-to-r from-cyan-950/70 via-slate-900 to-blue-950/70 border border-cyan-500/50 rounded-3xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[0_0_25px_rgba(6,182,212,0.15)]">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid fa-rocket"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-white flex items-center gap-1.5 flex-wrap">
+                                <span>🚀 Speed-Log HUD (CAD Mission Control)</span>
+                                <span class="text-[9px] bg-cyan-950 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-full font-mono">FLAGSHIP</span>
+                            </div>
+                            <p class="text-[11px] text-slate-300 mt-0.5">Completare în 3 secunde cu macro-butoane, generator ISO automat, blueprint CAD dinamic și gesturi swipe.</p>
+                        </div>
+                    </div>
+                    <button onclick="lockSelectedLayout('mission', 'Speed-Log HUD')" class="px-3.5 py-1.5 rounded-xl ${isSelected ? 'bg-cyan-500 text-slate-950 font-black shadow-cyan-500/40' : 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-400/40 font-bold'} text-xs whitespace-nowrap transition active:scale-95 flex items-center justify-center gap-1.5 shadow-md">
+                        <i class="fa-solid ${isSelected ? 'fa-check' : 'fa-star'}"></i> ${isSelected ? 'Stil Activ Selectat' : 'Alege acest Stil'}
+                    </button>
+                </div>
+            `;
+
+            if (isDemo) {
+                html += `
+                    <div class="bg-cyan-950/40 border border-cyan-500/30 rounded-2xl p-2.5 text-center text-xs text-cyan-300 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>Previzualizare Speed-Log HUD cu date inginerești demonstrative. Testează adăugarea rapidă de mai jos!</span>
+                    </div>
+                `;
+            }
+
+            // 1. Dynamic CAD Telemetry Island
+            html += `
+                <div class="bg-slate-900/90 border border-cyan-500/40 rounded-3xl p-3.5 shadow-xl space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="relative flex h-2.5 w-2.5">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
+                            </span>
+                            <span class="font-mono text-xs font-black text-cyan-300 tracking-wider">CAD TELEMETRY ONLINE</span>
+                        </div>
+                        <span class="font-mono text-[10px] text-slate-400 bg-slate-950 border border-slate-800 px-2.5 py-0.5 rounded-full">
+                            <i class="fa-solid fa-calendar-day text-cyan-500 mr-1"></i> ${new Date().toISOString().split('T')[0]}
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-2.5">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Livrabile</div>
+                            <div class="text-xl font-black text-cyan-400 font-mono">${logs.length}</div>
+                            <div class="text-[9px] text-slate-500">Piese în flux</div>
+                        </div>
+                        <div class="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-2.5">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Planșe 2D</div>
+                            <div class="text-xl font-black text-blue-400 font-mono">${totalDrawings}</div>
+                            <div class="text-[9px] text-slate-500">Desene execuție</div>
+                        </div>
+                        <div class="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-2.5">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Reușite</div>
+                            <div class="text-xl font-black text-amber-400 font-mono">${highlightsCount}</div>
+                            <div class="text-[9px] text-slate-500">Dosar Mărire</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 2. Interactive CAD Blueprint Visualizer
+            html += `
+                <div class="bg-slate-900/90 border border-cyan-500/30 rounded-3xl p-3.5 space-y-2.5 shadow-xl">
+                    <div class="flex items-center justify-between text-xs font-bold text-cyan-400 px-1">
+                        <span class="flex items-center gap-1.5 font-mono">
+                            <i class="fa-solid fa-draw-polygon"></i> CAD BLUEPRINT SCHEMATIC
+                        </span>
+                        <span class="text-[10px] text-slate-400 font-mono">LIVE PREVIEW</span>
+                    </div>
+                    <div id="mission-blueprint-svg-box" class="overflow-hidden rounded-2xl border border-slate-800 bg-[#080e1a] shadow-inner transition-all duration-300">
+                        ${getBlueprintSvg(missionState.partFamily)}
+                    </div>
+                </div>
+            `;
+
+            // 3. The 3-Tap Zero-Typing "Speed-Logger Dock"
+            html += `
+                <div class="bg-slate-900 border-2 border-cyan-500/50 rounded-3xl p-4 space-y-3.5 shadow-2xl">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <span class="font-mono text-xs font-black text-cyan-400 flex items-center gap-1.5">
+                            <span class="text-base">⚡</span> SPEED-LOGGER (ZERO-TYPING)
+                        </span>
+                        <span class="text-[10px] text-slate-400">Tastare opțională</span>
+                    </div>
+
+                    <!-- Step 1: Familii de Piese (1 Tap) -->
+                    <div class="space-y-1.5">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">1. Selectează Piesa:</div>
+                        <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 text-xs font-semibold">
+                            <button type="button" onclick="setMissionPartFamily('flansa')" data-part="flansa" class="mission-part-chip py-2 px-1.5 rounded-xl border transition text-center flex flex-col items-center justify-center gap-0.5 ${missionState.partFamily === 'flansa' ? 'bg-cyan-500 text-slate-950 font-black shadow-md shadow-cyan-500/30 border-cyan-400' : 'bg-slate-950 text-slate-300 border-slate-800'}">
+                                <span class="text-sm">⚙️</span>
+                                <span class="text-[10px] truncate w-full">Flanșă</span>
+                            </button>
+                            <button type="button" onclick="setMissionPartFamily('batiu')" data-part="batiu" class="mission-part-chip py-2 px-1.5 rounded-xl border transition text-center flex flex-col items-center justify-center gap-0.5 ${missionState.partFamily === 'batiu' ? 'bg-cyan-500 text-slate-950 font-black shadow-md shadow-cyan-500/30 border-cyan-400' : 'bg-slate-950 text-slate-300 border-slate-800'}">
+                                <span class="text-sm">🏗️</span>
+                                <span class="text-[10px] truncate w-full">Batiu</span>
+                            </button>
+                            <button type="button" onclick="setMissionPartFamily('arbore')" data-part="arbore" class="mission-part-chip py-2 px-1.5 rounded-xl border transition text-center flex flex-col items-center justify-center gap-0.5 ${missionState.partFamily === 'arbore' ? 'bg-cyan-500 text-slate-950 font-black shadow-md shadow-cyan-500/30 border-cyan-400' : 'bg-slate-950 text-slate-300 border-slate-800'}">
+                                <span class="text-sm">🔩</span>
+                                <span class="text-[10px] truncate w-full">Arbore</span>
+                            </button>
+                            <button type="button" onclick="setMissionPartFamily('suport')" data-part="suport" class="mission-part-chip py-2 px-1.5 rounded-xl border transition text-center flex flex-col items-center justify-center gap-0.5 ${missionState.partFamily === 'suport' ? 'bg-cyan-500 text-slate-950 font-black shadow-md shadow-cyan-500/30 border-cyan-400' : 'bg-slate-950 text-slate-300 border-slate-800'}">
+                                <span class="text-sm">📐</span>
+                                <span class="text-[10px] truncate w-full">Suport</span>
+                            </button>
+                            <button type="button" onclick="setMissionPartFamily('carcasa')" data-part="carcasa" class="mission-part-chip py-2 px-1.5 rounded-xl border transition text-center flex flex-col items-center justify-center gap-0.5 ${missionState.partFamily === 'carcasa' ? 'bg-cyan-500 text-slate-950 font-black shadow-md shadow-cyan-500/30 border-cyan-400' : 'bg-slate-950 text-slate-300 border-slate-800'}">
+                                <span class="text-sm">📦</span>
+                                <span class="text-[10px] truncate w-full">Carcasă</span>
+                            </button>
+                            <button type="button" onclick="setMissionPartFamily('ansamblu')" data-part="ansamblu" class="mission-part-chip py-2 px-1.5 rounded-xl border transition text-center flex flex-col items-center justify-center gap-0.5 ${missionState.partFamily === 'ansamblu' ? 'bg-cyan-500 text-slate-950 font-black shadow-md shadow-cyan-500/30 border-cyan-400' : 'bg-slate-950 text-slate-300 border-slate-800'}">
+                                <span class="text-sm">⚡</span>
+                                <span class="text-[10px] truncate w-full">Ansamblu</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Disciplină CAD & DFM -->
+                    <div class="space-y-1.5">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">2. Disciplină & Producție:</div>
+                        <div class="grid grid-cols-3 gap-1.5 text-xs">
+                            <button type="button" onclick="setMissionActivity('Proiectare 3D')" data-act="Proiectare 3D" class="mission-act-chip py-1.5 px-2 rounded-xl border transition text-center ${missionState.activityType === 'Proiectare 3D' ? 'bg-cyan-600 text-white font-bold shadow-md shadow-cyan-500/30 border-cyan-400' : 'bg-slate-950 text-slate-400 border-slate-800'}">
+                                📐 3D Model
+                            </button>
+                            <button type="button" onclick="setMissionActivity('Desene 2D')" data-act="Desene 2D" class="mission-act-chip py-1.5 px-2 rounded-xl border transition text-center ${missionState.activityType === 'Desene 2D' ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-500/30 border-blue-400' : 'bg-slate-950 text-slate-400 border-slate-800'}">
+                                📋 Desene 2D
+                            </button>
+                            <button type="button" onclick="setMissionActivity('Layout')" data-act="Layout" class="mission-act-chip py-1.5 px-2 rounded-xl border transition text-center ${missionState.activityType === 'Layout' ? 'bg-purple-600 text-white font-bold shadow-md shadow-purple-500/30 border-purple-400' : 'bg-slate-950 text-slate-400 border-slate-800'}">
+                                📐 Layout
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Procedee Fabricație DFM -->
+                    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 text-[11px]">
+                        <button type="button" onclick="setMissionMfg('Prelucrare CNC 3-Axe')" data-mfg="Prelucrare CNC 3-Axe" class="mission-mfg-chip px-2.5 py-1 rounded-xl whitespace-nowrap transition ${missionState.mfgProcess.includes('CNC') ? 'bg-purple-600 text-white font-bold' : 'bg-slate-950 text-slate-400 border border-slate-800'}">⚙️ CNC Frezare</button>
+                        <button type="button" onclick="setMissionMfg('Tablă Laser & Îndoire')" data-mfg="Tablă Laser & Îndoire" class="mission-mfg-chip px-2.5 py-1 rounded-xl whitespace-nowrap transition ${missionState.mfgProcess.includes('Tablă') ? 'bg-purple-600 text-white font-bold' : 'bg-slate-950 text-slate-400 border border-slate-800'}">✂️ Tablă Laser</button>
+                        <button type="button" onclick="setMissionMfg('Sudură MIG & Debitare')" data-mfg="Sudură MIG & Debitare" class="mission-mfg-chip px-2.5 py-1 rounded-xl whitespace-nowrap transition ${missionState.mfgProcess.includes('Sudură') ? 'bg-purple-600 text-white font-bold' : 'bg-slate-950 text-slate-400 border border-slate-800'}">🔥 Sudură MIG</button>
+                        <button type="button" onclick="setMissionMfg('Asamblare Generală')" data-mfg="Asamblare Generală" class="mission-mfg-chip px-2.5 py-1 rounded-xl whitespace-nowrap transition ${missionState.mfgProcess.includes('Asamblare') ? 'bg-purple-600 text-white font-bold' : 'bg-slate-950 text-slate-400 border border-slate-800'}">🔩 Asamblare</button>
+                    </div>
+
+                    <!-- Stepper Planșe 2D (Afișat doar la Desene 2D) -->
+                    <div id="mission-stepper-box" style="display: ${missionState.activityType === 'Desene 2D' ? 'flex' : 'none'};" class="items-center justify-between bg-slate-950 p-2.5 rounded-2xl border border-blue-500/30">
+                        <span class="text-xs font-bold text-blue-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-lines text-blue-400"></i> Număr Planșe 2D:
+                        </span>
+                        <div class="flex items-center gap-3">
+                            <button type="button" onclick="stepMissionDrawings(-1)" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm flex items-center justify-center active:scale-90">-</button>
+                            <span id="mission-drawings-val" class="font-mono text-base font-black text-white px-1">${missionState.drawingsCount}</span>
+                            <button type="button" onclick="stepMissionDrawings(1)" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm flex items-center justify-center active:scale-90">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Part Number & Rev / Synthesizer Preview -->
+                    <div class="space-y-2 pt-1">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2/3">
+                                <label class="block text-[10px] text-slate-400 uppercase font-mono mb-0.5">Cod Piesă / PDM:</label>
+                                <input type="text" id="mission-live-pn" value="${missionState.partNumberAuto}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-cyan-300 font-mono font-bold focus:outline-none focus:border-cyan-500">
+                            </div>
+                            <div class="w-1/3">
+                                <label class="block text-[10px] text-slate-400 uppercase font-mono mb-0.5">Revizie:</label>
+                                <input type="text" id="mission-live-rev" value="${missionState.revisionAuto}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-cyan-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-0.5">
+                                <span class="font-bold text-cyan-400">Descriere Tehnică ISO (Auto-generată):</span>
+                                <span class="text-slate-500 italic">Editabilă</span>
+                            </div>
+                            <textarea id="mission-live-desc" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 leading-relaxed font-sans">${escapeHtml(getMissionSynthesizedText())}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Giant Glowing 1-Tap Save Button -->
+                    <button type="button" onclick="executeMissionSpeedLog()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-black text-sm tracking-wide shadow-xl shadow-cyan-500/25 active:scale-95 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-bolt text-amber-300"></i>
+                        <span>ÎNREGISTREAZĂ LIVRABIL (1-TAP)</span>
+                    </button>
+                </div>
+            `;
+
+            // 4. 1-Finger Filter Segmented Bar
+            html += `
+                <div class="space-y-2 pt-2">
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-filter text-cyan-400"></i> Filtrează Livrabile:
+                        </span>
+                        <span class="text-[10px] text-slate-500">Gesturi: 👈 ⭐ | 👉 Avansează</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 text-xs">
+                        <button onclick="setMissionFilter('all')" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${missionState.activeFilter === 'all' ? 'bg-cyan-600 text-white shadow-md' : 'bg-slate-900 text-slate-400 border border-slate-800'}">
+                            • Toate (${logs.length})
+                        </button>
+                        <button onclick="setMissionFilter('3d')" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${missionState.activeFilter === '3d' ? 'bg-cyan-600 text-white shadow-md' : 'bg-slate-900 text-cyan-400 border border-slate-800'}">
+                            📐 3D (${group3D.length})
+                        </button>
+                        <button onclick="setMissionFilter('2d')" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${missionState.activeFilter === '2d' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-900 text-blue-400 border border-slate-800'}">
+                            📋 2D (${group2D.length})
+                        </button>
+                        <button onclick="setMissionFilter('layout')" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${missionState.activeFilter === 'layout' ? 'bg-purple-600 text-white shadow-md' : 'bg-slate-900 text-purple-400 border border-slate-800'}">
+                            📐 Layout (${groupLayout.length})
+                        </button>
+                        <button onclick="setMissionFilter('workshop')" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${missionState.activeFilter === 'workshop' ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-900 text-emerald-400 border border-slate-800'}">
+                            🏭 Atelier (${groupReleased.length})
+                        </button>
+                        <button onclick="setMissionFilter('highlights')" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition ${missionState.activeFilter === 'highlights' ? 'bg-amber-600 text-white shadow-md' : 'bg-slate-900 text-amber-400 border border-slate-800'}">
+                            ⭐ Reușite (${highlightsCount})
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // 5. Kinetic Blueprint Deliverable Cards
+            html += `<div class="space-y-3 pt-1">`;
+            if (filteredLogs.length === 0) {
+                html += `
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 text-center space-y-1">
+                        <div class="text-2xl text-slate-500">🔍</div>
+                        <div class="text-xs font-bold text-slate-300">Niciun livrabil în această categorie</div>
+                        <p class="text-[11px] text-slate-500">Folosește Speed-Logger-ul de mai sus pentru a adăuga primul reper!</p>
+                    </div>
+                `;
+            } else {
+                html += filteredLogs.map((log) => {
+                    const is3D = (log.activity_type || '').includes('3D');
+                    const is2D = (log.activity_type || '').includes('2D');
+                    const isLayout = (log.activity_type || '').includes('Layout');
+                    const isReleased = (log.status_tag === 'Lansat Atelier' || log.status_tag === 'Finalizat');
+
+                    return `
+                        <div data-id="${log.id}" data-stage="${escapeHtml(log.status_tag || 'În Lucru')}" data-type="${escapeHtml(log.activity_type || 'Proiectare 3D')}" class="mission-swipe-card bg-slate-900/95 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-lg hover:border-cyan-500/40 transition">
+                            <!-- Card Header -->
+                            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-8 h-8 rounded-xl ${is3D ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : is2D ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'} flex items-center justify-center text-sm font-bold shrink-0">
+                                        ${is3D ? '📐' : is2D ? '📋' : '📐'}
+                                    </span>
+                                    <div>
+                                        <div class="font-mono text-xs font-black text-cyan-300 flex items-center gap-1.5">
+                                            <span>${escapeHtml(log.part_number || 'P/N')}</span>
+                                            <span class="text-[10px] text-slate-400 bg-slate-950 px-1.5 py-0.2 rounded border border-slate-800">${escapeHtml(log.revision || 'Rev A')}</span>
+                                        </div>
+                                        <div class="text-[10px] text-slate-400 truncate max-w-[170px]">${escapeHtml(log.project_name || 'General')}</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[10px] font-mono text-slate-400">${log.date}</span>
+                                    <button onclick="quickToggleMissionStar('${log.id}')" class="p-1.5 text-sm transition active:scale-75 ${log.is_highlight ? 'text-amber-400' : 'text-slate-700 hover:text-slate-500'}" title="Dosar Mărire">
+                                        <i class="fa-solid fa-star"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <p class="text-xs text-slate-200 font-medium leading-relaxed cursor-pointer" onclick="openDailyDetailModal(${log.id})">
+                                ${escapeHtml(log.description)}
+                            </p>
+
+                            <!-- Process and Materials Badges -->
+                            <div class="flex items-center gap-1.5 flex-wrap text-[10px]">
+                                <span class="bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800 text-slate-300">${log.activity_type}</span>
+                                ${log.drawings_count > 0 ? `<span class="bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800 text-blue-400 font-bold">📄 ${log.drawings_count} planșe</span>` : ''}
+                                ${log.manufacturing_process ? `<span class="bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800 text-purple-300">⚙️ ${escapeHtml(log.manufacturing_process)}</span>` : ''}
+                                ${log.material ? `<span class="bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800 text-amber-300/90 font-mono">${escapeHtml(log.material)}</span>` : ''}
+                                <span class="px-2 py-0.5 rounded-lg text-[9px] font-bold ${isReleased ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30' : 'bg-amber-950/80 text-amber-300 border border-amber-500/30'}">
+                                    ${escapeHtml(log.status_tag || 'În Lucru')}
+                                </span>
+                            </div>
+
+                            <!-- Bottom 1-Tap Management Action Bar -->
+                            <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-xs">
+                                <button onclick="quickAdvanceMissionCard('${log.id}', '${escapeHtml(log.status_tag || '')}', '${escapeHtml(log.activity_type || '')}')" class="px-2.5 py-1 rounded-xl bg-slate-950 hover:bg-slate-800 text-cyan-400 border border-cyan-500/30 text-[11px] font-bold transition active:scale-95 flex items-center gap-1">
+                                    <i class="fa-solid fa-angles-right text-[10px]"></i>
+                                    <span>${isReleased ? '✓ În Fabricație' : 'Avansează Stadiu >>'}</span>
+                                </button>
+                                <div class="flex items-center gap-1">
+                                    <button onclick="quickCopyMissionCard('${escapeHtml(log.part_number || '')}', '${escapeHtml(log.description || '')}')" class="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 text-xs" title="Copiază">
+                                        <i class="fa-solid fa-copy"></i>
+                                    </button>
+                                    <button onclick="openDailyDetailModal(${log.id})" class="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 text-xs" title="Fișă Tehnică">
+                                        <i class="fa-solid fa-sliders"></i>
+                                    </button>
+                                    <button onclick="quickDeleteMissionCard('${log.id}')" class="p-1.5 rounded-lg bg-slate-950 hover:bg-rose-950 text-slate-500 hover:text-rose-400 border border-slate-800 text-xs" title="Șterge">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            html += `</div>`;
+
+            container.innerHTML = html;
+
+            setTimeout(attachMissionSwipeGestures, 50);
         }
 
         // =========================================================================
