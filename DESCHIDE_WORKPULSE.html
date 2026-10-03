@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="0; url=http://localhost:5000">
+    <title>Deschide WorkPulse</title>
+    <style>
+        body {
+            background-color: #0b0f17;
+            color: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 28px;
+            padding: 32px 24px;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+        .icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #2563eb, #06b6d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.5);
+        }
+        h2 { font-size: 1.25rem; font-weight: 800; margin: 0 0 8px; color: #fff; }
+        p { font-size: 0.85rem; color: #94a3b8; line-height: 1.5; margin: 0 0 24px; }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #2563eb, #06b6d4);
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border-radius: 16px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            transition: transform 0.15s ease;
+        }
+        .btn:active { transform: scale(0.97); }
+        .hint {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 18px;
+            margin-bottom: 0;
+            line-height: 1.4;
+        }
+    </style>
+    <script>
+        window.location.href = "http://localhost:5000";
+    </script>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">🚀</div>
+        <h2>Pornire WorkPulse</h2>
+        <p>Aplicația se deschide automat în browser la adresa locală.<br>Dacă nu ești redirecționat automat, apasă butonul:</p>
+        <a href="http://localhost:5000" class="btn">👉 Deschide WorkPulse (localhost:5000)</a>
+        <p class="hint">
+            Asigură-te că serverul Termux rulează în fundal.<br>
+            Autentificare inițială: <b>admin</b> / parolă: <b>admin</b>
+        </p>
+    </div>
+</body>
+</html>

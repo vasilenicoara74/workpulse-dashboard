@@ -29,12 +29,29 @@ FAILED_LOGINS = {}
 
 init_db()
 
-# Cybersecurity Response Headers
+# Cybersecurity Response Headers & CORS
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        res = Response()
+        origin = request.headers.get('Origin', '*')
+        res.headers['Access-Control-Allow-Origin'] = origin
+        res.headers['Access-Control-Allow-Credentials'] = 'true'
+        res.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+        res.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+        return res
+
 @app.after_request
 def set_security_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     response.headers['X-XSS-Protection'] = '1; mode=block'
+    origin = request.headers.get('Origin')
+    if origin:
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
     return response
 
 # Auth Decorator

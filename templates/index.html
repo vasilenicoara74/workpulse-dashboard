@@ -88,6 +88,19 @@
                 <p class="text-xs text-slate-400">Autentificare Cont Admin Proiectant</p>
             </div>
 
+            <!-- Protocol Warning Banner when opened as static file from zip/storage -->
+            <div id="file-protocol-warning" class="hidden bg-amber-950/50 border border-amber-500/50 rounded-2xl p-3 text-center space-y-2">
+                <div class="flex items-center justify-center gap-1.5 text-amber-400 font-bold text-xs">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Fișier deschis direct din Zip
+                </div>
+                <p class="text-[11px] text-slate-300 leading-snug">
+                    Aplicația rulează pe serverul Termux în fundal. Pentru conectare și salvare baze de date, deschide adresa:
+                </p>
+                <a href="http://localhost:5000" class="block w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold text-xs shadow-md shadow-blue-500/30 active:scale-95 transition">
+                    👉 Deschide http://localhost:5000
+                </a>
+            </div>
+
             <form onsubmit="handleLogin(event)" class="space-y-3 text-xs">
                 <div>
                     <label class="block font-medium text-slate-300 mb-1">Utilizator:</label>
@@ -1229,6 +1242,13 @@
 
         // ================= AUTHENTICATION =================
         async function checkAuthStatus() {
+            if (!window.location.protocol.startsWith('http')) {
+                const warn = document.getElementById('file-protocol-warning');
+                if (warn) warn.classList.remove('hidden');
+                document.getElementById('login-overlay').classList.remove('hidden');
+                return;
+            }
+
             try {
                 const res = await fetch('/api/auth/me');
                 const data = await res.json();
@@ -1253,6 +1273,13 @@
             const errEl = document.getElementById('login-error-msg');
             errEl.classList.add('hidden');
 
+            if (!window.location.protocol.startsWith('http')) {
+                errEl.innerHTML = `⚠️ Ai deschis direct fișierul static.<br>Aplicația necesită serverul Termux.<br><a href="http://localhost:5000" class="underline font-bold text-cyan-300 block mt-2 py-2 px-3 rounded-xl bg-blue-900/60 border border-blue-500/40">👉 Deschide http://localhost:5000</a>`;
+                errEl.classList.remove('hidden');
+                window.location.href = "http://localhost:5000";
+                return;
+            }
+
             try {
                 const res = await fetch('/api/auth/login', {
                     method: 'POST',
@@ -1268,7 +1295,7 @@
                     errEl.classList.remove('hidden');
                 }
             } catch (err) {
-                errEl.innerText = 'Eroare de conexiune la server';
+                errEl.innerHTML = `Eroare de conexiune la server.<br><span class="text-[10px] text-slate-300">Verifică dacă serverul rulează în Termux la <a href="http://localhost:5000" class="underline text-cyan-400">http://localhost:5000</a></span>`;
                 errEl.classList.remove('hidden');
             }
         }
