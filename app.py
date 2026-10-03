@@ -247,16 +247,16 @@ def api_daily_logs():
         query += " AND d.project_id = ?"
         params.append(int(project_id))
     if activity_type and activity_type != 'all':
-        query += " AND d.activity_type = ?"
-        params.append(activity_type)
+        query += " AND (d.activity_type = ? OR d.activity_type LIKE ?)"
+        params.extend([activity_type, f"%{activity_type}%"])
     if status_tag and status_tag != 'all':
         query += " AND d.status_tag = ?"
         params.append(status_tag)
     if highlight_only in ('1', 'true', True):
         query += " AND d.is_highlight = 1"
     if search:
-        query += " AND (d.description LIKE ? OR d.part_number LIKE ? OR p.name LIKE ?)"
-        params.extend([f"%{search}%", f"%{search}%", f"%{search}%"])
+        query += " AND (d.description LIKE ? OR d.part_number LIKE ? OR p.name LIKE ? OR d.activity_type LIKE ?)"
+        params.extend([f"%{search}%", f"%{search}%", f"%{search}%", f"%{search}%"])
 
     query += " ORDER BY d.date DESC, d.id DESC"
 

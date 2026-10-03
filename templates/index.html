@@ -159,69 +159,62 @@
             <!-- ================= TAB 1: JURNAL TABELAR LEJER (ZILE / LUNI / ANI) ================= -->
             <section id="tab-table" class="space-y-3.5">
 
-                <!-- Monthly & Filter Control Bar -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-3">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                                <i class="fa-regular fa-calendar text-blue-400"></i> Filtru Perioadă:
-                            </span>
-                            <select id="filter-month-select" onchange="loadDailyLogs()" class="bg-slate-950 border border-slate-700 text-white font-bold text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-blue-500">
-                                <option value="all">Toate Lunile & Anii</option>
-                            </select>
-                            <select id="filter-project-select" onchange="loadDailyLogs()" class="bg-slate-950 border border-slate-700 text-white font-semibold text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-blue-500">
-                                <option value="all">Toate Ansamblurile</option>
-                            </select>
-                        </div>
-
+                <!-- Control Bar & DOAR UN SINGUR FILTRU -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-3 shadow-lg">
+                    <!-- Action Buttons & Quick KPIs -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                         <div class="flex items-center gap-2">
-                            <a href="/export/csv" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1 transition">
-                                <i class="fa-solid fa-file-csv text-emerald-400"></i> Export CSV
-                            </a>
                             <button onclick="openNewDailyLogModal()" class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-600/30 transition">
-                                <i class="fa-solid fa-compass-drafting text-cyan-300"></i> + Notează Sarcină
+                                <i class="fa-solid fa-pen-to-square"></i> + Notează Sarcină
                             </button>
+                            <button onclick="openNewProjectModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus text-blue-400"></i> + Ansamblu
+                            </button>
+                            <a href="/export/csv" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1 transition">
+                                <i class="fa-solid fa-file-csv text-emerald-400"></i> CSV
+                            </a>
+                        </div>
+
+                        <!-- Compact Scorecards -->
+                        <div class="flex items-center gap-3 text-xs bg-slate-950/80 border border-slate-800 px-3 py-1.5 rounded-xl self-start sm:self-auto">
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase font-semibold">Zile: </span>
+                                <strong class="text-white font-bold" id="sum-active-days">0</strong>
+                            </div>
+                            <span class="text-slate-700">|</span>
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase font-semibold">Proiecte: </span>
+                                <strong class="text-cyan-400 font-bold" id="sum-active-projects">0</strong>
+                            </div>
+                            <span class="text-slate-700">|</span>
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase font-semibold">Reușite: </span>
+                                <strong class="text-amber-400 font-bold" id="sum-highlights">0 ⭐</strong>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Monthly Summary Chips (Lejer) -->
-                    <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800 text-center">
-                        <div class="bg-slate-950/70 border border-slate-800 p-2 rounded-xl">
-                            <span class="text-[10px] text-slate-400 font-semibold uppercase">Zile de Muncă</span>
-                            <div class="text-base font-black text-white mt-0.5" id="sum-active-days">0</div>
+                    <!-- DOAR UN SINGUR FILTRU AERISIT -->
+                    <div class="flex items-center gap-2 pt-2 border-t border-slate-800/80">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                            <input type="text" id="daily-search" oninput="debounceLoadDailyLogs()" placeholder="Caută proiect, reper sau sarcină..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500">
                         </div>
-                        <div class="bg-slate-950/70 border border-slate-800 p-2 rounded-xl">
-                            <span class="text-[10px] text-slate-400 font-semibold uppercase">Ansambluri Lucrate</span>
-                            <div class="text-base font-black text-cyan-400 mt-0.5" id="sum-active-projects">0</div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <select id="single-activity-filter" onchange="onSingleFilterChange(this.value)" class="bg-slate-950 border border-slate-700 text-white font-semibold text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-cyan-500">
+                                <option value="all">Toate Activitățile</option>
+                                <option value="Proiectare 3D">📐 Proiectare 3D</option>
+                                <option value="Desene 2D">📋 Desene 2D</option>
+                                <option value="Layout">📐 Layout</option>
+                                <option value="highlight">⭐ Doar Realizări Cheie</option>
+                            </select>
+                            <span id="table-entries-count" class="text-[11px] text-slate-400 font-semibold px-1 hidden sm:inline">0 sarcini</span>
                         </div>
-                        <div class="bg-slate-950/70 border border-slate-800 p-2 rounded-xl">
-                            <span class="text-[10px] text-slate-400 font-semibold uppercase">Realizări Cheie</span>
-                            <div class="text-base font-black text-amber-400 mt-0.5" id="sum-highlights">0 ⭐</div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Activity Filter Pills (Lejer & Detaliat) -->
-                    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-2 border-t border-slate-800/80 text-[11px]">
-                        <span class="text-[10px] text-slate-500 font-bold uppercase whitespace-nowrap">Filtru:</span>
-                        <button onclick="setActivityFilter('all')" id="filt-all" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white font-bold whitespace-nowrap transition">Toate</button>
-                        <button onclick="setActivityFilter('Modelare CAD 3D')" id="filt-cad" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">📐 CAD 3D</button>
-                        <button onclick="setActivityFilter('Desene 2D & BOM')" id="filt-2d" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">📋 2D & BOM</button>
-                        <button onclick="setActivityFilter('Calcule & Cotare')" id="filt-calc" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">⚙️ Calcule & Cotare</button>
-                        <button onclick="setActivityFilter('Modificare ECN')" id="filt-ecn" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">🔄 Modificări ECN</button>
-                        <button onclick="setActivityFilter('Asistență Atelier')" id="filt-shop" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition">🏭 Atelier / Montaj</button>
-                        <button onclick="toggleHighlightFilter()" id="filt-star" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-amber-950/80 text-amber-400 border border-slate-700 whitespace-nowrap transition flex items-center gap-1">⭐ Doar Reușite Mărire</button>
                     </div>
                 </div>
 
                 <!-- Main Activity Table Card -->
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-                    <div class="p-3 border-b border-slate-800 flex items-center justify-between text-xs">
-                        <div class="relative flex-1 max-w-xs">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2 text-slate-500 text-[11px]"></i>
-                            <input type="text" id="daily-search" onkeyup="debounceLoadDailyLogs()" placeholder="Caută reper, sarcină sau descriere..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1 text-xs text-white focus:outline-none focus:border-blue-500">
-                        </div>
-                        <span id="table-entries-count" class="text-[11px] text-slate-500">0 înregistrări</span>
-                    </div>
 
                     <!-- Responsive Table Container -->
                     <div class="overflow-x-auto">
@@ -652,18 +645,26 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tip Activitate:</label>
-                        <select id="edit-modal-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
-                            <option value="Modelare CAD 3D">Modelare CAD 3D</option>
-                            <option value="Desene 2D & BOM">Desene 2D & BOM</option>
-                            <option value="Calcule & Cotare">Calcule Mecanice & Cotare</option>
-                            <option value="Modificare ECN">Modificare ECN</option>
-                            <option value="Asistență Atelier">Asistență Atelier</option>
-                            <option value="Documentație Tehnică">Documentație Tehnică</option>
-                        </select>
+                <!-- CĂSUȚA DE BIFARE (Ce ai lucrat) -->
+                <div class="bg-slate-950 p-2.5 rounded-xl border border-cyan-500/30 space-y-1.5">
+                    <label class="block text-[10px] font-bold text-cyan-300 uppercase tracking-wider">Ce ai lucrat la proiect (Bifează):</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+                            <input type="checkbox" id="edit-chk-3d" class="w-4 h-4 rounded text-cyan-500 bg-slate-950 border-slate-700">
+                            <span class="text-xs font-semibold text-white">📐 Proiectare 3D</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+                            <input type="checkbox" id="edit-chk-2d" class="w-4 h-4 rounded text-blue-500 bg-slate-950 border-slate-700">
+                            <span class="text-xs font-semibold text-white">📋 Desene 2D</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+                            <input type="checkbox" id="edit-chk-layout" class="w-4 h-4 rounded text-purple-500 bg-slate-950 border-slate-700">
+                            <span class="text-xs font-semibold text-white">📐 Layout</span>
+                        </label>
                     </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Planșe / Piese:</label>
                         <input type="number" id="edit-modal-drawings-count" min="1" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white font-bold text-center focus:outline-none focus:border-cyan-500">
@@ -676,7 +677,7 @@
                             <option value="Confecție Sudată">Confecție Sudată</option>
                             <option value="Profile Aluminiu">Profile Aluminiu</option>
                             <option value="Asamblare Mecanică">Asamblare Mecanică</option>
-                            <option value="Organe Asamblare ISO">Organe Asamblare ISO</option>
+                            <option value="General">General / Standard</option>
                         </select>
                     </div>
                     <div>
@@ -686,7 +687,6 @@
                             <option value="În curs">În curs</option>
                             <option value="Lansat Atelier">Lansat Atelier</option>
                             <option value="Realizare Cheie ⭐">Realizare Cheie ⭐</option>
-                            <option value="Modificare Client">Modificare Client</option>
                         </select>
                     </div>
                 </div>
@@ -782,114 +782,73 @@
                     </div>
                 </div>
 
-                <!-- SECȚIUNEA 2: DISCIPLINĂ LIVRABIL & VOLUM -->
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                <!-- SECȚIUNEA 2: CĂSUȚA DE BIFARE (Ce ai lucrat la proiect) -->
+                <div class="bg-slate-950 p-3 rounded-xl border border-cyan-500/40 space-y-2.5 shadow-md">
                     <div class="flex items-center justify-between">
-                        <div class="text-[10px] font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-shapes"></i> 2. Disciplină Livrabil & Volum
-                        </div>
-                        <span class="text-[10px] text-slate-400 font-medium">Selectează etapa</span>
+                        <label class="block text-[11px] font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-square-check text-cyan-400"></i> 2. Ce ai lucrat la proiect? (Bifează):
+                        </label>
+                        <span class="text-[10px] text-slate-400 italic">Bifează ce se aplică</span>
                     </div>
 
-                    <!-- Activity chips -->
-                    <input type="hidden" id="log-type" value="Modelare CAD 3D">
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5" id="activity-chips-container">
-                        <button type="button" onclick="selectConfigActivity('Modelare CAD 3D')" class="chip-act active-chip px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
-                            <span>📐</span> Modelare 3D CAD
-                        </button>
-                        <button type="button" onclick="selectConfigActivity('Desene 2D & BOM')" class="chip-act px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
-                            <span>📋</span> Desene 2D & BOM
-                        </button>
-                        <button type="button" onclick="selectConfigActivity('Calcule & Cotare')" class="chip-act px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
-                            <span>⚙️</span> Calcule & Cotare
-                        </button>
-                        <button type="button" onclick="selectConfigActivity('Modificare ECN')" class="chip-act px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
-                            <span>🔄</span> Modificare ECN
-                        </button>
-                        <button type="button" onclick="selectConfigActivity('Asistență Atelier')" class="chip-act px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
-                            <span>🏭</span> Atelier / Montaj
-                        </button>
-                        <button type="button" onclick="selectConfigActivity('Documentație Tehnică')" class="chip-act px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
-                            <span>📁</span> Documentație PDM
-                        </button>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <!-- Bifa Proiectare 3D -->
+                        <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500/60 cursor-pointer transition select-none">
+                            <input type="checkbox" id="chk-opt-3d" checked class="w-4 h-4 rounded text-cyan-500 bg-slate-950 border-slate-700 focus:ring-0">
+                            <div>
+                                <div class="text-xs font-bold text-white flex items-center gap-1">
+                                    <span>📐</span> Proiectare 3D
+                                </div>
+                                <div class="text-[9px] text-slate-400">Modelare piese & subansambluri</div>
+                            </div>
+                        </label>
+
+                        <!-- Bifa Desene 2D -->
+                        <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/60 cursor-pointer transition select-none">
+                            <input type="checkbox" id="chk-opt-2d" class="w-4 h-4 rounded text-blue-500 bg-slate-950 border-slate-700 focus:ring-0">
+                            <div>
+                                <div class="text-xs font-bold text-white flex items-center gap-1">
+                                    <span>📋</span> Desene 2D
+                                </div>
+                                <div class="text-[9px] text-slate-400">Planșe execuție & BOM</div>
+                            </div>
+                        </label>
+
+                        <!-- Bifa Layout -->
+                        <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-purple-500/60 cursor-pointer transition select-none">
+                            <input type="checkbox" id="chk-opt-layout" class="w-4 h-4 rounded text-purple-500 bg-slate-950 border-slate-700 focus:ring-0">
+                            <div>
+                                <div class="text-xs font-bold text-white flex items-center gap-1">
+                                    <span>📐</span> Layout
+                                </div>
+                                <div class="text-[9px] text-slate-400">Aranjament general & concept</div>
+                            </div>
+                        </label>
                     </div>
 
-                    <!-- Volume Stepper Counter -->
-                    <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
-                        <span class="text-[11px] text-slate-300 font-medium">Volum Livrabil (Planșe 2D / Piese Modelate):</span>
+                    <!-- Număr Planșe 2D -->
+                    <div class="flex items-center justify-between pt-1.5 border-t border-slate-800/80">
+                        <span class="text-[11px] text-slate-300 font-medium">Volum (Planșe 2D / Piese Lucrate):</span>
                         <div class="flex items-center gap-1.5">
-                            <button type="button" onclick="stepDrawingsCount(-1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center text-sm transition">
+                            <button type="button" onclick="stepDrawingsCount(-1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center text-xs transition">
                                 <i class="fa-solid fa-minus"></i>
                             </button>
-                            <input type="number" id="log-drawings-count" value="1" min="1" max="100" class="w-14 h-8 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-white text-xs focus:outline-none focus:border-cyan-500">
-                            <button type="button" onclick="stepDrawingsCount(1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center text-sm transition">
+                            <input type="number" id="log-drawings-count" value="1" min="1" max="100" class="w-12 h-7 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-white text-xs focus:outline-none focus:border-cyan-500">
+                            <button type="button" onclick="stepDrawingsCount(1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center text-xs transition">
                                 <i class="fa-solid fa-plus"></i>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- SECȚIUNEA 3: TEHNOLOGIE DE FABRICAȚIE & MATERIAL -->
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
-                    <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-industry"></i> 3. Tehnologie de Fabricație & Material
-                    </div>
-
-                    <input type="hidden" id="log-mfg" value="Tablă Sheet Metal">
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5" id="mfg-chips-container">
-                        <button type="button" onclick="selectConfigMfg('Tablă Sheet Metal')" class="chip-mfg active-chip px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
-                            <span>⚙️</span> Tablă (Laser/Abkant)
-                        </button>
-                        <button type="button" onclick="selectConfigMfg('Prelucrare CNC')" class="chip-mfg px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
-                            <span>🔩</span> Prelucrare CNC
-                        </button>
-                        <button type="button" onclick="selectConfigMfg('Confecție Sudată')" class="chip-mfg px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
-                            <span>⚡</span> Confecție Sudată
-                        </button>
-                        <button type="button" onclick="selectConfigMfg('Profile Aluminiu')" class="chip-mfg px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
-                            <span>🔲</span> Profile Aluminiu
-                        </button>
-                        <button type="button" onclick="selectConfigMfg('Asamblare Mecanică')" class="chip-mfg px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
-                            <span>🛠️</span> Asamblare Mecanică
-                        </button>
-                        <button type="button" onclick="selectConfigMfg('Organe Asamblare ISO')" class="chip-mfg px-2 py-1.5 rounded-lg border text-left text-[11px] font-medium transition flex items-center gap-1.5">
-                            <span>📦</span> Standarde / BOM
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Material Utilizat:</label>
-                            <select id="log-material" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white text-xs focus:outline-none focus:border-cyan-500">
-                                <option value="Oțel (S235 / S355)">Oțel (S235 / S355)</option>
-                                <option value="Inox (AISI 304 / 316)">Inox (AISI 304 / 316)</option>
-                                <option value="Aluminiu (EN AW-6060 / 6082)">Aluminiu (EN AW-6060 / 6082)</option>
-                                <option value="Plastic Tehnic (POM / PA6)">Plastic Tehnic (POM / PA6)</option>
-                                <option value="Organe Asamblare ISO 8.8 / 10.9">Organe Asamblare ISO 8.8 / 10.9</option>
-                                <option value="Alt Material">Alt Material / Mixt</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Sursă Modificare / ECN (dacă e cazul):</label>
-                            <select id="log-ecn-source" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white text-xs focus:outline-none focus:border-cyan-500">
-                                <option value="">Proiect Nou (Fără ECN)</option>
-                                <option value="Modificare Cerințe Client">Modificare Cerințe Client</option>
-                                <option value="Sesizare Atelier / Montaj">Sesizare Atelier / Montaj</option>
-                                <option value="Optimizare Proiectant (DFM)">Optimizare Proiectant (DFM)</option>
-                                <option value="Limitare Furnizor / Cotă Lipsă">Limitare Furnizor / Cotă Lipsă</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECȚIUNEA 4: DESCRIERE LIVRABIL & ASISTENT AI GEMINI -->
+                <!-- SECȚIUNEA 3: CE AI REALIZAT (DESCRIERE LIVRABIL & ASISTENT AI) -->
                 <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
                     <div class="flex items-center justify-between">
                         <div class="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-pen-nib"></i> 4. Ce Ai Realizat / Livrabil Concret *
+                            <i class="fa-solid fa-pen-nib"></i> 3. Ce Ai Realizat / Livrabil Concret *
                         </div>
                         <button type="button" onclick="triggerAISuggestion()" id="btn-ai-polish" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-[10px] flex items-center gap-1 shadow-sm transition">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> ✨ Îmbunătățește cu AI
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> ✨ Finisează cu AI Copilot
                         </button>
                     </div>
 
@@ -898,32 +857,45 @@
                     <!-- Quick Snippets -->
                     <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 text-[10px]">
                         <span class="text-slate-500 whitespace-nowrap">Inserare rapidă:</span>
-                        <button type="button" onclick="insertQuickSnippet('Verificat coliziuni cinematice 3D.')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap">+ Coliziuni 3D</button>
-                        <button type="button" onclick="insertQuickSnippet('Definit toleranțe ISO 2768-mK și ajustaje funcționale.')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap">+ Toleranțe ISO</button>
-                        <button type="button" onclick="insertQuickSnippet('Exportat pachet de fabricație PDF și fișiere DXF debitare.')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap">+ PDF & DXF</button>
-                        <button type="button" onclick="insertQuickSnippet('Sincronizat nomenclatorul BOM cu baza PDM.')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap">+ Sincronizat BOM</button>
+                        <button type="button" onclick="insertQuickSnippet('Modelat 3D componentele și verificat coliziuni cinematice.')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap">+ Modelat 3D</button>
+                        <button type="button" onclick="insertQuickSnippet('Generat planșe 2D de execuție cu toleranțe ISO și tabel BOM.')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap">+ Desene 2D</button>
+                        <button type="button" onclick="insertQuickSnippet('Definit layout general ansamblu și cote de gabarit.')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap">+ Layout Ansamblu</button>
                     </div>
                 </div>
 
-                <!-- SECȚIUNEA 5: MARCAJ EVALUARE & STARE -->
+                <!-- SECȚIUNEA 4: TEHNOLOGIE FABRICAȚIE & EVALUARE -->
                 <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Tehnologie (Opțional):</label>
+                            <select id="log-mfg" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2 py-1.5 text-white text-xs focus:outline-none focus:border-cyan-500">
+                                <option value="Tablă Sheet Metal">Tablă Sheet Metal</option>
+                                <option value="Prelucrare CNC">Prelucrare CNC</option>
+                                <option value="Confecție Sudată">Confecție Sudată</option>
+                                <option value="Profile Aluminiu">Profile Aluminiu</option>
+                                <option value="Asamblare Mecanică">Asamblare Mecanică</option>
+                                <option value="General">General / Standard</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Material (Opțional):</label>
+                            <input type="text" id="log-material" placeholder="ex: Oțel S235, Inox 304, Al 6082" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white text-xs focus:outline-none focus:border-cyan-500">
+                        </div>
                         <div>
                             <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Stare Livrabil:</label>
-                            <select id="log-status" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white text-xs focus:outline-none focus:border-cyan-500">
+                            <select id="log-status" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2 py-1.5 text-white text-xs focus:outline-none focus:border-cyan-500">
                                 <option value="Finalizat">Finalizat</option>
                                 <option value="În curs">În curs</option>
                                 <option value="Lansat Atelier">Lansat în Atelier</option>
-                                <option value="Realizare Cheie ⭐">Realizare Tehnică Cheie ⭐</option>
-                                <option value="Modificare Client">Modificare Client</option>
+                                <option value="Realizare Cheie ⭐">Realizare Cheie ⭐</option>
                             </select>
                         </div>
-                        <div class="pt-2 sm:pt-4">
-                            <label class="flex items-center gap-2 cursor-pointer bg-slate-900 border border-amber-500/30 p-2 rounded-xl">
-                                <input type="checkbox" id="log-highlight" class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-700 focus:ring-0">
-                                <span class="font-bold text-amber-300 text-[11px]">⭐ Evidențiază pentru Mărire Salarială</span>
-                            </label>
-                        </div>
+                    </div>
+                    <div class="pt-1.5">
+                        <label class="flex items-center gap-2 cursor-pointer bg-slate-900 border border-amber-500/30 p-2 rounded-xl">
+                            <input type="checkbox" id="log-highlight" class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-700 focus:ring-0">
+                            <span class="font-bold text-amber-300 text-[11px]">⭐ Evidențiază pentru Evaluare & Mărire Salarială</span>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -1388,57 +1360,27 @@
         function openNewAchievementModal() { populateProjectDropdowns(); openModal('modal-new-achievement'); }
         function openNewBlockerModal() { populateProjectDropdowns(); openModal('modal-new-blocker'); }
 
-        // ================= JURNAL TABELAR ZILE & FILTRE =================
+        // ================= JURNAL TABELAR ZILE & DOAR UN SINGUR FILTRU =================
         function debounceLoadDailyLogs() {
             clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(loadDailyLogs, 300);
+            searchTimeout = setTimeout(loadDailyLogs, 250);
         }
 
-        function setActivityFilter(type) {
-            currentActivityFilter = type;
-            const btnMap = {
-                'all': 'filt-all',
-                'Modelare CAD 3D': 'filt-cad',
-                'Desene 2D & BOM': 'filt-2d',
-                'Calcule & Cotare': 'filt-calc',
-                'Modificare ECN': 'filt-ecn',
-                'Asistență Atelier': 'filt-shop'
-            };
-            Object.entries(btnMap).forEach(([k, id]) => {
-                const btn = document.getElementById(id);
-                if (!btn) return;
-                if (k === type) {
-                    btn.className = 'px-2.5 py-1 rounded-lg bg-blue-600 text-white font-bold whitespace-nowrap transition shadow-sm';
-                } else {
-                    btn.className = 'px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 whitespace-nowrap transition';
-                }
-            });
-            loadDailyLogs();
-        }
-
-        function toggleHighlightFilter() {
-            onlyHighlightsFilter = !onlyHighlightsFilter;
-            const btn = document.getElementById('filt-star');
-            if (btn) {
-                if (onlyHighlightsFilter) {
-                    btn.className = 'px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-black border border-amber-400 whitespace-nowrap transition flex items-center gap-1 shadow-md shadow-amber-500/20';
-                } else {
-                    btn.className = 'px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-amber-950/80 text-amber-400 border border-slate-700 whitespace-nowrap transition flex items-center gap-1';
-                }
+        function onSingleFilterChange(val) {
+            if (val === 'highlight') {
+                currentActivityFilter = 'all';
+                onlyHighlightsFilter = true;
+            } else {
+                currentActivityFilter = val;
+                onlyHighlightsFilter = false;
             }
             loadDailyLogs();
         }
 
         async function loadDailyLogs() {
-            const monthVal = document.getElementById('filter-month-select')?.value || 'all';
-            const projectVal = document.getElementById('filter-project-select')?.value || 'all';
-            const searchVal = document.getElementById('daily-search')?.value || '';
+            const searchVal = document.getElementById('daily-search')?.value.trim() || '';
 
-            let url = `/api/daily-logs?search=${encodeURIComponent(searchVal)}&project_id=${projectVal}`;
-            if (monthVal !== 'all') {
-                const [y, m] = monthVal.split('-');
-                url += `&year=${y}&month=${m}`;
-            }
+            let url = `/api/daily-logs?search=${encodeURIComponent(searchVal)}`;
             if (currentActivityFilter !== 'all') {
                 url += `&activity_type=${encodeURIComponent(currentActivityFilter)}`;
             }
@@ -1452,10 +1394,18 @@
                 const data = await res.json();
 
                 // Update summary chips
-                document.getElementById('sum-active-days').innerText = `${data.summary.unique_days} zile`;
-                document.getElementById('sum-active-projects').innerText = `${data.summary.unique_projects} ansambluri`;
-                document.getElementById('sum-highlights').innerText = `${data.summary.highlights} ⭐`;
-                document.getElementById('table-entries-count').innerText = `${data.logs.length} activități`;
+                if (document.getElementById('sum-active-days')) {
+                    document.getElementById('sum-active-days').innerText = `${data.summary.unique_days || 0} zile`;
+                }
+                if (document.getElementById('sum-active-projects')) {
+                    document.getElementById('sum-active-projects').innerText = `${data.summary.unique_projects || 0}`;
+                }
+                if (document.getElementById('sum-highlights')) {
+                    document.getElementById('sum-highlights').innerText = `${data.summary.highlights || 0} ⭐`;
+                }
+                if (document.getElementById('table-entries-count')) {
+                    document.getElementById('table-entries-count').innerText = `${data.logs.length} sarcini`;
+                }
 
                 // Populate available months dropdown once or update
                 const monthSelect = document.getElementById('filter-month-select');
@@ -1600,9 +1550,15 @@
             const btn = document.getElementById('btn-ai-polish');
             const descArea = document.getElementById('log-desc');
             const originalText = descArea.value.trim();
-            const actType = document.getElementById('log-type').value;
+
+            const selectedTypes = [];
+            if (document.getElementById('chk-opt-3d')?.checked) selectedTypes.push('Proiectare 3D');
+            if (document.getElementById('chk-opt-2d')?.checked) selectedTypes.push('Desene 2D');
+            if (document.getElementById('chk-opt-layout')?.checked) selectedTypes.push('Layout');
+            const actType = selectedTypes.length > 0 ? selectedTypes.join(', ') : 'Proiectare 3D';
+
             const pn = document.getElementById('log-part-number').value.trim() || 'ASM-001';
-            const mfg = document.getElementById('log-mfg').value;
+            const mfg = document.getElementById('log-mfg')?.value || 'General';
 
             btn.disabled = true;
             const originalBtnHtml = btn.innerHTML;
@@ -1635,9 +1591,15 @@
         async function triggerAIEditSuggestion() {
             const descArea = document.getElementById('edit-modal-desc');
             const originalText = descArea.value.trim();
-            const actType = document.getElementById('edit-modal-type').value;
+
+            const selectedTypes = [];
+            if (document.getElementById('edit-chk-3d')?.checked) selectedTypes.push('Proiectare 3D');
+            if (document.getElementById('edit-chk-2d')?.checked) selectedTypes.push('Desene 2D');
+            if (document.getElementById('edit-chk-layout')?.checked) selectedTypes.push('Layout');
+            const actType = selectedTypes.length > 0 ? selectedTypes.join(', ') : 'Proiectare 3D';
+
             const pn = document.getElementById('view-modal-pn').innerText || 'ASM-001';
-            const mfg = document.getElementById('edit-modal-mfg').value;
+            const mfg = document.getElementById('edit-modal-mfg')?.value || 'General';
 
             try {
                 const res = await fetch('/api/ai/suggest', {
@@ -1664,16 +1626,22 @@
             const desc = document.getElementById('log-desc').value.trim();
             if (!desc) return showToast('Completează ce ai realizat!', true);
 
+            const selectedTypes = [];
+            if (document.getElementById('chk-opt-3d')?.checked) selectedTypes.push('Proiectare 3D');
+            if (document.getElementById('chk-opt-2d')?.checked) selectedTypes.push('Desene 2D');
+            if (document.getElementById('chk-opt-layout')?.checked) selectedTypes.push('Layout');
+            const actType = selectedTypes.length > 0 ? selectedTypes.join(', ') : 'Proiectare 3D';
+
             const payload = {
                 date: document.getElementById('log-date').value,
                 project_id: document.getElementById('log-project').value,
                 part_number: document.getElementById('log-part-number').value.trim(),
                 revision: document.getElementById('log-revision').value.trim(),
-                activity_type: document.getElementById('log-type').value,
+                activity_type: actType,
                 drawings_count: parseInt(document.getElementById('log-drawings-count').value, 10) || 1,
-                manufacturing_process: document.getElementById('log-mfg').value,
-                material: document.getElementById('log-material').value,
-                ecn_source: document.getElementById('log-ecn-source').value,
+                manufacturing_process: document.getElementById('log-mfg')?.value || 'General',
+                material: document.getElementById('log-material')?.value.trim() || '',
+                ecn_source: '',
                 status_tag: document.getElementById('log-status').value,
                 description: desc,
                 is_highlight: document.getElementById('log-highlight').checked
@@ -1738,7 +1706,11 @@
                 document.getElementById('view-modal-pn').innerText = `${log.part_number || '-'} ${log.revision || ''}`;
                 document.getElementById('view-modal-project').innerText = `${log.project_name || 'General'} (${log.cad_software || 'CAD'})`;
 
-                document.getElementById('edit-modal-type').value = log.activity_type || 'Modelare CAD 3D';
+                const act = log.activity_type || '';
+                if (document.getElementById('edit-chk-3d')) document.getElementById('edit-chk-3d').checked = act.includes('3D');
+                if (document.getElementById('edit-chk-2d')) document.getElementById('edit-chk-2d').checked = act.includes('2D');
+                if (document.getElementById('edit-chk-layout')) document.getElementById('edit-chk-layout').checked = act.includes('Layout');
+
                 document.getElementById('edit-modal-drawings-count').value = log.drawings_count || 1;
                 document.getElementById('edit-modal-mfg').value = log.manufacturing_process || 'Tablă Sheet Metal';
                 document.getElementById('edit-modal-material').value = log.material || 'Oțel';
@@ -1758,12 +1730,18 @@
             const desc = document.getElementById('edit-modal-desc').value.trim();
             if (!desc) return showToast('Descrierea este obligatorie!', true);
 
+            const selectedTypes = [];
+            if (document.getElementById('edit-chk-3d')?.checked) selectedTypes.push('Proiectare 3D');
+            if (document.getElementById('edit-chk-2d')?.checked) selectedTypes.push('Desene 2D');
+            if (document.getElementById('edit-chk-layout')?.checked) selectedTypes.push('Layout');
+            const actType = selectedTypes.length > 0 ? selectedTypes.join(', ') : 'Proiectare 3D';
+
             const payload = {
-                activity_type: document.getElementById('edit-modal-type').value,
+                activity_type: actType,
                 drawings_count: parseInt(document.getElementById('edit-modal-drawings-count').value, 10) || 1,
-                manufacturing_process: document.getElementById('edit-modal-mfg').value,
-                material: document.getElementById('edit-modal-material').value,
-                ecn_source: document.getElementById('edit-modal-ecn-source').value,
+                manufacturing_process: document.getElementById('edit-modal-mfg')?.value || 'General',
+                material: document.getElementById('edit-modal-material')?.value.trim() || '',
+                ecn_source: document.getElementById('edit-modal-ecn-source')?.value.trim() || '',
                 status_tag: document.getElementById('edit-modal-status').value,
                 description: desc,
                 is_highlight: document.getElementById('edit-modal-highlight').checked
